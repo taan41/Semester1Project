@@ -1,0 +1,43 @@
+tiến trình game (giống slay the spire):
+- leo tầng
+- mỗi tầng có >= 2 lựa chọn (quái hoặc event ngẫu nhiên (nhặt đồ, dính bẫy, gặp ma,...))
+- các tầng 5, 10, 15,... có event định sẵn (kho báu, shop, cắm trại hồi máu, boss,...)
+
+combat (theo lượt):
+- chọn 1 trong 2:
+  + đánh quái trực tiếp, quái mất hp = atk ng chơi, ng chơi mất hp = atk quái
+  + dùng kỹ năng, k bị quái đánh nhưng mất mana, mana hồi theo lượt
+
+cấu trúc:
+- entity:
+  + atk (chỉ số tấn công)
+  + hp (máu)
+  + mana
+-- player (entity, ng chơi):
+   + gold
+   + equipment list (danh sách trang bị, tăng chỉ số)
+   + skill list (danh sách ký năng, dùng trong combat)
+-- monster (entity, quái):
+   + reward (phần thưởng sau khi bị hạ)
+   + statMultiplier (tăng chỉ số dựa theo số tầng, độ khó,...)
+
+- item:
+-- gold (vàng, dùng trong shop)
+-- equiment (trang bị, mặc trên ng, chỉ đc mặc mỗi loại 1 cái):
+   + weapon (vũ khí, chủ yếu tăng atk)
+   + armor (giáp, chủ yếu tăng hp)
+   + ring (nhẫn, chủ yếu tăng mana)
+-- skill (kỹ năng, mang tối đa 3 (?) kỹ năng):
+   ví dụ: hồi máu, hồi mana mất máu, đánh 1 quái sát thương to, đánh nh quái sát thương bé, tăng chỉ số trong vài lượt,...
+
+- event:
+-- quái con (1 đến 4 quái)
+-- quái tinh anh (1 đến 2 quái, thưởng nh hơn)
+-- boss (thưởng nh nhất)
+-- (ngẫu nhiên)
+   + nhặt đồ (thưởng ít)
+   + nhặt kho báu (thưởng nh)
+   + dính bẫy (mất máu)
+   + gặp ma (đánh quái đặc biệt, cho trang bị đặc biệt)
+-- shop (bán trang bị & kỹ năng)
+-- trại (hồi máu & mana)
