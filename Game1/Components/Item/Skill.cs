@@ -14,21 +14,22 @@ class Skill : Item
     public override void Print()
     {
         base.Print();
-        Console.Write($" | {Target} |");
+        Console.Write($"| {Target} |");
+
         if (Damage > 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write($" [ ▲ {Damage} ]");
         }
+
         if (Heal > 0)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write($" [ + {Heal} ]");
         }
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Console.Write($" ({MPCost} MP)");
-        Console.ResetColor();
-        Console.WriteLine("  ");
 
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine($" ({MPCost} MP)  ");
+        Console.ResetColor();
     }
 }

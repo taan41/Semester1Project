@@ -19,7 +19,8 @@ class Monster : Entity
             _ => UINumbers.MonsterBarLen
         };
         
-        Console.Write($" {Name,-UINumbers.NameLen} | ATK: {Attack,-3} ");
-        UIHandler.DrawBar(Health, MaxHealth, true, barLen, ConsoleColor.Red);
+        base.Print();
+        Console.Write($"| ATK: {Attack,-3} ");
+        UIHandler.Misc.DrawBar(Health, MaxHealth, true, barLen, ConsoleColor.Red);
     }
 }

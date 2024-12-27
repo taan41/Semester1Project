@@ -17,7 +17,7 @@ abstract class Item : Component
             ItemRarity.Legendary => ConsoleColor.DarkYellow,
             _ => ConsoleColor.White
         };
-        Console.Write($" {Name, -UINumbers.NameLen}");
+        base.Print();
         Console.ResetColor();
     }
 }

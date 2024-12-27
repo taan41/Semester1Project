@@ -6,10 +6,25 @@ class Game
 {
     public static void Main()
     {
-        UIDemo();
+        CursorVisible = false;
+        UIHandler.Menu.Welcome();
+    }
+
+    static void JsonTest()
+    {
+        Monster monster = new()
+        {
+            Attack = 10,
+            MaxHealth = 10,
+            Health = 10,
+            MaxMana = 10,
+            Mana = 10
+        };
+
+        WriteLine(JsonSerializer.Serialize(monster));
     }
     
-    public static void UIDemo()
+    static void UIDemo()
     {
         CursorVisible = false;
         Clear();
@@ -89,40 +104,40 @@ class Game
         {
             Clear();
             WriteLine("GAME".PadLeft(32).PadRight(28));
-            UIHandler.DrawBorder('=');
+            UIHandler.Misc.DrawLine('=');
             WriteLine(" Progress: 6/16");
             WriteLine(" •  •  •  •  ●  • ");
-            UIHandler.DrawBorder('-');
+            UIHandler.Misc.DrawLine('-');
             int monsterCursorTop = CursorTop;
             foreach(var monster in monsters)
                 monster.Print();
-            UIHandler.DrawBorder('-');
+            UIHandler.Misc.DrawLine('-');
             player.Print();
-            UIHandler.DrawBorder('-');
+            UIHandler.Misc.DrawLine('-');
             int actionCursorTop = CursorTop;
             actions.ForEach(action => WriteLine($" {action}"));
 
             while (true)
             {
-                switch(UIHandler.PickAction(actionCursorTop, actions))
+                switch(UIHandler.Misc.PickOption(actionCursorTop, actions))
                 {
                     case 0:
                         break;
                     
                     case 1:
                         WriteLine();
-                        UIHandler.DrawBorder('-');
+                        UIHandler.Misc.DrawLine('-');
                         int skillCursorTop = CursorTop;
                         foreach(var skill in skills)
                             skill.Print();
-                        UIHandler.PickFromArray(skillCursorTop, skills);
+                        UIHandler.Misc.PickComponent(skillCursorTop, skills);
                         break;
 
                     default:
                         continue;
                 }
                 
-                UIHandler.PickFromArray(monsterCursorTop, monsters);
+                UIHandler.Misc.PickComponent(monsterCursorTop, monsters);
                 break;
             }
         }

@@ -3,14 +3,16 @@ class Player : Entity
 {
     public List<Equipment> Equipments { get; set; } = [];
     public List<Skill> Skills { get; set; } = [];
+    public List<Item> Inventory { get; set; } = [];
     public Gold Gold { get; set; } = new(0);
 
     public override void Print()
     {
-        Console.WriteLine($" {Name,-UINumbers.NameLen} | ATK: {Attack,-3}");
+        base.Print();
+        Console.WriteLine($"| ATK: {Attack,-3}");
         Console.Write(" HP ");
-        UIHandler.DrawBar(Health, MaxHealth, true, UINumbers.PlayerBarLen, ConsoleColor.Red);
+        UIHandler.Misc.DrawBar(Health, MaxHealth, true, UINumbers.PlayerBarLen, ConsoleColor.Red);
         Console.Write(" MP ");
-        UIHandler.DrawBar(Mana, MaxMana, true, UINumbers.PlayerBarLen, ConsoleColor.Blue);
+        UIHandler.Misc.DrawBar(Mana, MaxMana, true, UINumbers.PlayerBarLen, ConsoleColor.Blue);
     }
 }
