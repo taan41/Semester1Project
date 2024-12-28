@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using static System.Console;
 
-class Program
+class Server
 {
     const int defaultPort = 5000;
 
@@ -228,6 +228,14 @@ class Program
         catch(Exception ex)
         {
             LogHandler.AddLog($"Error: {ex.Message}");
+        }
+    }
+
+    public static void RemoveClient(ClientHandler client)
+    {
+        lock(clientHandlers)
+        {
+            clientHandlers.Remove(client);
         }
     }
 }

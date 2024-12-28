@@ -5,10 +5,10 @@ static class MagicNum
 {
     public const int
         usernameMin = 4, usernameMax = 50,
-        passwordMin = 8, passwordMax = 100,
-        nicknameMin = 1, nicknameMax = UIHandler.Numbers.PlayerNameLen,
-        groupnameMin = 6, groupNameMax = 50,
+        passwordMin = 6, passwordMax = 100,
+        nicknameMin = 1, nicknameMax = 25,
         pwdHashLen = 32, pwdSaltLen = 16,
+        emailLen = 255,
         inputLimit = 500,
         bufferSize = 2048;
 }

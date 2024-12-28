@@ -1,11 +1,12 @@
 using System.Text.Json;
 
 [Serializable]
-class Score(int userID, string nickname, TimeSpan clearTime)
+class Score(int userID, string nickname, TimeSpan clearTime, DateTime? uploadedTime = null)
 {
     public int UserID { get; set; } = userID;
     public string Nickname { get; set; } = nickname;
     public TimeSpan ClearTime { get; set; } = clearTime;
+    public DateTime UploadedTime { get; set; } = uploadedTime ?? DateTime.Now;
 
     public override string ToString()
         => $"{Nickname, -MagicNum.nicknameMax} - {ClearTime:hh:mm:ss.fff}";

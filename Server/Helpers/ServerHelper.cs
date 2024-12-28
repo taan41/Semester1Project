@@ -21,36 +21,6 @@ class ServerHelper
         Write(" Enter choice: ");
     }
 
-    // Return false when leaving viewer
-    public static bool ViewLog()
-    {
-        Clear();
-        UIHelper.DrawHeader("Server Control Center");
-        WriteLine(" Viewing activity log");
-        WriteLine(" 'DEL' to clear log");
-        WriteLine(" 'ESC' to return");
-        UIHelper.DrawLine('-');
-        
-        LogHandler.WriteAllLog();
-        LogHandler.ToggleLogView(true);
-
-        while(true)
-        {
-            ConsoleKey key = ReadKey(true).Key;
-
-            switch(key)
-            {
-                case ConsoleKey.Escape:
-                    LogHandler.ToggleLogView(false);
-                    return false;
-
-                case ConsoleKey.Delete:
-                    LogHandler.ClearLog();
-                    return true;
-            }
-        }
-    }
-
     public static void OverviewMenu(string? serverIP, int port)
     {
         Clear();
@@ -84,6 +54,36 @@ class ServerHelper
         WriteLine(" 0. Return");
         UIHelper.DrawLine('-');
         Write(" Enter Choice: ");
+    }
+
+    // Return false when leaving viewer
+    public static bool ViewLog()
+    {
+        Clear();
+        UIHelper.DrawHeader("Server Control Center");
+        WriteLine(" Viewing activity log");
+        WriteLine(" 'DEL' to clear log");
+        WriteLine(" 'ESC' to return");
+        UIHelper.DrawLine('-');
+        
+        LogHandler.WriteAllLog();
+        LogHandler.ToggleLogView(true);
+
+        while(true)
+        {
+            ConsoleKey key = ReadKey(true).Key;
+
+            switch(key)
+            {
+                case ConsoleKey.Escape:
+                    LogHandler.ToggleLogView(false);
+                    return false;
+
+                case ConsoleKey.Delete:
+                    LogHandler.ClearLog();
+                    return true;
+            }
+        }
     }
     
     public static bool CheckIPv4(string? ipAddress)

@@ -55,7 +55,7 @@ static class DBHandler
                 Nickname VARCHAR({MagicNum.nicknameMax}) NOT NULL,
                 PasswordHash VARBINARY({MagicNum.pwdHashLen}) DEFAULT NULL,
                 Salt VARBINARY({MagicNum.pwdSaltLen}) DEFAULT NULL,
-                Email VARCHAR(255) NOT NULL,
+                Email VARCHAR({MagicNum.emailLen}) NOT NULL,
                 INDEX idx_userID (UserID),
                 INDEX idx_username (Username)
             )", conn))
@@ -67,7 +67,7 @@ static class DBHandler
             CREATE TABLE Highscores (
                 ScoreID INT AUTO_INCREMENT PRIMARY KEY,
                 UserID INT NOT NULL,
-                TimeScore TIME(3) NOT NULL,
+                ClearTime TIME(3) NOT NULL,
                 UploadedTime DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (UserID) REFERENCES Users(UserID) ON UPDATE CASCADE ON DELETE CASCADE,
                 INDEX idx_userID (UserID)
@@ -157,7 +157,7 @@ static class DBHandler
             }
         }
 
-        public static async Task<(User? requestedUser, string errorMessage)> Get(string username, bool getPwd)
+        public static async Task<(User? requestedUser, string errorMessage)> Get(string username, bool getPwd = true)
         {
             string query = getPwd ?
                 "SELECT UserID, Username, Nickname, PasswordHash, Salt, Email FROM Users WHERE Username = @username" :
@@ -204,7 +204,7 @@ static class DBHandler
             }
         }
         
-        public static async Task<(User? requestedUser, string errorMessage)> Get(int userID, bool getPwd)
+        public static async Task<(User? requestedUser, string errorMessage)> Get(int userID, bool getPwd = true)
         {
             string query = getPwd ?
                 "SELECT UserID, Username, Nickname, PasswordHash, Salt, Email FROM Users WHERE UserID = @userID" :
@@ -300,6 +300,164 @@ static class DBHandler
     }
 
     public class HighscoreDB
+    {
+        public static async Task<(bool success, string errorMessage)> Add(Score score)
+        {
+            string query = "INSERT INTO Highscores (UserID, Nickname, ClearTime) VALUES (@userID, @nickname, @clearTime)";
+
+            try
+            {
+                using MySqlConnection conn = new(connectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@userID", score.UserID);
+                cmd.Parameters.AddWithValue("@nickname", score.Nickname);
+                cmd.Parameters.AddWithValue("@clearTime", score.ClearTime);
+
+                await cmd.ExecuteNonQueryAsync();
+
+                return (true, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public static async Task<(List<Score>? scores, string errorMessage)> GetUser(int userID)
+        {
+            string query = @"
+                SELECT
+                    U.Nickname,
+                    H.ClearTime,
+                    H.UploadedTime
+                FROM 
+                    Highscores H
+                JOIN
+                    Users U ON H.UserID = U.UserID AND U.UserID = @userID
+                WHERE 
+                    H.UserID = @userID
+                ORDER BY 
+                    H.ClearTime ASC
+                LIMIT 20";
+
+            try
+            {
+                using MySqlConnection conn = new(connectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@userID", userID);
+
+                List<Score> scores = [];
+
+                using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                    scores.Add(new(
+                        userID, 
+                        reader.GetString("Nickname"), 
+                        reader.GetTimeSpan("ClearTime"), 
+                        reader.GetDateTime("UploadedTime")
+                    ));
+
+                return (scores, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
+        }
+        
+        public static async Task<(List<Score>? scores, string errorMessage)> GetMonthly()
+        {
+            string query = @"
+                SELECT
+                    U.UserID,
+                    U.Nickname,
+                    H.ClearTime,
+                    H.UploadedTime
+                FROM 
+                    Highscores H
+                JOIN
+                    Users U ON H.UserID = U.UserID
+                WHERE 
+                    MONTH(H.UploadedTime) = MONTH(CURRENT_DATE())
+                    AND YEAR(H.UploadedTime) = YEAR(CURRENT_DATE())
+                ORDER BY 
+                    H.ClearTime ASC
+                LIMIT 10";
+
+            try
+            {
+                using MySqlConnection conn = new(connectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+
+                List<Score> scores = [];
+
+                using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                    scores.Add(new(
+                        reader.GetInt32("UserID"), 
+                        reader.GetString("Nickname"), 
+                        reader.GetTimeSpan("ClearTime"), 
+                        reader.GetDateTime("UploadedTime")
+                    ));
+
+                return (scores, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
+        }
+        
+        public static async Task<(List<Score>? scores, string errorMessage)> GetAllTime()
+        {
+            string query = @"
+                SELECT
+                    U.UserID,
+                    U.Nickname,
+                    H.ClearTime,
+                    H.UploadedTime
+                FROM 
+                    Highscores H
+                JOIN
+                    Users U ON H.UserID = U.UserID
+                ORDER BY 
+                    H.ClearTime ASC
+                LIMIT 10";
+
+            try
+            {
+                using MySqlConnection conn = new(connectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+
+                List<Score> scores = [];
+
+                using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                    scores.Add(new(
+                        reader.GetInt32("UserID"), 
+                        reader.GetString("Nickname"), 
+                        reader.GetTimeSpan("ClearTime"), 
+                        reader.GetDateTime("UploadedTime")
+                    ));
+
+                return (scores, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
+        }
+    }
+
+    public class GameSaveDB
     {
 
     }

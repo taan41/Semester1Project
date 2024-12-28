@@ -11,7 +11,7 @@ static class UIHandler
 
         public const int
             NameLen = 25,
-            PlayerNameLen = 25;
+            PlayerNameLen = MagicNum.nicknameMax;
 
         public const int
             PlayerBarLen = 30,

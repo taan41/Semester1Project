@@ -22,15 +22,10 @@ class User
     }
     
     public override string ToString()
-        => $"User(ID:{UserID})";
+        => $"User(ID: {UserID})";
 
-    public string Info(bool showUsername, bool showNickname)
-    {
-        StringBuilder sb = new($"[ID: {UserID}]");
-        if (showUsername) sb.Append($" Username: {Username}");
-        if (showNickname) sb.Append($" Nickname: {Nickname}");
-        return sb.ToString();
-    }
+    public string ToString(bool showFullInfo)
+        => showFullInfo ? $"User(ID: {UserID}, Username: {Username}, Nickname: {Nickname})" : ToString();
 
     public string Serialize()
         => JsonSerializer.Serialize(this);

@@ -5,40 +5,25 @@ enum CommandType
     Empty, Ping, Error, GetAES,
     CheckUsername, Register,
     GetUserPwd, Login, Logout,
-    ChangeNickname, ChangePassword,
-    GetFriendList, RemoveFriend,
-    GetReceivedRq, AcceptFriendRq, AcceptAllRq, DenyFriendRq, DenyAllRq,
-    GetAllUsers, SendFriendRq, BlockUser, UnblockUser, BlockAll,
-    SetPartner, GetPartnerHistory, RemovePartner,
-    GetCreatedGroups, CreateGroup, ChangeGroupName, DeleteGroup,
-    GetSubcribed, RemoveSubcribed, GetAllGroups, SubcribeToGroup,
-    JoinGroup, GetGroupInfo, GetGroupHistory, LeaveGroup,
-    Message, EchoMessage, NoticePrivateMsg,
-    SendFile, DoneSendingFile, AcceptFile,
+    ChangeNickname, ChangeEmail, ChangePassword,
+    UploadScore, GetUserScores, GetMonthlyScores, GetAllTimeScores,
+    UploadSave, DownloadSave,
     Disconnect
 }
 
 [Serializable]
-class Command
+class Command(CommandType cmdType = CommandType.Empty, string? payload = null)
 {
-    public CommandType CommandType { get; set; } = CommandType.Empty;
-    public string Payload { get; set; } = "";
+    public CommandType CommandType { get; set; } = cmdType;
+    public string Payload { get; set; } = payload ?? "";
 
-    public Command() {}
-
-    public Command(CommandType cmdType, string? payload)
+    public void Set(CommandType cmdType, string? payload = null)
     {
         CommandType = cmdType;
         Payload = payload ?? "";
     }
 
-    public void Set(CommandType cmdType, string? payload)
-    {
-        CommandType = cmdType;
-        Payload = payload ?? "";
-    }
-
-    public void SetError(string? payload)
+    public void SetError(string? payload = null)
         => Set(CommandType.Error, payload);
 
     public string Name()

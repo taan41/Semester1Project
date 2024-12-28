@@ -12,25 +12,20 @@ class User
 
     public User() {}
 
-    public User(User userTemplate)
+    public User(User userToCopy)
     {
-        UserID = userTemplate.UserID;
-        Username = userTemplate.Username;
-        Nickname = userTemplate.Nickname;
-        Email = userTemplate.Email;
-        PwdSet = userTemplate.PwdSet;
+        UserID = userToCopy.UserID;
+        Username = userToCopy.Username;
+        Nickname = userToCopy.Nickname;
+        Email = userToCopy.Email;
+        PwdSet = userToCopy.PwdSet;
     }
     
     public override string ToString()
-        => $"User(ID:{UserID})";
+        => $"User(ID: {UserID})";
 
-    public string Info(bool showUsername, bool showNickname)
-    {
-        StringBuilder sb = new($"[ID: {UserID}]");
-        if (showUsername) sb.Append($" Username: {Username}");
-        if (showNickname) sb.Append($" Nickname: {Nickname}");
-        return sb.ToString();
-    }
+    public string ToString(bool showFullInfo)
+        => showFullInfo ? $"User(ID: {UserID}, Username: {Username}, Nickname: {Nickname})" : ToString();
 
     public string Serialize()
         => JsonSerializer.Serialize(this);
