@@ -17,11 +17,11 @@ static class LogHandler
 
     public static async void Initialize()
     {
-        var (oldLog, errorMessage) = await DBHelper.LogDB.GetAll();
+        var (oldLog, errorMessage) = await DBHandler.LogDB.GetAll();
 
         if(oldLog == null)
         {
-            Console.WriteLine($" LogManager error: {errorMessage}");
+            Console.WriteLine($" LogHandler error: {errorMessage}");
             return;
         }
         
@@ -37,7 +37,7 @@ static class LogHandler
         if(!initailized)
             return;
 
-        var (success, errorMessage) = await DBHelper.LogDB.Add(sourceMethod ?? "null", logContent);
+        var (success, errorMessage) = await DBHandler.LogDB.Add(sourceMethod ?? "null", logContent);
 
         if(success)
         {
@@ -50,7 +50,7 @@ static class LogHandler
             }
         }
         else
-            Console.WriteLine($" LogManager error: {errorMessage}");
+            Console.WriteLine($" LogHandler error: {errorMessage}");
     }
 
     public static async void ClearLog()
@@ -61,11 +61,11 @@ static class LogHandler
         lock(logList)
             logList.Clear();
 
-        var (success, errorMessage) = await DBHelper.LogDB.Clear();
+        var (success, errorMessage) = await DBHandler.LogDB.Clear();
 
         if(!success)
         {
-            Console.WriteLine($" LogManager error: {errorMessage}");
+            Console.WriteLine($" LogHandler error: {errorMessage}");
             AddLog(errorMessage);
         }
     }

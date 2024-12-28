@@ -53,7 +53,7 @@ class Server
                 return false;
 
 
-            if (DBHelper.Initialize(server, db, uid, password, out string errorMessage))
+            if (DBHandler.Initialize(server, db, uid, password, out string errorMessage))
                 WriteLine(" Connect to MySql database successfully");
             else
             {

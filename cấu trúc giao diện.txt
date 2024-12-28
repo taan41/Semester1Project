@@ -1,0 +1,39 @@
+// - pickable option
+// + enter field
+// -- communicate with server
+
+
+welcome screen:
+- login
+- play offline -> play game screen
+- exit
+
+login screen:
+  + username -- check username & get password hash
+  + password -- send login signal
+-> play game screen
+- register
+- reset password
+
+register screen:
+  + username -- check availability
+  + password
+  + confirm password
+  + nickname
+  + email -- save user data
+-> login screen
+
+reset password screen:
+  + username -- check username & get email
+  + email
+  + new password
+  + confirm new password -- update user data
+-> login screen
+
+play game screen:
+- new game
+- load game
+- view score (not available offline)
+- return -> welcome screen
+
+

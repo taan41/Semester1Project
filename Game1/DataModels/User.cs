@@ -17,6 +17,7 @@ class User
         UserID = userTemplate.UserID;
         Username = userTemplate.Username;
         Nickname = userTemplate.Nickname;
+        Email = userTemplate.Email;
         PwdSet = userTemplate.PwdSet;
     }
     

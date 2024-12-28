@@ -2,7 +2,7 @@ using System.Data;
 using System.Text;
 using MySql.Data.MySqlClient;
 
-static class DBHelper
+static class DBHandler
 {
     private static string connectionString = "";
 
@@ -266,7 +266,7 @@ static class DBHelper
                     cmd.Parameters.AddWithValue("@newNickname", newNickname);
                 
                 if (newEmail != null)
-                    cmd.Parameters.AddWithValue("@onlineStatus", newEmail);
+                    cmd.Parameters.AddWithValue("@newEmail", newEmail);
 
                 if (newPwd != null)
                 {
@@ -283,6 +283,11 @@ static class DBHelper
                 return (false, ex.Message);
             }
         }
+    }
+
+    public class HighscoreDB
+    {
+        
     }
 
     public class LogDB
@@ -338,19 +343,18 @@ static class DBHelper
 
         public static async Task<(bool success, string errorMessage)> Clear()
         {
-            string delQuery = "DELETE FROM ActivityLog";
-            string resetIncrementQuery = "ALTER TABLE ActivityLog AUTO_INCREMENT = 1";
+            string query = @"
+                DELETE FROM ActivityLog;
+                ALTER TABLE ActivityLog AUTO_INCREMENT = 1;
+            ";
 
             try
             {
                 using MySqlConnection conn = new(connectionString);
                 await conn.OpenAsync();
 
-                using MySqlCommand delCmd = new(delQuery, conn);
-                await delCmd.ExecuteNonQueryAsync();
-
-                using MySqlCommand resetIncrementCmd = new(resetIncrementQuery, conn);
-                await resetIncrementCmd.ExecuteNonQueryAsync();
+                using MySqlCommand cmd = new(query, conn);
+                await cmd.ExecuteNonQueryAsync();
 
                 return (true, "");
             }
