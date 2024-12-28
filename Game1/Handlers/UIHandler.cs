@@ -1,25 +1,26 @@
 using System.Text;
 
 using static System.Console;
-using static UINumbers;
-
-static class UINumbers
-{
-    public const int UIWidth = 70;
-
-    public const int
-        NameLen = 25;
-
-    public const int
-        PlayerBarLen = 30,
-        MonsterBarLen = 10,
-        EliteBarLen = 15,
-        BossBarLen = 20;
-
-}
+using static UIHandler.Numbers;
 
 static class UIHandler
 {
+    public static class Numbers
+    {
+        public const int UIWidth = 70;
+
+        public const int
+            NameLen = 25,
+            PlayerNameLen = 25;
+
+        public const int
+            PlayerBarLen = 30,
+            MonsterBarLen = 10,
+            EliteBarLen = 15,
+            BossBarLen = 20;
+
+    }
+
     public class Misc
     {
         public static void WriteCenter(string str)

@@ -11,8 +11,8 @@ class Player : Entity
         base.Print();
         Console.WriteLine($"| ATK: {Attack,-3}");
         Console.Write(" HP ");
-        UIHandler.Misc.DrawBar(Health, MaxHealth, true, UINumbers.PlayerBarLen, ConsoleColor.Red);
+        UIHandler.Misc.DrawBar(Health, MaxHealth, true, UIHandler.Numbers.PlayerBarLen, ConsoleColor.Red);
         Console.Write(" MP ");
-        UIHandler.Misc.DrawBar(Mana, MaxMana, true, UINumbers.PlayerBarLen, ConsoleColor.Blue);
+        UIHandler.Misc.DrawBar(Mana, MaxMana, true, UIHandler.Numbers.PlayerBarLen, ConsoleColor.Blue);
     }
 }

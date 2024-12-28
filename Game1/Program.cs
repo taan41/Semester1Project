@@ -33,7 +33,7 @@ class Game
             WriteLine($"|  {i}");
 
         WriteLine("|  Fix console's size until all lines are straight and fully visible");
-        Write(new string('-', UINumbers.UIWidth));
+        Write(new string('-', UIHandler.Numbers.UIWidth));
         ReadKey(true);
 
         Monster slime = new()

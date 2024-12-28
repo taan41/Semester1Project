@@ -14,9 +14,9 @@ class Monster : Entity
     {
         int barLen = Type switch
         {
-            MonsterType.Elite => UINumbers.EliteBarLen,
-            MonsterType.Boss => UINumbers.BossBarLen,
-            _ => UINumbers.MonsterBarLen
+            MonsterType.Elite => UIHandler.Numbers.EliteBarLen,
+            MonsterType.Boss => UIHandler.Numbers.BossBarLen,
+            _ => UIHandler.Numbers.MonsterBarLen
         };
         
         base.Print();
