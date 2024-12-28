@@ -6,7 +6,7 @@ static class MagicNum
     public const int
         usernameMin = 4, usernameMax = 50,
         passwordMin = 8, passwordMax = 100,
-        nicknameMin = 1, nicknameMax = UIHandler.Numbers.PlayerNameLen,
+        nicknameMin = 1, nicknameMax = 25,
         groupnameMin = 6, groupNameMax = 50,
         pwdHashLen = 32, pwdSaltLen = 16,
         inputLimit = 500,
@@ -28,7 +28,7 @@ static class Utilities
         byte[] salt = new byte[MagicNum.pwdSaltLen];
         RandomNumberGenerator.Fill(salt);
 
-        using var pbkdf2 = new Rfc2898DeriveBytes(EncodeString(pwd), salt, 5000, HashAlgorithmName.SHA256);
+        using var pbkdf2 = new Rfc2898DeriveBytes(EncodeString(pwd), salt, 10000, HashAlgorithmName.SHA256);
         byte[] pwdHash = pbkdf2.GetBytes(MagicNum.pwdHashLen);
 
         return (pwdHash, salt);
@@ -36,7 +36,7 @@ static class Utilities
 
     public static bool VerifyPassword(string pwd, byte[] storedPwdHash, byte[] storedSalt)
     {
-        using var pbkdf2 = new Rfc2898DeriveBytes(EncodeString(pwd), storedSalt, 5000, HashAlgorithmName.SHA256);
+        using var pbkdf2 = new Rfc2898DeriveBytes(EncodeString(pwd), storedSalt, 10000, HashAlgorithmName.SHA256);
         byte[] pwdHash = pbkdf2.GetBytes(MagicNum.pwdHashLen);
 
         return pwdHash.SequenceEqual(storedPwdHash);

@@ -69,18 +69,32 @@ static class DBHandler
                 UserID INT NOT NULL,
                 TimeScore TIME(3) NOT NULL,
                 UploadedTime DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (UserID) REFERENCES Users(UserID) ON UPDATE CASCADE ON DELETE CASCADE
+                FOREIGN KEY (UserID) REFERENCES Users(UserID) ON UPDATE CASCADE ON DELETE CASCADE,
+                INDEX idx_userID (UserID)
             )", conn))
         {
             createScores.ExecuteNonQuery();
+        }
+
+        using (MySqlCommand createSaves = new(@"
+            CREATE TABLE GameSaves (
+                SaveID INT AUTO_INCREMENT PRIMARY KEY,
+                UserID INT NOT NULL UNIQUE,
+                UploadedTime DATETIME DEFAULT CURRENT_TIMESTAMP,
+                SaveData TEXT,
+                FOREIGN KEY (UserID) REFERENCES Users(UserID) ON UPDATE CASCADE ON DELETE CASCADE,
+                INDEX idx_userID (UserID)
+            )", conn))
+        {
+            createSaves.ExecuteNonQuery();
         }
 
         using (MySqlCommand createLog = new(@"
             CREATE TABLE ActivityLog (
                 LogIndex INT AUTO_INCREMENT PRIMARY KEY,
                 LogTime DATETIME DEFAULT CURRENT_TIMESTAMP,
-                Source VARCHAR(255) NOT NULL,
-                Content TEXT NOT NULL
+                Source VARCHAR(255),
+                Content TEXT
             )", conn))
         {
             createLog.ExecuteNonQuery();
@@ -287,7 +301,7 @@ static class DBHandler
 
     public class HighscoreDB
     {
-        
+
     }
 
     public class LogDB

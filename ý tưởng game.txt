@@ -6,7 +6,7 @@ tiến trình game (giống slay the spire):
 combat (theo lượt):
 - chọn 1 trong 2:
   + đánh quái trực tiếp, quái mất hp = atk ng chơi, ng chơi mất hp = atk quái
-  + dùng kỹ năng, k bị quái đánh nhưng mất mana, mana hồi theo lượt
+  + dùng kỹ năng, k bị quái đánh nhưng mất mana, mana hồi = đánh quái trực tiếp (20% ~ 25%)
 
 cấu trúc:
 - entity:

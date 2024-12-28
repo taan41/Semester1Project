@@ -96,52 +96,7 @@ static class UIHandler
         }
 
         public static int? PickOption(int startCursorTop, List<string> options)
-        {
-            int pointer = 0, oldPtr;
-            ConsoleKeyInfo keyPressed;
-
-            SetCursorPosition(0, startCursorTop);
-            WriteLine($" ► {options[pointer]} ");
-            SetCursorPosition(0, startCursorTop);
-
-            while (true)
-            {
-                keyPressed = ReadKey(true);
-                switch(keyPressed.Key)
-                {
-                    case ConsoleKey.UpArrow:
-                        if (pointer > 0)
-                        {
-                            oldPtr = pointer--;
-                            break;
-                        }
-                        continue;
-
-                    case ConsoleKey.DownArrow:
-                        if (pointer < options.Count - 1)
-                        {
-                            oldPtr = pointer++;
-                            break;
-                        }
-                        continue;
-
-                    case ConsoleKey.Enter:
-                        Write($" ► {options[pointer]} ");
-                        return pointer;
-
-                    case ConsoleKey.Escape:
-                        Write($" {options[pointer]}  ");
-                        return null;
-
-                    default: continue;
-                }
-
-                Write($" {options[oldPtr]}  ");
-                SetCursorPosition(0, pointer + startCursorTop);
-                Write($" ► {options[pointer]}");
-                CursorLeft = 0;
-            }
-        }
+            => PickOption(0, startCursorTop, options);
 
         public static int? PickOption(int startCursorLeft, int startCursorTop, List<string> options)
         {
@@ -216,7 +171,7 @@ static class UIHandler
             int startCursorLeft = UIWidth / 10 * 4;
             int startCursorTop = CursorTop;
 
-            List<string> options = ["LOGIN", "REGISTER", "PLAY OFFLINE", "EXIT"];
+            List<string> options = ["LOGIN", "PLAY OFFLINE", "EXIT"];
             foreach (var option in options)
             {
                 CursorLeft = startCursorLeft;

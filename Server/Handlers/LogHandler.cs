@@ -13,7 +13,7 @@ class Log(DateTime? _time, string _source, string _content)
 static class LogHandler
 {
     private static List<Log> logList = [];
-    private static bool initailized = false, inLogView = false;
+    private static bool initialized = false, inLogView = false;
 
     public static async void Initialize()
     {
@@ -26,7 +26,7 @@ static class LogHandler
         }
         
         logList = oldLog;
-        initailized = true;
+        initialized = true;
     }
 
     public static void AddLog(string logContent, object? sourceObj, [CallerMemberName] string sourceMethod = "unknown method")
@@ -34,7 +34,7 @@ static class LogHandler
 
     public static async void AddLog(string logContent, [CallerMemberName] string? sourceMethod = null)
     {
-        if(!initailized)
+        if(!initialized)
             return;
 
         var (success, errorMessage) = await DBHandler.LogDB.Add(sourceMethod ?? "null", logContent);
@@ -55,7 +55,7 @@ static class LogHandler
 
     public static async void ClearLog()
     {
-        if(!initailized)
+        if(!initialized)
             return;
 
         lock(logList)
@@ -70,9 +70,9 @@ static class LogHandler
         }
     }
 
-    public static void WriteCurrentLog()
+    public static void WriteAllLog()
     {
-        if(!initailized)
+        if(!initialized)
             return;
         
         lock(logList)
