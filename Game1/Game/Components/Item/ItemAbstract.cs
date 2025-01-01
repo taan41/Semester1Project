@@ -5,8 +5,15 @@ enum ItemRarity
 
 [Serializable]
 abstract class Item : Component
-{
-    public ItemRarity Rarity { get; set; }
+{    
+    public ItemRarity Rarity { get; set; } = ItemRarity.Common;
+
+    public Item() {}
+
+    public Item(string name, ItemRarity rarity = ItemRarity.Common) : base(name)
+    {
+        Rarity = rarity;
+    }
 
     public override void Print()
     {

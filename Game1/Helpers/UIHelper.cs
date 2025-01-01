@@ -1,17 +1,17 @@
 using System.Text;
 
 using static System.Console;
-using static UIHandler.Numbers;
+using static UIHelper.UIConstants;
 
-static class UIHandler
+static class UIHelper
 {
-    public static class Numbers
+    public static class UIConstants
     {
         public const int UIWidth = 70;
 
         public const int
             NameLen = 25,
-            PlayerNameLen = MagicNum.nicknameMax;
+            PlayerNameLen = Utilities.DataConstants.nicknameMax;
 
         public const int
             PlayerBarLen = 30,
@@ -21,7 +21,7 @@ static class UIHandler
 
     }
 
-    public class Misc
+    public static class UIMisc
     {
         public static void WriteCenter(string str)
             => WriteLine(str.PadLeft((UIWidth + str.Length - 1) / 2));
@@ -42,16 +42,22 @@ static class UIHandler
             WriteLine(sb.ToString());
             ResetColor();
         }
+    }
 
+    public static class InteractiveUI
+    {
         public static T? PickComponent<T>(int startCursorTop, List<T> components) where T : Component
+            => PickComponent(0, startCursorTop, components);
+
+        public static T? PickComponent<T>(int startCursorLeft, int startCursorTop, List<T> components) where T : Component
         {
             int pointer = 0, oldPtr;
             ConsoleKeyInfo keyPressed;
 
-            SetCursorPosition(0, startCursorTop);
+            SetCursorPosition(startCursorLeft, startCursorTop);
             Write(" ►");
             components[pointer].Print();
-            SetCursorPosition(0, startCursorTop);
+            SetCursorPosition(startCursorLeft, startCursorTop);
 
             while (true)
             {
@@ -87,11 +93,11 @@ static class UIHandler
                 }
 
                 components[oldPtr].Print();
-                SetCursorPosition(0, pointer + startCursorTop);
+                SetCursorPosition(startCursorLeft, pointer + startCursorTop);
                 
                 Write(" ►");
                 components[pointer].Print();
-                SetCursorPosition(0, CursorTop - 1);
+                SetCursorPosition(startCursorLeft, CursorTop - 1);
             }
         }
 
@@ -144,45 +150,6 @@ static class UIHandler
                 Write($" ► {options[pointer]}");
                 CursorLeft = startCursorLeft;
             }
-        }
-    }
-
-    public class Menu
-    {
-        public static int? Welcome()
-        {
-            Clear();
-            ForegroundColor = ConsoleColor.Red;
-            Misc.DrawLine('=');
-            ForegroundColor = ConsoleColor.Cyan;
-            //₀₁₁₀     ----------------------------------------------------------------------
-            WriteLine("   ₁₀₁₀   ₁₀         ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╔═╗ ╦   ╔═╗     ₁ ₁₀       ₁₀₁  ");
-            WriteLine("    ₁ ₁     ₀        ║   ║ ║ ║╚╣ ╚═╗ ║ ║ ║   ╠╣            ₀   ₁₁    ");
-            WriteLine("                     ╚═╝ ╚═╝ ╩ ╩ ╚═╝ ╚═╝ ╩═╝ ╚═╝                 ₁₀₀ ");
-            WriteLine("     ₀₀₁  ₁₁₀ ₁₀                                     ₁₀₁₀  ₀ ₁ ");
-            WriteLine(" ₀₁                  ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╦ ╦ ╔═╗ ╦═╗          ₀₀  ₁₀     ");
-            WriteLine("₁₁ ₀₀ ₁ ₀₁           ║   ║ ║ ║╚╣ ║╔╣ ║ ║ ╠╣  ╠╦╝                  ₀₁ ");
-            WriteLine("   ₁         ₀₁      ╚═╝ ╚═╝ ╩ ╩ ╚╩╩ ╚═╝ ╩═╝ ╩╚═         ₁₁₀ ₀₁      ");
-            ForegroundColor = ConsoleColor.Green;
-            Misc.DrawLine('=');
-            WriteLine();
-            ResetColor();
-
-            int startCursorLeft = UIWidth / 10 * 4;
-            int startCursorTop = CursorTop;
-
-            List<string> options = ["LOGIN", "PLAY OFFLINE", "EXIT"];
-            foreach (var option in options)
-            {
-                CursorLeft = startCursorLeft;
-                WriteLine($" {option}");
-            }
-
-            ForegroundColor = ConsoleColor.Blue;
-            Misc.DrawLine('-');
-            ResetColor();
-
-            return Misc.PickOption(startCursorLeft, startCursorTop, options);
         }
     }
 }

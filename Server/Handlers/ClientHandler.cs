@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Sockets;
 
+using static Utilities;
+
 class ClientHandler
 {
     readonly TcpClient client;
@@ -28,7 +30,7 @@ class ClientHandler
     {
         try
         {
-            byte[] buffer = new byte[MagicNum.bufferSize];
+            byte[] buffer = new byte[DataConstants.bufferSize];
             Memory<byte> memory = new(buffer, 0, buffer.Length);
             int bytesRead;
 
@@ -39,7 +41,7 @@ class ClientHandler
 
             while((bytesRead = await stream.ReadAsync(memory, token)) > 0)
             {
-                receivedCmd = Command.Deserialize(Utilities.DecodeBytes(buffer, 0, bytesRead));
+                receivedCmd = Json.Deserialize<Command>(Encode.GetString(buffer, 0, bytesRead));
 
                 switch (receivedCmd?.CommandType)
                 {
@@ -86,7 +88,7 @@ class ClientHandler
 
                 if (cmdToSend.CommandType != CommandType.Empty)
                 {
-                    await stream.WriteAsync(Utilities.EncodeString(cmdToSend.Serialize()), token);
+                    await stream.WriteAsync(Encode.GetBytes(Json.Serialize(cmdToSend)), token);
                     cmdToSend.Set(CommandType.Empty, null);
                 }
             }
@@ -116,7 +118,7 @@ class ClientHandler
 
     private async Task<Command> Register(Command cmd)
     {
-        User? registeredUser = User.Deserialize(cmd.Payload);
+        User? registeredUser = Json.Deserialize<User>(cmd.Payload);
 
         if(registeredUser == null)
             return Helper.ErrorCmd(this, cmd, "Invalid registering user");
@@ -140,7 +142,7 @@ class ClientHandler
         if(requestedUser.PwdSet == null)
             return (Helper.ErrorCmd(this, cmd, "No password found"), null);
 
-        return (new(cmd.CommandType, requestedUser.PwdSet.Serialize()), requestedUser);
+        return (new(cmd.CommandType, Json.Serialize(requestedUser.PwdSet)), requestedUser);
     }
 
     private Command Login(Command cmd, User? tempUser)
@@ -150,7 +152,7 @@ class ClientHandler
 
         user = tempUser;
         LogHandler.AddLog($"Logged in as {user}", endPoint);
-        return new(cmd.CommandType, user.Serialize());
+        return new(cmd.CommandType, Json.Serialize(user));
     }
 
     private Command Logout(Command cmd)
@@ -202,7 +204,7 @@ class ClientHandler
         if(user == null || user.UserID < 1)
             return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-        var newPwd = PasswordSet.Deserialize(cmd.Payload);
+        var newPwd = Json.Deserialize<PasswordSet>(cmd.Payload);
 
         var (success, errorMessage) = await DBHandler.UserDB.Update(user.UserID, null, null, newPwd);
 

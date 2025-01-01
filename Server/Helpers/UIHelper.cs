@@ -1,10 +1,10 @@
 using static System.Console;
-using static UIHelper.Numbers;
+using static UIHelper.UIConstants;
 
 
 static class UIHelper
 {
-    public static class Numbers
+    public static class UIConstants
     {
         public const int UIWidth = 70;
     }

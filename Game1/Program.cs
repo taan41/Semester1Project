@@ -2,23 +2,24 @@
 
 using static System.Console;
 
-class Game
+class Program
 {
     public static void Main()
     {
         CursorVisible = false;
-        UIHandler.Menu.Welcome();
+        // UIHelper.Menu.Welcome();
+        Game.Start();
     }
 
     static void JsonTest()
     {
         Monster monster = new()
         {
-            Attack = 10,
-            MaxHealth = 10,
-            Health = 10,
-            MaxMana = 10,
-            Mana = 10
+            ATK = 10,
+            MaxHP = 10,
+            HP = 10,
+            MaxMP = 10,
+            MP = 10
         };
 
         WriteLine(JsonSerializer.Serialize(monster));
@@ -33,42 +34,42 @@ class Game
             WriteLine($"|  {i}");
 
         WriteLine("|  Fix console's size until all lines are straight and fully visible");
-        Write(new string('-', UIHandler.Numbers.UIWidth));
+        Write(new string('-', UIHelper.UIConstants.UIWidth));
         ReadKey(true);
 
         Monster slime = new()
         {
-            Attack = 1,
-            MaxHealth = 10,
-            Health = 10,
+            ATK = 1,
+            MaxHP = 10,
+            HP = 10,
             Name = "Slime"
         };
 
         Monster motherSlime = new()
         {
-            Attack = 5,
-            MaxHealth = 50,
-            Health = 40,
+            ATK = 5,
+            MaxHP = 50,
+            HP = 40,
             Name = "Mother Slime",
             Type = MonsterType.Elite
         };
         
         Monster kingSlime = new()
         {
-            Attack = 15,
-            MaxHealth = 100,
-            Health = 60,
+            ATK = 15,
+            MaxHP = 100,
+            HP = 60,
             Name = "King Slime",
             Type = MonsterType.Boss
         };
 
         Player player = new()
         {
-            Attack = 15,
-            MaxHealth = 100,
-            Health = 95,
-            MaxMana = 40,
-            Mana = 15,
+            ATK = 15,
+            MaxHP = 100,
+            HP = 95,
+            MaxMP = 40,
+            MP = 15,
             Name = "Hero"
         };
 
@@ -104,40 +105,40 @@ class Game
         {
             Clear();
             WriteLine("GAME".PadLeft(32).PadRight(28));
-            UIHandler.Misc.DrawLine('=');
+            UIHelper.UIMisc.DrawLine('=');
             WriteLine(" Progress: 6/16");
             WriteLine(" •  •  •  •  ●  • ");
-            UIHandler.Misc.DrawLine('-');
+            UIHelper.UIMisc.DrawLine('-');
             int monsterCursorTop = CursorTop;
             foreach(var monster in monsters)
                 monster.Print();
-            UIHandler.Misc.DrawLine('-');
+            UIHelper.UIMisc.DrawLine('-');
             player.Print();
-            UIHandler.Misc.DrawLine('-');
+            UIHelper.UIMisc.DrawLine('-');
             int actionCursorTop = CursorTop;
             actions.ForEach(action => WriteLine($" {action}"));
 
             while (true)
             {
-                switch(UIHandler.Misc.PickOption(actionCursorTop, actions))
+                switch(UIHelper.InteractiveUI.PickOption(actionCursorTop, actions))
                 {
                     case 0:
                         break;
                     
                     case 1:
                         WriteLine();
-                        UIHandler.Misc.DrawLine('-');
+                        UIHelper.UIMisc.DrawLine('-');
                         int skillCursorTop = CursorTop;
                         foreach(var skill in skills)
                             skill.Print();
-                        UIHandler.Misc.PickComponent(skillCursorTop, skills);
+                        UIHelper.InteractiveUI.PickComponent(skillCursorTop, skills);
                         break;
 
                     default:
                         continue;
                 }
                 
-                UIHandler.Misc.PickComponent(monsterCursorTop, monsters);
+                UIHelper.InteractiveUI.PickComponent(monsterCursorTop, monsters);
                 break;
             }
         }

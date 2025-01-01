@@ -29,9 +29,9 @@ class Command(CommandType cmdType = CommandType.Empty, string? payload = null)
     public string Name()
         => CommandType.ToString();
 
-    // public string Serialize()
-    //     => JsonSerializer.Serialize(this);
+    public string Serialize()
+        => JsonSerializer.Serialize(this);
 
-    // public static Command? Deserialize(string data) =>
-    //     JsonSerializer.Deserialize<Command>(data);
+    public static Command? Deserialize(string data) =>
+        JsonSerializer.Deserialize<Command>(data);
 }

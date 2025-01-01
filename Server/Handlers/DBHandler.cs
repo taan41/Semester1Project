@@ -2,6 +2,8 @@ using System.Data;
 using System.Text;
 using MySql.Data.MySqlClient;
 
+using static Utilities;
+
 static class DBHandler
 {
     private static string connectionString = "";
@@ -51,11 +53,11 @@ static class DBHandler
         using (MySqlCommand createUsers = new(@$"
             CREATE TABLE Users (
                 UserID INT AUTO_INCREMENT PRIMARY KEY,
-                Username VARCHAR({MagicNum.usernameMax}) NOT NULL UNIQUE,
-                Nickname VARCHAR({MagicNum.nicknameMax}) NOT NULL,
-                PasswordHash VARBINARY({MagicNum.pwdHashLen}) DEFAULT NULL,
-                Salt VARBINARY({MagicNum.pwdSaltLen}) DEFAULT NULL,
-                Email VARCHAR({MagicNum.emailLen}) NOT NULL,
+                Username VARCHAR({DataConstants.usernameMax}) NOT NULL UNIQUE,
+                Nickname VARCHAR({DataConstants.nicknameMax}) NOT NULL,
+                Email VARCHAR({DataConstants.emailLen}) NOT NULL,
+                PasswordHash VARBINARY({DataConstants.pwdHashLen}) DEFAULT NULL,
+                Salt VARBINARY({DataConstants.pwdSaltLen}) DEFAULT NULL,
                 INDEX idx_userID (UserID),
                 INDEX idx_username (Username)
             )", conn))
@@ -130,7 +132,7 @@ static class DBHandler
 
         public static async Task<(bool success, string errorMessage)> Add(User userToAdd)
         {
-            string query = "INSERT INTO Users (Username, Nickname, PasswordHash, Salt, Email) VALUES (@username, @nickname, @pwdHash, @salt, @email)";
+            string query = "INSERT INTO Users (Username, Nickname, Email, PasswordHash, Salt) VALUES (@username, @nickname, @email, @pwdHash, @salt)";
 
             if (userToAdd.PwdSet == null)
                 return (false, "Null user password");
@@ -143,9 +145,9 @@ static class DBHandler
                 using MySqlCommand cmd = new(query, conn);
                 cmd.Parameters.AddWithValue("@username", userToAdd.Username);
                 cmd.Parameters.AddWithValue("@nickname", userToAdd.Nickname);
-                cmd.Parameters.AddWithValue("@pwdHash", userToAdd.PwdSet.PwdHash);
-                cmd.Parameters.AddWithValue("@salt", userToAdd.PwdSet.Salt);
                 cmd.Parameters.AddWithValue("@email", userToAdd.Email);
+                cmd.Parameters.AddWithValue("@pwdHash", userToAdd.PwdSet.PwdHash);
+                cmd.Parameters.AddWithValue("@salt", userToAdd.PwdSet.PwdSalt);
 
                 await cmd.ExecuteNonQueryAsync();
 
@@ -180,11 +182,11 @@ static class DBHandler
 
                 if (getPwd)
                 {
-                    byte[] pwdHash = new byte[MagicNum.pwdHashLen];
-                    byte[] salt = new byte[MagicNum.pwdSaltLen];
+                    byte[] pwdHash = new byte[DataConstants.pwdHashLen];
+                    byte[] salt = new byte[DataConstants.pwdSaltLen];
 
-                    reader.GetBytes("PasswordHash", 0, pwdHash, 0, MagicNum.pwdHashLen);
-                    reader.GetBytes("Salt", 0, salt, 0, MagicNum.pwdSaltLen);
+                    reader.GetBytes("PasswordHash", 0, pwdHash, 0, DataConstants.pwdHashLen);
+                    reader.GetBytes("Salt", 0, salt, 0, DataConstants.pwdSaltLen);
 
                     pwdSet = new(pwdHash, salt);
                 }
@@ -227,11 +229,11 @@ static class DBHandler
 
                 if (getPwd)
                 {
-                    byte[] pwdHash = new byte[MagicNum.pwdHashLen];
-                    byte[] salt = new byte[MagicNum.pwdSaltLen];
+                    byte[] pwdHash = new byte[DataConstants.pwdHashLen];
+                    byte[] salt = new byte[DataConstants.pwdSaltLen];
 
-                    reader.GetBytes("PasswordHash", 0, pwdHash, 0, MagicNum.pwdHashLen);
-                    reader.GetBytes("Salt", 0, salt, 0, MagicNum.pwdSaltLen);
+                    reader.GetBytes("PasswordHash", 0, pwdHash, 0, DataConstants.pwdHashLen);
+                    reader.GetBytes("Salt", 0, salt, 0, DataConstants.pwdSaltLen);
 
                     pwdSet = new(pwdHash, salt);
                 }
@@ -285,7 +287,7 @@ static class DBHandler
                 if (newPwd != null)
                 {
                     cmd.Parameters.AddWithValue("@newPwdHash", newPwd.PwdHash);
-                    cmd.Parameters.AddWithValue("@newSalt", newPwd.Salt);
+                    cmd.Parameters.AddWithValue("@newSalt", newPwd.PwdSalt);
                 }
 
                 await cmd.ExecuteNonQueryAsync();

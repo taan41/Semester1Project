@@ -8,7 +8,7 @@ class Score(int userID, string nickname, TimeSpan clearTime)
     public TimeSpan ClearTime { get; set; } = clearTime;
 
     public override string ToString()
-        => $"{Nickname, -MagicNum.nicknameMax} - {ClearTime:hh:mm:ss.fff}";
+        => $"{Nickname, -Utilities.DataConstants.nicknameMax} - {ClearTime:hh:mm:ss.fff}";
 
     public string Serialize()
         => JsonSerializer.Serialize(this);

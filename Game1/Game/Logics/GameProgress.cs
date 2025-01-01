@@ -1,0 +1,59 @@
+using System.Text;
+
+[Serializable]
+class GameProgress
+{
+    public const int MaxFloor = 3, MaxRoom = 16;
+
+    private int _floor = 1;
+    private int _room = 0;
+
+    public int Floor
+    {
+        get => _floor;
+        set
+        {
+            if (value < 0) value = 0;
+            if (value > MaxFloor) value = MaxFloor;
+            _floor = value;
+        }
+    }
+
+    public int Room
+    {
+        get => _room;
+        set
+        {
+            if (value < 0) value = 0;
+            if (value > MaxRoom) value = MaxRoom;
+            _room = value;
+        }
+    }
+
+    public void Next()
+    {
+        if (Room == MaxRoom)
+        {
+            Room = 1;
+            Floor++;
+        }
+        else
+            Room++;
+    }
+
+    public void Print()
+    {
+        StringBuilder sb = new();
+        sb.Append($" Progress: {_room}/{MaxRoom} - Floor {_floor}\n");
+        for (int i = 1; i <= _room; i++)
+        {
+            if (i == MaxRoom)
+                sb.Append(" ▲ ");
+            else if (i % 5 == 0)
+                sb.Append(" ● ");
+            else
+                sb.Append(" • ");
+        }
+        Console.WriteLine(sb);
+    }
+}
