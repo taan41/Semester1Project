@@ -24,7 +24,10 @@ static class UIHelper
     public static class UIMisc
     {
         public static void WriteCenter(string str)
-            => WriteLine(str.PadLeft((UIWidth + str.Length - 1) / 2));
+        {
+            CursorLeft = (UIWidth - str.Length) / 2;
+            WriteLine(str);
+        }
 
         public static void DrawLine(char lineChar)
             => WriteLine(new string(lineChar, UIWidth));
@@ -135,20 +138,22 @@ static class UIHelper
                         continue;
 
                     case ConsoleKey.Enter:
-                        Write($" ► {options[pointer]} ");
+                        CursorLeft = startCursorLeft;
+                        Write($" ► {options[pointer]} ◄");
                         return pointer;
 
                     case ConsoleKey.Escape:
+                        CursorLeft = startCursorLeft;
                         Write($" {options[pointer]}  ");
                         return null;
 
                     default: continue;
                 }
 
+                SetCursorPosition(startCursorLeft, startCursorTop + oldPtr);
                 Write($" {options[oldPtr]}  ");
-                SetCursorPosition(startCursorLeft, pointer + startCursorTop);
+                SetCursorPosition(startCursorLeft, startCursorTop + pointer);
                 Write($" ► {options[pointer]}");
-                CursorLeft = startCursorLeft;
             }
         }
     }

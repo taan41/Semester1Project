@@ -6,21 +6,79 @@ static class GameUI
 {
     public const string GameTitle = "CONSOLE CONQUER";
 
-    public static (int cursorLeft, int cursorTop) WelcomeScreen(List<string> options)
+    private static readonly string[] background0 = [
+        "₁     ₀₀  ₁ ₁     ₀  ₁ ₁₀     ₀₁  ₁ ₀₀₁  ₁   ₁₀  ₀₁₁     ₀    ₀₁    ₁₀",
+        "₀₁₀₀   ₁  ₀₁   ₀₁    ₀₁₁  ₀₁       ₀₁₁   ₁      ₀₀₁   ₁₀₁₁   ₀₁ ₁  ₀₀ ",
+        "  ₁ ₁ ₁₀    ₁₀₀  ₁    ₁₀      ₀₁   ₀₁  ₁ ₁    ₁    ₁₀       ₁₀   ₁ ₁₁ ",
+        "₀₁   ₁₀  ₁₁₀  ₀     ₀₀   ₀₁₁  ₀      ₀  ₁  ₁   ₀₀ ₁  ₁   ₀ ₀  ₀₀   ₁₁₀",
+        "₁     ₀₀    ₁   ₁₀  ₀₁₁    ₀₁ ₁     ₀  ₁ ₁₀     ₀₁  ₁ ₀ ₀₁    ₀₁    ₁₀",
+        "₀   ₀ ₁  ₁₀₁  ₁₀   ₁     ₀₁₀   ₀₀₁₁  ₀₁   ₁₀₁  ₀ ₀₀   ₁₁  ₀₁  ₀₀₁   ₀₁",
+        "₀₀   ₁  ₁    ₀₁     ₀₁₀  ₀  ₀₁   ₁  ₀  ₁ ₁₀₁     ₀₀  ₁   ₁₀  ₀₀ ₁   ₀₁",
+        "₀₁₁    ₀₁₁₀₀   ₁  ₀₁   ₀  ₀₁    ₁   ₁₀₁₁     ₀₁₁   ₁      ₀₀ ₀₁ ₁   ₀₀",
+        "₀  ₀     ₁   ₁₀₁  ₁₀    ₁ ₀₁  ₀   ₀ ₁₁   ₀₁ ₁₀₁₀ ₀₀₁   ₁₀₁  ₀ ₀  ₁  ₀₁"
+    ];
+
+    private static readonly string[] background = [
+        "₁       ₀₀₁₁     ₁₁ ₁₁         ₀₁  ₁ ₀₀₁  ₁   ₁₀₀₁₁    ₀₀₁          ₁₀",
+        "₀₁₀₀      ₀₁   ₀₁     ₁    ₀₁    ₁   ₀₁₁₁         ₀₀₁   ₁₀ ₁₁       ₀₀",
+        "  ₁ ₁ ₁₀     ₁₁      ₁₀      ₀₁       ₁  ₁₁₁₁      ₁₀       ₁₀   ₁ ₁₁ ",
+        "₀₁    ₁₀₁₁₀        ₀₀   ₀₁₁₀      ₀₁₁     ₁     ₀₀₁  ₁        ₀₀   ₁₁₀",
+        "₁      ₁₁₀₀    ₁   ₁₀₀ ₁₁    ₀₁ ₁     ₀  ₁₁₀      ₀₁₁₀  ₀₁    ₀₁    ₁₀",
+        "₀    ₁  ₁₀₁₁₀       ₁   ₀₁₀   ₀₀₁₁        ₁₀₁  ₀₀₀₁₁      ₀₁  ₀₀₁   ₀₁",
+        "₀₀       ₁₁    ₀₁     ₀₁₀₀₁   ₁₀     ₁  ₁₁₀₁     ₀₀  ₁   ₁₀₀₁       ₀₁",
+        "₀₁₁    ₀₁₁₀₀   ₁  ₀₁₀ ₀₁       ₁   ₁₀₁₁     ₀₁₁   ₁      ₀₀₀₁₁      ₀₀",
+        "₀₀   ₁     ₁₀₁  ₁₀   ₁ ₀₁  ₀   ₀₁₁   ₀₁₁₀₁  ₀₀₀₁   ₁₀₁           ₁  ₀₁"
+    ];
+
+    private static readonly string[] title = [
+        "",
+        "    ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╔═╗ ╦   ╔═╗    ",
+        "    ║   ║ ║ ║╚╣ ╚═╗ ║ ║ ║   ╠╣     ",
+        "    ╚═╝ ╚═╝ ╩ ╩ ╚═╝ ╚═╝ ╩═╝ ╚═╝    ",
+        "",
+        "    ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╦ ╦ ╔═╗ ╦═╗    ",
+        "    ║   ║ ║ ║╚╣ ║╔╣ ║ ║ ╠╣  ╠╦╝    ",
+        "    ╚═╝ ╚═╝ ╩ ╩ ╚╩╩ ╚═╝ ╩═╝ ╩╚═    ",
+        ""
+    ];
+
+    public static async Task TitleAnimation(int cursorTop, CancellationToken stopToken)
     {
+        int lineIndex = 0, lineLength = background[0].Length;
+
+        try
+        {
+            while(!stopToken.IsCancellationRequested)
+            {
+                SetCursorPosition(0, cursorTop);
+                // foreach(var line in background)
+                //     WriteLine($"{line[lineIndex..]}{line[0..lineIndex]}");
+                // SetCursorPosition(0, cursorTop + 1);
+                // foreach(var line in title)
+                //     UIMisc.WriteCenter(line);
+                for (int i = 0; i < background.Length; i++)
+                {
+                    Write($"{background[i][lineIndex..]}{background[i][0..lineIndex]}");
+                    UIMisc.WriteCenter(title[i]);
+                }
+                lineIndex += 1;
+                lineIndex %= lineLength;
+                
+                await Task.Delay(300, stopToken);
+            }
+        }
+        catch (OperationCanceledException) {}
+    }
+
+    public static (int cursorLeft, int cursorTop, CancellationTokenSource animToken) WelcomeScreen(List<string> options)
+    {
+        CancellationTokenSource animTokenSource = new();
+
         Clear();
-        ForegroundColor = ConsoleColor.Red;
+        SetCursorPosition(0, 0);
         UIMisc.DrawLine('=');
-        ForegroundColor = ConsoleColor.Cyan;
-        //₀₁₁₀     ----------------------------------------------------------------------
-        WriteLine("   ₁₀₁₀   ₁₀         ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╔═╗ ╦   ╔═╗     ₁ ₁₀       ₁₀₁  ");
-        WriteLine("    ₁ ₁     ₀        ║   ║ ║ ║╚╣ ╚═╗ ║ ║ ║   ╠╣            ₀   ₁₁    ");
-        WriteLine("                     ╚═╝ ╚═╝ ╩ ╩ ╚═╝ ╚═╝ ╩═╝ ╚═╝                 ₁₀₀ ");
-        WriteLine("     ₀₀₁  ₁₁₀ ₁₀                                     ₁₀₁₀  ₀ ₁ ");
-        WriteLine(" ₀₁                  ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╦ ╦ ╔═╗ ╦═╗          ₀₀  ₁₀     ");
-        WriteLine("₁₁ ₀₀ ₁ ₀₁           ║   ║ ║ ║╚╣ ║╔╣ ║ ║ ╠╣  ╠╦╝                  ₀₁ ");
-        WriteLine("   ₁         ₀₁      ╚═╝ ╚═╝ ╩ ╩ ╚╩╩ ╚═╝ ╩═╝ ╩╚═         ₁₁₀ ₀₁      ");
-        ForegroundColor = ConsoleColor.Green;
+        int titleCursorTop = CursorTop;
+        CursorTop += 9;
         UIMisc.DrawLine('=');
         WriteLine();
         ResetColor();
@@ -35,11 +93,11 @@ static class GameUI
         }
 
         WriteLine();
-        ForegroundColor = ConsoleColor.Blue;
         UIMisc.DrawLine('-');
-        ResetColor();
 
-        return (optionsCursorLeft, optionsCursorTop);
+        _ = Task.Run(() => TitleAnimation(titleCursorTop, animTokenSource.Token));
+
+        return (optionsCursorLeft, optionsCursorTop, animTokenSource);
     }
 
     public static int? PlayOnline()

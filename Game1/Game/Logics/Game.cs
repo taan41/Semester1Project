@@ -8,16 +8,19 @@ class Game
         List<string> welcomeOptions = ["PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
         while(true)
         {
-            var (cursorLeft, cursorTop) = GameUI.WelcomeScreen(welcomeOptions);
+            var (cursorLeft, cursorTop, animTokenSource) = GameUI.WelcomeScreen(welcomeOptions);
+            Console.ReadKey(true);
             
             switch(InteractiveUI.PickOption(cursorLeft, cursorTop, welcomeOptions))
             {
                 case 0:
                 case 1:
+                    animTokenSource.Cancel();
                     StartGame();
                     continue;
                 
                 case 2: case null:
+                    animTokenSource.Cancel();
                     return;
             }
         }
