@@ -1,117 +1,127 @@
-class EventManager(int seed)
+class EventManager
 {
-    private readonly Random random = new(seed);
+    private readonly Random _random;
+    private readonly GameData _gameData;
+    private readonly List<List<Event>> _events;
 
-    public List<Event> GenerateEvents(GameData gameData)
+    public EventManager(GameData gameData)
     {
-        int monsterPower = 15 + (gameData.Progress.Room - 1) * 1 + (gameData.Progress.Floor - 1) * GameProgress.MaxRoom;
+        _gameData = gameData;
+        _random = new(_gameData.Seed);
+        _events = GenerateEvents(_random);
+    }
 
-        if (gameData.Progress.Room == GameProgress.MaxRoom)
-            return [GenerateBossFight(gameData, monsterPower)];
+    public List<Event> GetEvents()
+        => _events.ElementAt(_gameData.Progress.Room + (_gameData.Progress.Floor - 1) * GameProgress.MaxRoom);
 
-        if (gameData.Progress.Room % 10 == 0)
-            return [new(EventType.Camp)];
-        
-        int eventQuantity = random.Next(1, 101) > 50 ? 3 : 2;
+    private List<List<Event>> GenerateEvents(Random rng)
+    {
+        List<List<Event>> events = [];
 
-        List<Event> events = [];
-        while(eventQuantity-- > 0)
-            events.Add(GenerateNormalEvent(gameData, monsterPower));
+        for (int room = 1; room <= GameProgress.MaxRoom * GameProgress.MaxFloor; room++)
+        {
+            int curRoom = room % GameProgress.MaxRoom;
+            int curFloor = (room - 1) / GameProgress.MaxRoom + 1;
+            int monsterPower = 15 + (curRoom - 1) * 1 + (curFloor - 1) * GameProgress.MaxRoom;
+
+            if (curRoom % GameProgress.MaxRoom == 0)
+            {
+                events.Add([GenerateBossFight(rng, curFloor, monsterPower)]);
+                continue;
+            }
+
+            if (_gameData.Progress.Room % 10 == 0)
+            {
+                events.Add([new(EventType.Camp)]);
+                continue;
+            }
+            
+            int eventQuantity = rng.Next(1, 101) > 50 ? 3 : 2;
+
+            List<Event> possibleEvents = [];
+            while(eventQuantity-- > 0)
+                possibleEvents.Add(GenerateNormalEvent(rng, curRoom, curFloor, monsterPower));
+
+            events.Add(possibleEvents);
+        }
 
         return events;
     }
 
-    private Event GenerateNormalEvent(GameData gameData, int monsterPower)
+    private static Event GenerateNormalEvent(Random rng, int room, int floor, int monsterPower)
     {
-        int randomValue = random.Next(1, 101);
+        int randomValue = rng.Next(1, 101);
 
-        if (randomValue > 15 && gameData.Progress.Room > 3)
-            return GenerateEliteFight(gameData, monsterPower);
+        if (randomValue > 75 && room > 3)
+            return GenerateEliteFight(rng, floor, monsterPower);
 
-        return GenerateNormalFight(gameData, monsterPower);
+        return GenerateNormalFight(rng, floor, monsterPower);
     }
 
-    private FightEvent GenerateNormalFight(GameData gameData, int monsterPower)
+    private static FightEvent GenerateNormalFight(Random rng, int floor, int monsterPower)
     {
-        int randomValue = random.Next(1, 101);
-        int normalQuantity = randomValue > 60 ? (randomValue > 90 ? 4 : 2) : 3;
+        int randomValue = rng.Next(1, 101);
+        int normalQuantity = randomValue > 35 ? (randomValue > 90 ? 4 : 3) : 2;
         
         Gold gold = CalculateGold(monsterPower, normalQuantity, 0, 0, randomValue);
-
-        List<Monster> availableMonsters = GameAssets.NormalMonsterList.FindAll(monster => monster.Floor == gameData.Progress.Floor);
-        List<Monster> monsters = [];
-
-        while(normalQuantity-- > 0)
-        {
-            Monster pickedMonster = availableMonsters[random.Next(0, availableMonsters.Count)];
-            monsters.Add(new(pickedMonster, monsterPower));
-        }
+        List<Monster> monsters = GenerateMonsters(rng, floor, monsterPower, normalQuantity);
 
         return new FightEvent(monsters, [gold]);
     }
 
-    private FightEvent GenerateEliteFight(GameData gameData, int monsterPower)
+    private static FightEvent GenerateEliteFight(Random rng, int floor, int monsterPower)
     {
-        int randomValue = random.Next(1, 101);
+        int randomValue = rng.Next(1, 101);
         int eliteQuantity = randomValue > 90 ? 2 : 1;
         int normalQuantity = randomValue > 50 ? (randomValue > 75 ? 0 : 1) : 2;
         
         Gold gold = CalculateGold(monsterPower, normalQuantity, eliteQuantity, 0, randomValue);
-
-        List<Monster> availableMonsters = GameAssets.EliteMonsterList.FindAll(monster => monster.Floor == gameData.Progress.Floor);
-        List<Monster> monsters = [];
-
-        while(eliteQuantity-- > 0)
-        {
-            Monster pickedMonster = availableMonsters[random.Next(0, availableMonsters.Count)];
-            monsters.Add(new(pickedMonster, monsterPower * 2));
-        }
-
-        availableMonsters = GameAssets.NormalMonsterList.FindAll(monster => monster.Floor == gameData.Progress.Floor);
-        while(normalQuantity-- > 0)
-        {
-            Monster pickedMonster = availableMonsters[random.Next(0, availableMonsters.Count)];
-            monsters.Add(new(pickedMonster, monsterPower));
-        }
+        List<Monster> monsters = GenerateMonsters(rng, floor, monsterPower, normalQuantity, eliteQuantity);
 
         return new FightEvent(monsters, [gold]);
     }
 
-    private FightEvent GenerateBossFight(GameData gameData, int monsterPower)
+    private static FightEvent GenerateBossFight(Random rng, int floor, int monsterPower)
     {
-        int randomValue = random.Next(1, 101);
+        int randomValue = rng.Next(1, 101);
         int bossQuantity = randomValue > 99 ? 2 : 1;
-        int eliteQuantity = randomValue > 15 ? 1 : 2;
+        int eliteQuantity = randomValue > 15 ? (randomValue > 99 ? 0 : 1) : 2;
         int normalQuantity = randomValue > 15 ? (randomValue > 99 ? 0 : 3) : 2;
         
         Gold gold = CalculateGold(monsterPower, normalQuantity, eliteQuantity, bossQuantity, randomValue);
-
-        List<Monster> availableMonsters = GameAssets.BossMonsterList.FindAll(monster => monster.Floor == gameData.Progress.Floor);
-        List<Monster> monsters = [];
-
-        while(bossQuantity-- > 0)
-        {
-            Monster pickedMonster = availableMonsters[random.Next(0, availableMonsters.Count)];
-            monsters.Add(new(pickedMonster, monsterPower * 5));
-        }
-
-        availableMonsters = GameAssets.EliteMonsterList.FindAll(monster => monster.Floor == gameData.Progress.Floor);
-        while(eliteQuantity-- > 0)
-        {
-            Monster pickedMonster = availableMonsters[random.Next(0, availableMonsters.Count)];
-            monsters.Add(new(pickedMonster, monsterPower * 2));
-        }
-
-        availableMonsters = GameAssets.NormalMonsterList.FindAll(monster => monster.Floor == gameData.Progress.Floor);
-        while(normalQuantity-- > 0)
-        {
-            Monster pickedMonster = availableMonsters[random.Next(0, availableMonsters.Count)];
-            monsters.Add(new(pickedMonster, monsterPower));
-        }
+        List<Monster> monsters = GenerateMonsters(rng, floor, monsterPower, normalQuantity, eliteQuantity, bossQuantity);
 
         return new FightEvent(monsters, [gold]);
     }
 
+    private static List<Monster> GenerateMonsters(Random rng, int floor, int monsterPower, int normalQuantity, int eliteQuantity = 0, int bossQuantity = 0)
+    {
+        List<Monster> monsters = [];
+        List<Monster> availableMonsters = GameAssets.BossMonsterList.FindAll(monster => monster.Floor == floor);
+
+        while(bossQuantity-- > 0)
+        {
+            Monster pickedMonster = availableMonsters[rng.Next(0, availableMonsters.Count)];
+            monsters.Add(new(pickedMonster, monsterPower * 5));
+        }
+
+        availableMonsters = GameAssets.EliteMonsterList.FindAll(monster => monster.Floor == floor);
+        while(eliteQuantity-- > 0)
+        {
+            Monster pickedMonster = availableMonsters[rng.Next(0, availableMonsters.Count)];
+            monsters.Add(new(pickedMonster, monsterPower * 2));
+        }
+
+        availableMonsters = GameAssets.NormalMonsterList.FindAll(monster => monster.Floor == floor);
+        while(normalQuantity-- > 0)
+        {
+            Monster pickedMonster = availableMonsters[rng.Next(0, availableMonsters.Count)];
+            monsters.Add(new(pickedMonster, monsterPower));
+        }
+
+        return monsters;
+    }
+
     private static Gold CalculateGold(int monsterPower, int normalQuantity, int eliteQuantity, int bossQuantity, int randomValue)
-        => new((int) (monsterPower * (1.25 + 0.25 * normalQuantity + 1 * eliteQuantity + 2 * bossQuantity) * (0.8 + 0.5 * randomValue / 100)));
+        => new((int) (monsterPower * (1.25 + 0.25 * normalQuantity + 0.6 * eliteQuantity + 2 * bossQuantity) * (0.85 + 0.3 * randomValue / 100)));
 }

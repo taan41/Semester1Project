@@ -16,6 +16,20 @@ class Player : Entity
         PlayerGold = new(goldQuantity);
     }
 
+    public List<Equipment> GetEquipped()
+    {
+        List<Equipment> equipped = [];
+
+        if (EquippedWeapon != null)
+            equipped.Add(EquippedWeapon);
+        if (EquippedArmor != null)
+            equipped.Add(EquippedArmor);
+        if (EquippedRing != null)
+            equipped.Add(EquippedRing);
+        
+        return equipped;
+    }
+
     public void Equip(Equipment equipment)
     {
         Equipment? oldEquipment = null;
@@ -53,6 +67,16 @@ class Player : Entity
         MP += equipment.BonusMaxMP;
     }
 
+    public void ChangeSkill(int index, Skill skillToChange)
+    {
+        Skill changingSkill = Skills.ElementAt(index);
+        Skills.RemoveAt(index);
+        Skills.Insert(index, skillToChange);
+        
+        SkillInventory.Remove(skillToChange);
+        AddSkill(changingSkill);
+    }
+
     public void AddItem(Item item)
     {
         if (item is Equipment equipment)
@@ -85,7 +109,7 @@ class Player : Entity
         else
         {
             SkillInventory.Add(skill);
-            SkillInventory.Sort((a, b) => string.Compare(a.GetType().Name, b.GetType().Name, StringComparison.Ordinal));
+            SkillInventory.Sort(new SkillComparer());
         }
     }
 

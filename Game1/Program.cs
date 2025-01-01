@@ -33,7 +33,7 @@ class Program
         for(int i = 2; i < 20; i++)
             WriteLine($"|  {i}");
 
-        WriteLine("|  Fix console's size until all lines are straight and fully visible");
+        WriteLine("|  Fix console's size until all lines are fully visible");
         Write(new string('-', UIHelper.UIConstants.UIWidth));
         ReadKey(true);
 

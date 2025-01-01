@@ -49,18 +49,26 @@ static class UIHelper
 
     public static class InteractiveUI
     {
-        public static T? PickComponent<T>(int startCursorTop, List<T> components) where T : Component
-            => PickComponent(0, startCursorTop, components);
+        public static int? PickComponent<T>(int startCursorTop, List<T> components, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false) where T : Component
+            => PickComponent(0, startCursorTop, components, exitUpwards, exitDownwards, startUpwards);
 
-        public static T? PickComponent<T>(int startCursorLeft, int startCursorTop, List<T> components) where T : Component
+        public static int? PickComponent<T>(int startCursorLeft, int startCursorTop, List<T> components, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false) where T : Component
         {
-            int pointer = 0, oldPtr;
+            int curIndex = startUpwards ? components.Count - 1 : 0, oldIndex;
+
+            if (components.Count == 0)
+            {
+                while (true)
+                    if (ReadKey(true).Key == ConsoleKey.Escape)
+                        return null;
+            }
+
             ConsoleKeyInfo keyPressed;
 
-            SetCursorPosition(startCursorLeft, startCursorTop);
+            SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
             Write(" ►");
-            components[pointer].Print();
-            SetCursorPosition(startCursorLeft, startCursorTop);
+            components[curIndex].Print();
+            SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
 
             while (true)
             {
@@ -68,53 +76,67 @@ static class UIHelper
                 switch(keyPressed.Key)
                 {
                     case ConsoleKey.UpArrow:
-                        if (pointer > 0)
+                        if (curIndex > 0)
                         {
-                            oldPtr = pointer--;
+                            oldIndex = curIndex--;
                             break;
+                        }
+                        else if (exitUpwards)
+                        {
+                            SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
+                            components[curIndex].Print();
+                            return -1;
                         }
                         continue;
 
                     case ConsoleKey.DownArrow:
-                        if (pointer < components.Count - 1)
+                        if (curIndex < components.Count - 1)
                         {
-                            oldPtr = pointer++;
+                            oldIndex = curIndex++;
                             break;
+                        }
+                        else if (exitDownwards)
+                        {
+                            SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
+                            components[curIndex].Print();
+                            return components.Count;
                         }
                         continue;
 
                     case ConsoleKey.Enter:
+                        SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
                         Write(" ►");
-                        components[pointer].Print();
-                        return components[pointer];
+                        components[curIndex].Print();
+                        return curIndex;
 
                     case ConsoleKey.Escape:
-                        components[pointer].Print();
+                        SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
+                        components[curIndex].Print();
                         return null;
 
                     default: continue;
                 }
 
-                components[oldPtr].Print();
-                SetCursorPosition(startCursorLeft, pointer + startCursorTop);
+                SetCursorPosition(startCursorLeft, startCursorTop + oldIndex);
+                components[oldIndex].Print();
                 
+                SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
                 Write(" ►");
-                components[pointer].Print();
-                SetCursorPosition(startCursorLeft, CursorTop - 1);
+                components[curIndex].Print();
             }
         }
 
-        public static int? PickOption(int startCursorTop, List<string> options)
-            => PickOption(0, startCursorTop, options);
+        public static int? PickOption(int startCursorTop, List<string> options, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false)
+            => PickOption(0, startCursorTop, options, exitUpwards, exitDownwards, startUpwards);
 
-        public static int? PickOption(int startCursorLeft, int startCursorTop, List<string> options)
+        public static int? PickOption(int startCursorLeft, int startCursorTop, List<string> options, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false)
         {
-            int pointer = 0, oldPtr;
+            int curIndex = startUpwards ? options.Count - 1 : 0, oldIndex;
             ConsoleKeyInfo keyPressed;
 
-            SetCursorPosition(startCursorLeft, startCursorTop);
-            WriteLine($" ► {options[pointer]} ");
-            SetCursorPosition(startCursorLeft, startCursorTop);
+            SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
+            WriteLine($" ► {options[curIndex]} ");
+            SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
 
             while (true)
             {
@@ -122,38 +144,51 @@ static class UIHelper
                 switch(keyPressed.Key)
                 {
                     case ConsoleKey.UpArrow:
-                        if (pointer > 0)
+                        if (curIndex > 0)
                         {
-                            oldPtr = pointer--;
+                            oldIndex = curIndex--;
                             break;
+                        }
+                        else if (exitUpwards)
+                        {
+                            SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
+                            Write($" {options[curIndex]}  ");
+                            return -1;
                         }
                         continue;
 
                     case ConsoleKey.DownArrow:
-                        if (pointer < options.Count - 1)
+                        if (curIndex < options.Count - 1)
                         {
-                            oldPtr = pointer++;
+                            oldIndex = curIndex++;
                             break;
+                        }
+                        else if (exitDownwards)
+                        {
+                            SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
+                            Write($" {options[curIndex]}  ");
+                            return options.Count;
                         }
                         continue;
 
                     case ConsoleKey.Enter:
-                        CursorLeft = startCursorLeft;
-                        Write($" ► {options[pointer]} ◄");
-                        return pointer;
+                        SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
+                        Write($" ► {options[curIndex]} ◄");
+                        return curIndex;
 
                     case ConsoleKey.Escape:
-                        CursorLeft = startCursorLeft;
-                        Write($" {options[pointer]}  ");
+                        SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
+                        Write($" {options[curIndex]}  ");
                         return null;
 
                     default: continue;
                 }
 
-                SetCursorPosition(startCursorLeft, startCursorTop + oldPtr);
-                Write($" {options[oldPtr]}  ");
-                SetCursorPosition(startCursorLeft, startCursorTop + pointer);
-                Write($" ► {options[pointer]}");
+                SetCursorPosition(startCursorLeft, startCursorTop + oldIndex);
+                Write($" {options[oldIndex]}  ");
+
+                SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
+                Write($" ► {options[curIndex]}");
             }
         }
     }

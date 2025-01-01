@@ -1,0 +1,6 @@
+thêm vật phẩm, kỹ năng, quái
+- lưu trong db & client
+- client tải về update mỗi lần kết nối tới server
+
+thêm save game
+- lưu trong db & client

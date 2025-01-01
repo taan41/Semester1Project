@@ -9,6 +9,7 @@ class GameData
     {
         Progress = new();
         Player = new("Hero", 3, 25, 10, 100);
-        Player.AddSkill(new(GameAssets.SkillList.ElementAt(0)));
+        for (int i = 0; i < 15; i++)
+            Player.AddSkill(new(GameAssets.SkillList.ElementAt(0)){ Damage = i, Rarity = (ItemRarity) (i % 4) });
     }
 }

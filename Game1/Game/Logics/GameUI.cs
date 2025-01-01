@@ -150,6 +150,59 @@ static class GameUI
         return (optionsCursorLeft, optionsCursorTop);
     }
 
+    public static (int routeCurTop, int invCurTop) PickRouteScreen(GameData gameData, List<Event> routes, List<string> invOptions)
+    {
+        Clear();
+        UIMisc.DrawLine('=');
+        ForegroundColor = ConsoleColor.Cyan;
+        UIMisc.WriteCenter(GameTitle);
+        ResetColor();
+        UIMisc.DrawLine('=');
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        
+        WriteLine(" -- Pick a route:");
+        int routeCurTop = CursorTop;
+        routes.ForEach(route => route.Print());
+        UIMisc.DrawLine('-');
+
+        int invCurTop = CursorTop;
+        invOptions.ForEach(option => WriteLine($" {option}"));
+        UIMisc.DrawLine('-');
+
+        gameData.Player.Print();
+        UIMisc.DrawLine('-');
+
+        return (routeCurTop, invCurTop);
+    }
+
+    public static (int invCurTop, int equippedCurTop) PickInventoryScreen<T>(GameData gameData, List<T> inv, List<T> equipped) where T : Item
+    {
+        Clear();
+        UIMisc.DrawLine('=');
+        ForegroundColor = ConsoleColor.Cyan;
+        UIMisc.WriteCenter(GameTitle);
+        ResetColor();
+        UIMisc.DrawLine('=');
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        
+        WriteLine(" -- Inventory:");
+        int invCurTop = CursorTop;
+        inv.ForEach(item => item.Print());
+        UIMisc.DrawLine('-');
+
+        WriteLine(" -- Currently equipped:");
+        int equippedCurTop = CursorTop;
+        equipped.ForEach(item => item.Print());
+        UIMisc.DrawLine('-');
+
+        gameData.Player.Print();
+        UIMisc.DrawLine('-');
+
+        return (invCurTop, equippedCurTop);
+    }
+
     public static (int monsterCurTop, int actionCurTop) FightScreen(GameData gameData, FightEvent fightEvent, List<string> actions)
     {
         Clear();

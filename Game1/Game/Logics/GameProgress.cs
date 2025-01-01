@@ -30,15 +30,20 @@ class GameProgress
         }
     }
 
-    public void Next()
+    public bool Next()
     {
         if (Room == MaxRoom)
         {
+            if (Floor == MaxFloor)
+                return false;
+                
             Room = 1;
             Floor++;
         }
         else
             Room++;
+        
+        return true;
     }
 
     public void Print()

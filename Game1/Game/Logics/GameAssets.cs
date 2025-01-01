@@ -11,10 +11,16 @@ class GameAssets
     ];
 
     public static List<Monster> MonsterList = [
-        new("Slime", 1, 10),
-        new("Rat", 4, 10),
+        new("Slime", 10, 100, 1),
+        new("Rat", 40, 100, 1),
         new("Mother Slime", 15, 100, 1, MonsterType.Elite),
         new("King Slime", 20, 100, 1, MonsterType.Boss),
+        new("Fish", 10, 100, 2),
+        new("Killer Whale", 10, 100, 2, MonsterType.Elite),
+        new("Poisedon", 10, 100, 2, MonsterType.Boss),
+        new("Skeleton", 10, 100, 3),
+        new("Gravedigger", 10, 100, 3, MonsterType.Elite),
+        new("Undead king", 10, 100, 3, MonsterType.Boss),
     ];
 
     public static List<Monster> NormalMonsterList = MonsterList.FindAll(monster => monster.Type == MonsterType.Normal);

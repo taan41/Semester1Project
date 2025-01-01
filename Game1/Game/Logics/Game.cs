@@ -58,31 +58,64 @@ class Game
 
         var (cursorLeft, cursorTop) = GameUI.PickComponentScreen(gameData, starters, " Choose one starter item:");
         
-        Equipment? pickedEquipment = InteractiveUI.PickComponent(cursorLeft, cursorTop, starters);
-        if (pickedEquipment == null)
+        int? pickedEquipInd = InteractiveUI.PickComponent(cursorLeft, cursorTop, starters);
+        if (pickedEquipInd == null)
             return;
 
-        gameData.Player.Equip(new(pickedEquipment));
+        Equipment pickedEquip = starters[(int) pickedEquipInd];
+
+        gameData.Player.Equip(new(pickedEquip));
         gameData.Progress.Next();
         GameLoop(gameData);
     }
 
     private static void GameLoop(GameData gameData)
     {
-        EventManager eventManager = new(gameData.Seed);
+        EventManager eventManager = new(gameData);
+        List<string> inventoryOptions = ["Change equipment", "Change skill"];
+        bool pickFromEnd = false;
 
         while (true)
         {
-            List<Event> events = eventManager.GenerateEvents(gameData);
-            var (routeCurLeft, routeCurTop) = GameUI.PickComponentScreen(gameData, events, " Pick a route:");
+            List<Event> routes = eventManager.GetEvents();
+            var (routeCurTop, invCurTop) = GameUI.PickRouteScreen(gameData, routes, inventoryOptions);
 
-            Event? pickedEvent = InteractiveUI.PickComponent(routeCurLeft, routeCurTop, events);
-            if (pickedEvent == null)
+            int? pickedRouteInd = InteractiveUI.PickComponent(routeCurTop, routes, false, true, pickFromEnd);
+            pickFromEnd = false;
+            if (pickedRouteInd == null)
                 return;
 
-            if (pickedEvent is FightEvent fightEvent)
+            if (pickedRouteInd == routes.Count) // Move down to inventory options
+            {
+                int? pickedInvInd = InteractiveUI.PickOption(invCurTop, inventoryOptions, true);
+                switch (pickedInvInd)
+                {
+                    case null:
+                        return;
+
+                    case -1:
+                        pickFromEnd = true;
+                        continue;
+
+                    case 0:
+                        HandleInventory(gameData, gameData.Player.EquipInventory, gameData.Player.GetEquipped());
+                        continue;
+
+                    case 1:
+                        HandleInventory(gameData, gameData.Player.SkillInventory, gameData.Player.Skills);
+                        continue;
+
+                    default:
+                        continue;
+                }
+            }
+
+            Event pickedRoute = routes[(int) pickedRouteInd];
+
+            if (pickedRoute is FightEvent fightEvent)
                 HandleFightEvent(gameData, fightEvent);
-            else switch (pickedEvent.Type)
+
+            else switch (pickedRoute.Type)
             {
                 case EventType.Camp:
                     gameData.Player.Regenerate();
@@ -90,6 +123,54 @@ class Game
             }
             
             gameData.Progress.Next();
+        }
+    }
+
+    private static void HandleInventory<T>(GameData gameData, List<T> inv, List<T> equipped) where T : Item
+    {
+        int displayCount = 5;
+        int startInd = 0, endInd = inv.Count > displayCount ? displayCount : inv.Count;
+        bool pickFromEnd = false;
+        while(true)
+        {
+            var (invCurTop, equippedCurTop) = GameUI.PickInventoryScreen(gameData, inv[startInd..endInd], equipped);
+            int? pickedEquipInd = InteractiveUI.PickComponent(invCurTop, inv[startInd..endInd], startInd > 0, endInd < inv.Count, pickFromEnd);
+
+            if (pickedEquipInd == null)
+                return;
+
+            if (pickedEquipInd == -1 && startInd > 0)
+            {
+                pickFromEnd = false;
+                startInd--;
+                endInd--;
+                continue;
+            }
+
+            if (pickedEquipInd == displayCount && endInd < inv.Count)
+            {
+                pickFromEnd = true;
+                startInd++;
+                endInd++;
+                continue;
+            }
+
+            Item pickedItem = inv[startInd + (int) pickedEquipInd];
+            if (pickedItem is Equipment pickedEquip)
+                gameData.Player.Equip(pickedEquip);
+            else if (pickedItem is Skill pickedSkill)
+            {
+                if (equipped.Count < 3)
+                {
+                    gameData.Player.AddSkill(pickedSkill);
+                    continue;
+                }
+
+                int? equippedSkillInd = InteractiveUI.PickComponent(equippedCurTop, equipped);
+                if (equippedSkillInd != null)
+                    gameData.Player.ChangeSkill((int) equippedSkillInd, pickedSkill);
+
+            }
         }
     }
 
@@ -104,18 +185,22 @@ class Game
             switch (InteractiveUI.PickOption(actionCurTop, fightActions))
             {
                 case 0:
-                    Monster? pickedMonster = InteractiveUI.PickComponent(monsterCurTop, fightEvent.Monsters);
-                    if (pickedMonster == null)
+                    int? pickedMonsterInd = InteractiveUI.PickComponent(monsterCurTop, fightEvent.Monsters);
+                    if (pickedMonsterInd == null)
                         continue;
+                    
+                    Monster pickedMonster = fightEvent.Monsters[(int) pickedMonsterInd];
                     
                     gameData.Player.Attack(pickedMonster);
                     break;
 
                 case 1:
                     var (skillCurTop, endCurTop) = GameUI.SkillFightScreen(gameData, fightEvent);
-                    Skill? pickedSkill = InteractiveUI.PickComponent(skillCurTop, gameData.Player.Skills);
-                    if (pickedSkill == null)
+                    int? pickedSkillInd = InteractiveUI.PickComponent(skillCurTop, gameData.Player.Skills);
+                    if (pickedSkillInd == null)
                         continue;
+
+                    Skill pickedSkill = gameData.Player.Skills[(int) pickedSkillInd];
 
                     if (pickedSkill.MPCost > gameData.Player.MP)
                     {
@@ -130,10 +215,11 @@ class Game
                         switch (pickedSkill.Type)
                         {
                             case TargetType.Single:
-                                pickedMonster = InteractiveUI.PickComponent(monsterCurTop, fightEvent.Monsters);
-                                if (pickedMonster == null)
+                                pickedMonsterInd = InteractiveUI.PickComponent(monsterCurTop, fightEvent.Monsters);
+                                if (pickedMonsterInd == null)
                                     continue;
 
+                                pickedMonster = fightEvent.Monsters[(int) pickedMonsterInd];
                                 gameData.Player.UseSkill(pickedSkill, [pickedMonster]);
                                 break;
 
@@ -162,9 +248,11 @@ class Game
         while(fightEvent.Rewards.Count > 0)
         {
             var (_, rewardCurTop) = GameUI.PickComponentScreen(gameData, fightEvent.Rewards, " Rewards:");
-            Item? pickedReward = InteractiveUI.PickComponent(rewardCurTop, fightEvent.Rewards);
-            if (pickedReward == null)
+            int? pickedRewardInd = InteractiveUI.PickComponent(rewardCurTop, fightEvent.Rewards);
+            if (pickedRewardInd == null)
                 return;
+            
+            Item pickedReward = fightEvent.Rewards[(int) pickedRewardInd];
 
             gameData.Player.AddItem(pickedReward);
             fightEvent.Rewards.Remove(pickedReward);
