@@ -8,19 +8,21 @@ class Monster : Entity
 {
     public MonsterType Type { get; set; }
     public int Power { get; set; } = 1;
-    // public double StatMultiplier { get; set; } = 1;
+    public int Floor { get; set; } = 1;
 
     public Monster() {}
 
-    public Monster(string name, int atk, int hp, MonsterType type = MonsterType.Normal) : base(name, atk, hp, 0)
+    public Monster(string name, int atk, int hp, int floor = 1, MonsterType type = MonsterType.Normal) : base(name, atk, hp, 0)
     {
         Type = type;
+        Floor = floor;
         Power = ATK * 5 + MaxHP;
     }
 
     public Monster(Monster other, int? targetPower = null) : base(other.Name, other.ATK, other.HP, 0)
     {
         Type = other.Type;
+        Floor = other.Floor;
         Power = other.Power;
         if (targetPower != null)
             ScaleStat((int) targetPower);
