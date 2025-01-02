@@ -175,7 +175,7 @@ class Program
 
             while (true)
             {
-                switch(UIHelper.InteractiveUI.PickOption(actionCursorTop, actions))
+                switch(UIHelper.InteractiveUI.PickAction(actionCursorTop, actions))
                 {
                     case 0:
                         break;

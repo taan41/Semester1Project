@@ -10,8 +10,12 @@ class FightEvent : Event
         Type = EventType.Fight;
         Monsters.AddRange(monsters);
         Rewards.AddRange(rewards);
-        MonsterType monsterType = Monsters[0].Type;
-        Name = $"{(monsterType == MonsterType.Boss ? "(!!!) " : monsterType == MonsterType.Elite ? "(!) " : "")}{monsterType} Fight";
-        // {(Monsters.Count > 1 ? $" + {Monsters.Count - 1}" : "")}
+
+        Name = Monsters[0].Type switch
+        {
+            MonsterType.Boss => "(!!!) Boss Fight",
+            MonsterType.Elite => "(!) Elite Fight",
+            _ => "Normal Fight"
+        };
     }
 }

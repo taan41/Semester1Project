@@ -1,5 +1,14 @@
 class EventManager
 {
+    private static readonly Dictionary<ItemRarity, (int weight, int powerMultiplier)> ItemWeights = new()
+    {
+        [ItemRarity.Common] = (BasePower + GameProgress.MaxRoom, -100),
+        [ItemRarity.Rare] = ((BasePower + GameProgress.MaxFloor) * 30 / 100, 0),
+        [ItemRarity.Epic] = (- (BasePower + GameProgress.MaxRoom) * 70 / 100, 100),
+        [ItemRarity.Legendary] = (- (BasePower + GameProgress.MaxRoom) / 2, 60),
+    };
+    private const int BasePower = 15;
+
     private readonly Random _random;
     private readonly GameData _gameData;
     private readonly AssetManager _assetManager;
@@ -24,7 +33,7 @@ class EventManager
         {
             int curRoom = room % GameProgress.MaxRoom + 1;
             int curFloor = room / GameProgress.MaxRoom + 1;
-            int monsterPower = 15 + (curRoom - 1) * 1 + (curFloor - 1) * GameProgress.MaxRoom;
+            int monsterPower = BasePower + (curRoom - 1) * 1 + (curFloor - 1) * GameProgress.MaxRoom;
 
             if (curRoom % GameProgress.MaxRoom == 0)
             {
@@ -40,7 +49,7 @@ class EventManager
 
             if (curRoom % 10 == 0)
             {
-                events.Add([new(EventType.Camp)]);
+                events.Add([new(EventType.Camp), GenerateShop(monsterPower)]);
                 continue;
             }
             
@@ -128,6 +137,52 @@ class EventManager
         }
 
         return monsters;
+    }
+
+    private ShopEvent GenerateShop(int monsterPower)
+    {
+        List<Item> sellingItems = [];
+
+        for (int i = 0; i < 5; i++)
+            sellingItems.Add(GenerateEquip(monsterPower));
+
+        return new(sellingItems);
+    }
+
+    private Equipment GenerateEquip(int monsterPower)
+    {
+        int totalWeight = 0;
+        foreach(var (weight, powerMultiplier) in ItemWeights.Values)
+        {
+            if (weight + monsterPower * powerMultiplier / 100 > 0)
+                totalWeight += weight + monsterPower * powerMultiplier / 100;
+        }
+
+        int randomValue = _random.Next(totalWeight);
+        int cumulativeWeight = 0;
+        ItemRarity rarity = ItemRarity.Common;
+
+        foreach(var itemWeight in ItemWeights)
+        {
+            int itemCurWeight = itemWeight.Value.weight + monsterPower * itemWeight.Value.powerMultiplier / 100;
+            if (itemCurWeight <= 0)
+                continue;
+
+            cumulativeWeight += itemCurWeight;
+            if (randomValue < cumulativeWeight)
+            {
+                rarity = itemWeight.Key;
+                break;
+            }
+        }
+
+        return rarity switch
+        {
+            ItemRarity.Rare => _assetManager.RareEquipments.ElementAt(_random.Next(_assetManager.RareEquipments.Count)),
+            ItemRarity.Epic => _assetManager.EpicEquipments.ElementAt(_random.Next(_assetManager.EpicEquipments.Count)),
+            ItemRarity.Legendary => _assetManager.LegendaryEquipments.ElementAt(_random.Next(_assetManager.LegendaryEquipments.Count)),
+            _ => _assetManager.CommonEquipments.ElementAt(_random.Next(_assetManager.CommonEquipments.Count)),
+        };
     }
 
     private static Gold CalculateGold(int monsterPower, int normalQuantity, int eliteQuantity, int bossQuantity, int randomValue)

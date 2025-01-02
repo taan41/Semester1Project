@@ -125,6 +125,29 @@ class Player : Entity
     public void Regenerate()
         => Regenerate(MaxHP, MaxMP);
 
+    public void TradeItem(Item item, bool buying)
+    {
+        if (buying)
+        {
+            AddItem(item);
+            PlayerGold.Quantity -= item.Price;
+        }
+        else
+        {
+            if (item is Equipment equip)
+            {
+                if (EquipInventory.Remove(equip))
+                    PlayerGold.Quantity += (int) (equip.Price * (double) Item.SellPricePercentage / 100);
+            }
+            else if (item is Skill skill)
+            {
+                if (SkillInventory.Remove(skill))
+                    PlayerGold.Quantity += (int) (skill.Price * (double) Item.SellPricePercentage / 100);
+
+            }
+        }
+    }
+
     public override void Print()
     {
         base.Print();

@@ -14,7 +14,7 @@ class Game
             GameUI.StartTitleAnim();
 
             Console.ReadKey(true);
-            switch(InteractiveUI.PickOption(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, welcomeOptions))
+            switch(InteractiveUI.PickAction(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, welcomeOptions))
             {
                 case 0:
                 case 1:
@@ -38,7 +38,7 @@ class Game
             GameUI.StartTitleAnim();
 
             Console.ReadKey(true);
-            switch(InteractiveUI.PickOption(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, playOptions))
+            switch(InteractiveUI.PickAction(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, playOptions))
             {
                 case 0:
                     GameUI.StopTitleAnim();
@@ -133,7 +133,7 @@ class Game
 
             if (pickedRouteInd == routes.Count) // Move down to inventory options
             {
-                int? pickedInvInd = InteractiveUI.PickOption(CursorPos.SubZoneTop + 1, invOptions, true);
+                int? pickedInvInd = InteractiveUI.PickAction(CursorPos.SubZoneTop + 1, invOptions, true);
                 switch (pickedInvInd)
                 {
                     case null:
@@ -149,11 +149,11 @@ class Game
                         continue;
 
                     case 0:
-                        HandleInventory(gameData, gameData.Player.EquipInventory, gameData.Player.GetEquipped());
+                        HandleEquipInventory(gameData);
                         continue;
 
                     case 1:
-                        HandleInventory(gameData, gameData.Player.SkillInventory, gameData.Player.Skills);
+                        HandleSkillInventory(gameData);
                         continue;
 
                     default:
@@ -165,12 +165,11 @@ class Game
 
             if (pickedRoute is FightEvent fightEvent)
             {
-                gameData.Save();
                 if (!HandleFightEvent(gameData, fightEvent))
-                {
                     return;
-                }
             }
+            else if (pickedRoute is ShopEvent shopEvent)
+                HandleShop(gameData, shopEvent);
 
             else switch (pickedRoute.Type)
             {
@@ -181,13 +180,14 @@ class Game
 
                 case EventType.Treasure:
                     gameData.Save();
-                    GameUI.TreasureOpening2(gameData);
+                    GameUI.TreasureOpening(gameData);
                     if (!HandleRewards(gameData, [new Gold(1000)]))
                         return;
                     break;
             }
             
             gameData.Progress.Next();
+            gameData.Save();
         }
     }
 
@@ -199,7 +199,7 @@ class Game
         gameData.SetTime(false);
         GameUI.PausePopup(pauseOptions, gameData.GetElapsedTime());
 
-        int? optionInd = InteractiveUI.PickOption(CursorPos.PauseOptionLeft, CursorPos.PauseOptionTop, pauseOptions);
+        int? optionInd = InteractiveUI.PickAction(CursorPos.PauseOptionLeft, CursorPos.PauseOptionTop, pauseOptions);
         switch(optionInd)
         {
             case 1:
@@ -211,17 +211,18 @@ class Game
         }
     }
 
-    private static void HandleInventory<T>(GameData gameData, List<T> inv, List<T> equipped) where T : Item
+    private static void HandleEquipInventory(GameData gameData)
     {
+        List<Equipment> equipInv = gameData.Player.EquipInventory;
         int displayCount = UIConstants.MainZoneHeight - 1;
-        int startInd = 0, endInd = inv.Count > displayCount ? displayCount : inv.Count;
+        int startInd = 0, endInd = equipInv.Count > displayCount ? displayCount : equipInv.Count;
         bool pickFromEnd = false;
 
         while(true)
         {
-            GameUI.InventoryScreen(gameData, inv[startInd..endInd], equipped);
+            GameUI.InventoryScreen(gameData, equipInv[startInd..endInd], gameData.Player.GetEquipped());
 
-            int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, inv[startInd..endInd], startInd > 0, endInd < inv.Count, pickFromEnd);
+            int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, equipInv[startInd..endInd], startInd > 0, endInd < equipInv.Count, pickFromEnd);
 
             if (pickedEquipInd == null)
                 return;
@@ -234,7 +235,7 @@ class Game
                 continue;
             }
 
-            if (pickedEquipInd == displayCount && endInd < inv.Count)
+            if (pickedEquipInd == displayCount && endInd < equipInv.Count)
             {
                 pickFromEnd = true;
                 startInd++;
@@ -242,25 +243,54 @@ class Game
                 continue;
             }
 
-            Item pickedItem = inv[startInd + (int) pickedEquipInd];
+            Equipment pickedEquip = equipInv[startInd + (int) pickedEquipInd];
+            gameData.Player.Equip(pickedEquip);
+        }
+    }
 
-            if (pickedItem is Equipment pickedEquip)
+    private static void HandleSkillInventory(GameData gameData)
+    {
+        List<Skill> skillInv = gameData.Player.SkillInventory;
+        int displayCount = UIConstants.MainZoneHeight - 1;
+        int startInd = 0, endInd = skillInv.Count > displayCount ? displayCount : skillInv.Count;
+        bool pickFromEnd = false;
+
+        while(true)
+        {
+            GameUI.InventoryScreen(gameData, skillInv[startInd..endInd], gameData.Player.Skills);
+
+            int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, skillInv[startInd..endInd], startInd > 0, endInd < skillInv.Count, pickFromEnd);
+
+            if (pickedEquipInd == null)
+                return;
+
+            if (pickedEquipInd == -1 && startInd > 0)
             {
-                gameData.Player.Equip(pickedEquip);
+                pickFromEnd = false;
+                startInd--;
+                endInd--;
+                continue;
             }
-            else if (pickedItem is Skill pickedSkill)
+
+            if (pickedEquipInd == displayCount && endInd < skillInv.Count)
             {
-                if (equipped.Count < 3)
-                {
-                    gameData.Player.AddSkill(pickedSkill);
-                    continue;
-                }
-
-                int? equippedSkillInd = InteractiveUI.PickComponent(CursorPos.SubZoneTop + 1, equipped);
-                if (equippedSkillInd != null)
-                    gameData.Player.ChangeSkill((int) equippedSkillInd, pickedSkill);
-
+                pickFromEnd = true;
+                startInd++;
+                endInd++;
+                continue;
             }
+
+            Skill pickedSkill = skillInv[startInd + (int) pickedEquipInd];
+
+            if (gameData.Player.Skills.Count < 3)
+            {
+                gameData.Player.AddSkill(pickedSkill);
+                continue;
+            }
+
+            int? equippedSkillInd = InteractiveUI.PickComponent(CursorPos.SubZoneTop + 1, gameData.Player.Skills);
+            if (equippedSkillInd != null)
+                gameData.Player.ChangeSkill((int) equippedSkillInd, pickedSkill);
         }
     }
 
@@ -273,7 +303,7 @@ class Game
         {
             GameUI.FightScreen(gameData, fightEvent.Monsters, fightActions);
 
-            switch (InteractiveUI.PickOption(CursorPos.SubZoneTop + 1, fightActions))
+            switch (InteractiveUI.PickAction(CursorPos.SubZoneTop + 1, fightActions))
             {
                 case 0:
                     int? pickedMonsterInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop, fightEvent.Monsters);
@@ -340,7 +370,6 @@ class Game
         return HandleRewards(gameData, fightEvent.Rewards);
     }
 
-
     // Return false if quit during picking rewards
     private static bool HandleRewards(GameData gameData, List<Item> rewards)
     {
@@ -359,5 +388,132 @@ class Game
         }
 
         return true;
+    }
+
+    private static void HandleShop(GameData gameData, ShopEvent shopEvent)
+    {
+        List<string> shopActions = ["Buy", "Sell", "Inventory"];
+        List<string> invActions = ["Change Equipment", "Change Skill"];
+
+        while (true)
+        {
+            GameUI.ShopMainScreen(gameData, shopActions);
+            
+            switch (InteractiveUI.PickAction(CursorPos.SubZoneTop, shopActions))
+            {
+                case null:
+                    return;
+                    
+                case 0:
+                    HandleShopBuy(gameData, shopEvent);
+                    break;
+
+                case 1:
+                    HandleShopSell(gameData);
+                    break;
+
+                case 2:
+                    GameUI.ShopMainScreen(gameData, invActions);
+
+                    int? pickedInvInd = InteractiveUI.PickAction(CursorPos.SubZoneTop, invActions);
+                    switch (pickedInvInd)
+                    {
+                        case 0:
+                            HandleEquipInventory(gameData);
+                            break;
+
+                        case 1:
+                            HandleSkillInventory(gameData);
+                            break;
+
+                        default:
+                            break;
+                    }
+                    break;
+            }
+        }
+    }
+
+    private static void HandleShopBuy(GameData gameData, ShopEvent shopEvent)
+    {
+        List<Item> shopItems = shopEvent.SellingItems;
+        int displayCount = UIConstants.MainZoneHeight + UIConstants.SubZoneHeight;
+        int startInd = 0, endInd = shopItems.Count > displayCount ? displayCount : shopItems.Count;
+        bool pickFromEnd = false;
+
+        while (true)
+        {
+            GameUI.ShopTradingScreen(gameData, shopItems[startInd..endInd], true);
+
+            int? pickedEquipInd = InteractiveUI.TradeItem(CursorPos.MainZoneTop + 1, shopItems[startInd..endInd], true, startInd > 0, endInd < shopItems.Count, pickFromEnd);
+
+            if (pickedEquipInd == null)
+                return;
+
+            if (pickedEquipInd == -1 && startInd > 0)
+            {
+                pickFromEnd = false;
+                startInd--;
+                endInd--;
+                continue;
+            }
+
+            if (pickedEquipInd == displayCount && endInd < shopItems.Count)
+            {
+                pickFromEnd = true;
+                startInd++;
+                endInd++;
+                continue;
+            }
+
+            Item pickedItem = shopItems[startInd + (int) pickedEquipInd];
+            if (pickedItem.Price <= gameData.Player.PlayerGold.Quantity)
+            {
+                gameData.Player.TradeItem(pickedItem, true);
+                shopItems.Remove(pickedItem);
+                endInd = shopItems.Count > displayCount ? displayCount : shopItems.Count;
+            }
+        }
+    }
+
+    private static void HandleShopSell(GameData gameData)
+    {
+        List<Item> playerItems = [];
+        playerItems.AddRange(gameData.Player.EquipInventory);
+        playerItems.AddRange(gameData.Player.SkillInventory);
+
+        int displayCount = UIConstants.MainZoneHeight + UIConstants.SubZoneHeight;
+        int startInd = 0, endInd = playerItems.Count > displayCount ? displayCount : playerItems.Count;
+        bool pickFromEnd = false;
+
+        while (true)
+        {
+            GameUI.ShopTradingScreen(gameData, playerItems[startInd..endInd], false);
+
+            int? pickedEquipInd = InteractiveUI.TradeItem(CursorPos.MainZoneTop + 1, playerItems[startInd..endInd], false, startInd > 0, endInd < playerItems.Count, pickFromEnd);
+
+            if (pickedEquipInd == null)
+                return;
+
+            if (pickedEquipInd == -1 && startInd > 0)
+            {
+                pickFromEnd = false;
+                startInd--;
+                endInd--;
+                continue;
+            }
+
+            if (pickedEquipInd == displayCount && endInd < playerItems.Count)
+            {
+                pickFromEnd = true;
+                startInd++;
+                endInd++;
+                continue;
+            }
+
+            Item pickedItem = playerItems[startInd + (int) pickedEquipInd];
+            gameData.Player.TradeItem(pickedItem, false);
+            playerItems.Remove(pickedItem);
+        }
     }
 }

@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using static System.Console;
 using static UIHelper;
 using static Utilities;
@@ -7,18 +8,6 @@ static class GameUI
     public const string GameTitle = "CONSOLE CONQUER";
 
     private static CancellationTokenSource? titleAnimTokenSource = null;
-
-    private static readonly string[] background0 = [
-        "₁     ₀₀  ₁ ₁     ₀  ₁ ₁₀     ₀₁  ₁ ₀₀₁  ₁   ₁₀  ₀₁₁     ₀    ₀₁    ₁₀",
-        "₀₁₀₀   ₁  ₀₁   ₀₁    ₀₁₁  ₀₁       ₀₁₁   ₁      ₀₀₁   ₁₀₁₁   ₀₁ ₁  ₀₀ ",
-        "  ₁ ₁ ₁₀    ₁₀₀  ₁    ₁₀      ₀₁   ₀₁  ₁ ₁    ₁    ₁₀       ₁₀   ₁ ₁₁ ",
-        "₀₁   ₁₀  ₁₁₀  ₀     ₀₀   ₀₁₁  ₀      ₀  ₁  ₁   ₀₀ ₁  ₁   ₀ ₀  ₀₀   ₁₁₀",
-        "₁     ₀₀    ₁   ₁₀  ₀₁₁    ₀₁ ₁     ₀  ₁ ₁₀     ₀₁  ₁ ₀ ₀₁    ₀₁    ₁₀",
-        "₀   ₀ ₁  ₁₀₁  ₁₀   ₁     ₀₁₀   ₀₀₁₁  ₀₁   ₁₀₁  ₀ ₀₀   ₁₁  ₀₁  ₀₀₁   ₀₁",
-        "₀₀   ₁  ₁    ₀₁     ₀₁₀  ₀  ₀₁   ₁  ₀  ₁ ₁₀₁     ₀₀  ₁   ₁₀  ₀₀ ₁   ₀₁",
-        "₀₁₁    ₀₁₁₀₀   ₁  ₀₁   ₀  ₀₁    ₁   ₁₀₁₁     ₀₁₁   ₁      ₀₀ ₀₁ ₁   ₀₀",
-        "₀  ₀     ₁   ₁₀₁  ₁₀    ₁ ₀₁  ₀   ₀ ₁₁   ₀₁ ₁₀₁₀ ₀₀₁   ₁₀₁  ₀ ₀  ₁  ₀₁"
-    ];
 
     private static readonly string[] background = [
         "₁       ₀₀₁₁     ₁₁ ₁₁         ₀₁  ₁ ₀₀₁  ₁   ₁₀₀₁₁    ₀₀₁          ₁₀",
@@ -32,21 +21,35 @@ static class GameUI
         "₀₀   ₁     ₁₀₁  ₁₀   ₁ ₀₁  ₀   ₀₁₁   ₀₁₁₀₁  ₀₀₀₁   ₁₀₁           ₁  ₀₁"
     ];
 
-    private static readonly string[] title = [
-        "",
-        "    ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╔═╗ ╦   ╔═╗    ",
-        "    ║   ║ ║ ║╚╣ ╚═╗ ║ ║ ║   ╠╣     ",
-        "    ╚═╝ ╚═╝ ╩ ╩ ╚═╝ ╚═╝ ╩═╝ ╚═╝    ",
-        "",
-        "    ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╦ ╦ ╔═╗ ╦═╗    ",
-        "    ║   ║ ║ ║╚╣ ║╔╣ ║ ║ ╠╣  ╠╦╝    ",
-        "    ╚═╝ ╚═╝ ╩ ╩ ╚╩╩ ╚═╝ ╩═╝ ╩╚═    ",
-        ""
+    private static readonly string[][] titles = [
+        [
+            "",
+            "    ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╔═╗ ╦   ╔═╗    ",
+            "    ║   ║ ║ ║║║ ╚═╗ ║ ║ ║   ╠╣     ",
+            "    ╚═╝ ╚═╝ ╩╚╝ ╚═╝ ╚═╝ ╩═╝ ╚═╝    ",
+            "",
+            "    ╔═╗ ╔═╗ ╦╗╦ ╔═╗ ╦ ╦ ╔═╗ ╦═╗    ",
+            "    ║   ║ ║ ║║║ ║╔╣ ║ ║ ╠╣  ╠╦╝    ",
+            "    ╚═╝ ╚═╝ ╩╚╝ ╚╩╩ ╚═╝ ╩═╝ ╩╚═    ",
+            ""
+        ],
+        [
+            @"      ____ ___  _  __ ___ ___  __   ____    ",
+            @"    / ___/ __ \/ |/ / __/ __ \/ /  / __/    ",
+            @"   / /__/ /_/ /    /\ \/ /_/ / /__/ _/      ",
+            @"   \___/\____/_/|_/___/\____/____/___/      ",
+            "",
+            @"      ____ ___  _  __ ___  __  __ ___ __    ",
+            @"    / ___/ __ \/ |/ / __ \/ / / / __/ _ \   ",
+            @"   / /__/ /_/ /    / /_/ / /_/ / _// , _/   ",
+            @"   \___/\____/_/|_/\___\_\____/___/_/|_|    ",
+        ]
     ];
 
     private static async Task TitleAnimation(CancellationToken stopToken)
     {
         int lineIndex = 0, lineLength = background[0].Length;
+        int randomTitle = RandomNumberGenerator.GetInt32(titles.Length);
 
         try
         {
@@ -56,12 +59,12 @@ static class GameUI
                 for (int i = 0; i < background.Length; i++)
                 {
                     Write($"{background[i][lineIndex..]}{background[i][0..lineIndex]}");
-                    UIMisc.WriteCenter(title[i]);
+                    UIMisc.WriteCenter(titles[randomTitle][i]);
                 }
                 lineIndex += 1;
                 lineIndex %= lineLength;
                 
-                await Task.Delay(300, stopToken);
+                await Task.Delay(400, stopToken);
             }
         }
         catch (OperationCanceledException) {}
@@ -297,6 +300,39 @@ static class GameUI
         UIMisc.DrawLine('-');
     }
 
+    public static void ShopMainScreen(GameData gameData, List<string> actions)
+    {
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        UIMisc.WriteCenter(@"   _____________________________                            ");
+        UIMisc.WriteCenter(@"  /    _____ _____ _____ _____  \            ┌─────────┐    ");
+        UIMisc.WriteCenter(@" /   |   __|  |  |     |  _  |   \           │   ♦$♦   │    ");
+        UIMisc.WriteCenter(@"|    |__   |     |  |  |   __|    |      ════╪═════════╪════");
+        UIMisc.WriteCenter(@" \   |_____|__|__|_____|__|      /           │ █     █ │    ");
+        UIMisc.WriteCenter(@"  \_____________________________/            ;  = ┴ =  ;    ");
+        UIMisc.DrawLine('-');
+        PrintOptions(actions, UIConstants.SubZoneHeight);
+        UIMisc.DrawLine('-');
+        gameData.Player.Print();
+        UIMisc.DrawLine('-');
+    }
+
+    public static void ShopTradingScreen<T>(GameData gameData, List<T> items, bool buying) where T : Item
+    {
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        WriteLine($" -- {(buying ? "Buying:" : "Selling:")}");
+        items.ForEach(item => item.PrintPrice(buying));
+        CursorTop = CursorPos.PlayerZoneTop - 1;
+        UIMisc.DrawLine('-');
+        gameData.Player.Print();
+        UIMisc.DrawLine('-');
+    }
+
     public static void CampfireScreen(GameData gameData)
     {
         Clear();
@@ -316,49 +352,6 @@ static class GameUI
     }
 
     public static void TreasureOpening(GameData gameData)
-    {
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        WriteLine();
-        WriteLine();
-        UIMisc.WriteCenter(@"╔╤═══════════════════╤╗");
-        UIMisc.WriteCenter(@"║├─────   ─── ──  ───┤║");
-        UIMisc.WriteCenter(@"║├─   ──╔════╗ ──── ─┤║");
-        UIMisc.WriteCenter(@"╠╪══════╬╤══╤╬═══════╪╣");
-        UIMisc.WriteCenter(@"║│───  ─╢└──┘║  ─ ── │║");
-        UIMisc.WriteCenter(@"║├── ── ╚════╝ ─  ───┤║");
-        UIMisc.WriteCenter(@"║└───────────────────┘║");
-        UIMisc.WriteCenter(@"╚═════════════════════╝");
-        WriteLine();
-        UIMisc.DrawLine('-');
-        gameData.Player.Print();
-        UIMisc.DrawLine('-');
-        ReadKey(true);
-
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        UIMisc.WriteCenter(@"╲  ╲  ╲  ╲  ╲   ╱  ╱  ╱  ╱  ╱");
-        UIMisc.WriteCenter(@"╲   ╔╤══════╦════╦═══════╤╗   ╱");
-        UIMisc.WriteCenter(@"╠╧══════╩════╩═══════╧╣");
-        UIMisc.WriteCenter(@"║   ╲ ╲ ╲ ╲ ╱ ╱ ╱ ╱   ║");
-        UIMisc.WriteCenter(@"║╲ ╲ ╲ ╲ ╲ ╳ ╱ ╱ ╱ ╱ ╱║");
-        UIMisc.WriteCenter(@"╠╤══════╦╤══╤╦═══════╤╣");
-        UIMisc.WriteCenter(@"║│───  ─╢└──┘║  ─ ── │║");
-        UIMisc.WriteCenter(@"║├── ── ╚════╝ ─  ───┤║");
-        UIMisc.WriteCenter(@"║└───────────────────┘║");
-        UIMisc.WriteCenter(@"╚═════════════════════╝");
-        WriteLine();
-        UIMisc.DrawLine('-');
-        gameData.Player.Print();
-        UIMisc.DrawLine('-');
-        ReadKey(true);
-    }
-
-    public static void TreasureOpening2(GameData gameData)
     {
         Clear();
         DrawHeader();
@@ -403,56 +396,6 @@ static class GameUI
         UIMisc.WriteCenter(@" *=:._  '+-._         +  ::  +       +  :   ");
         UIMisc.WriteCenter(@"     ''*=:._  '+-._   + O::O +   _.=*'  :   ");
         UIMisc.WriteCenter(@"           ''*=:._  ''+  ::  +*' _.;=*'     ");
-        UIMisc.DrawLine('-');
-        ReadKey(true);
-    }
-
-    public static void TreasureOpening3(GameData gameData)
-    {
-
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        WriteLine();
-        WriteLine();
-        UIMisc.WriteCenter(@"    .:::::..                                ");
-        UIMisc.WriteCenter(@"  :=: .:-=-:-=-:.:::.                       ");
-        UIMisc.WriteCenter(@" -- .=:              .-=-..::.              ");
-        UIMisc.WriteCenter(@" +  =.                   .-=:.::=+-.:.      ");
-        UIMisc.WriteCenter(@" +  ==:...             :-: .=-.      :=:    ");
-        UIMisc.WriteCenter(@".===-.   .::==:.      .:: =-           *:   ");
-        UIMisc.WriteCenter(@":= ==:  .:-==:    .:-==: ::         :==*:   ");
-        UIMisc.WriteCenter(@":=.=     :=+@*.  :-=-:.  ::  :-=-.  :: *:   ");
-        UIMisc.WriteCenter(@":= +      .*@%- .:-=-:.  --  ::=-:  .: *:   ");
-        UIMisc.WriteCenter(@":= =        :.        :: :: =-      .: *:   ");
-        UIMisc.WriteCenter(@":= :-=-..             :: :: =:      .: *:   ");
-        UIMisc.WriteCenter(@" ::..-=:.:..:=-.      :: :: =-    :=:. *:   ");
-        UIMisc.WriteCenter(@"         :::.:=-.::.:-+- :: =+:.:.:=:.:.    ");
-        UIMisc.WriteCenter(@"                .:::.:--.:: :-:::.          ");
-        UIMisc.DrawLine('-');
-        ReadKey(true);
-        
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        UIMisc.WriteCenter(@"      :::::-::.                             ");
-        UIMisc.WriteCenter(@"    ::-.:::-:  ::::::::..                   ");
-        UIMisc.WriteCenter(@"  .*:. .:=:::::..       :--::::..           ");
-        UIMisc.WriteCenter(@"   :=-+=:.:::. .:=:.:::.      ::=+=::-:.    ");
-        UIMisc.WriteCenter(@"       .=::.  :==:..:.  .-=---.::=:    :=:  ");
-        UIMisc.WriteCenter(@"          .:=: ...    .:==:..--.         :: ");
-        UIMisc.WriteCenter(@"    ...-=:.      ..:==:....   :=:.       :-.");
-        UIMisc.WriteCenter(@".+-:.                     .::==:..:=:.  :-. ");
-        UIMisc.WriteCenter(@":= ==:                             .:-*#:   ");
-        UIMisc.WriteCenter(@":=.=     :=+@*.-==-.           .:==:   *:   ");
-        UIMisc.WriteCenter(@":= +      .*@%-=-::  .:=-===-. .:-  =: *:   ");
-        UIMisc.WriteCenter(@":= =        :.        :: :: =-      .: *:   ");
-        UIMisc.WriteCenter(@":= :-=-..             :: :: =:      .: *:   ");
-        UIMisc.WriteCenter(@" ::..-=:.:..:=-.      :: :: =-    :=:. *:   ");
-        UIMisc.WriteCenter(@"         :::.:=-.::.:-+- :: =+:.:.:=:.:.    ");
-        UIMisc.WriteCenter(@"                .:::.:--.:: :-:::.          ");
         UIMisc.DrawLine('-');
         ReadKey(true);
     }

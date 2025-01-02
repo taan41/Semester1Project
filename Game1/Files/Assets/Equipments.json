@@ -22,5 +22,29 @@
     "BonusMaxMP": 10,
     "Rarity": 0,
     "Name": "Starter Staff"
+  },
+  {
+    "Type": 0,
+    "BonusATK": 2,
+    "BonusMaxHP": 0,
+    "BonusMaxMP": 15,
+    "Rarity": 1,
+    "Name": "Rare Staff"
+  },
+  {
+    "Type": 0,
+    "BonusATK": 3,
+    "BonusMaxHP": 0,
+    "BonusMaxMP": 20,
+    "Rarity": 2,
+    "Name": "Epit Staff"
+  },
+  {
+    "Type": 0,
+    "BonusATK": 3,
+    "BonusMaxHP": 0,
+    "BonusMaxMP": 30,
+    "Rarity": 3,
+    "Name": "Legendary Staff"
   }
 ]

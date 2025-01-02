@@ -8,14 +8,142 @@
     "EquippedWeapon": {
       "Type": 0,
       "BonusATK": 2,
-      "BonusMaxHP": 10,
-      "BonusMaxMP": 0,
-      "Rarity": 0,
-      "Name": "Starter Sword"
+      "BonusMaxHP": 0,
+      "BonusMaxMP": 15,
+      "Rarity": 1,
+      "Price": 0,
+      "Name": "Rare Staff"
     },
     "EquippedArmor": null,
     "EquippedRing": null,
-    "EquipInventory": [],
+    "EquipInventory": [
+      {
+        "Type": 0,
+        "BonusATK": 3,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 20,
+        "Rarity": 2,
+        "Price": 0,
+        "Name": "Epit Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 3,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 20,
+        "Rarity": 2,
+        "Price": 0,
+        "Name": "Epit Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 2,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 15,
+        "Rarity": 1,
+        "Price": 0,
+        "Name": "Rare Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 2,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 15,
+        "Rarity": 1,
+        "Price": 0,
+        "Name": "Rare Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 3,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 0,
+        "Rarity": 0,
+        "Price": 0,
+        "Name": "Starter Bow"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 2,
+        "BonusMaxHP": 10,
+        "BonusMaxMP": 0,
+        "Rarity": 0,
+        "Price": 0,
+        "Name": "Starter Sword"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 3,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 20,
+        "Rarity": 2,
+        "Price": 0,
+        "Name": "Epit Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 3,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 20,
+        "Rarity": 2,
+        "Price": 0,
+        "Name": "Epit Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 3,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 20,
+        "Rarity": 2,
+        "Price": 0,
+        "Name": "Epit Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 3,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 20,
+        "Rarity": 2,
+        "Price": 0,
+        "Name": "Epit Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 3,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 20,
+        "Rarity": 2,
+        "Price": 0,
+        "Name": "Epit Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 2,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 15,
+        "Rarity": 1,
+        "Price": 0,
+        "Name": "Rare Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 2,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 15,
+        "Rarity": 1,
+        "Price": 0,
+        "Name": "Rare Staff"
+      },
+      {
+        "Type": 0,
+        "BonusATK": 3,
+        "BonusMaxHP": 0,
+        "BonusMaxMP": 20,
+        "Rarity": 2,
+        "Price": 0,
+        "Name": "Epit Staff"
+      }
+    ],
     "Skills": [
       {
         "Type": 0,
@@ -23,6 +151,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 0,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -31,6 +160,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 1,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -39,6 +169,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 2,
+        "Price": 0,
         "Name": "Heal"
       }
     ],
@@ -49,6 +180,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 3,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -57,6 +189,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 3,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -65,6 +198,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 3,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -73,6 +207,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 2,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -81,6 +216,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 2,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -89,6 +225,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 2,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -97,6 +234,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 1,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -105,6 +243,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 1,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -113,6 +252,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 1,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -121,6 +261,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 0,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -129,6 +270,7 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 0,
+        "Price": 0,
         "Name": "Heal"
       },
       {
@@ -137,20 +279,22 @@
         "Heal": 5,
         "MPCost": 5,
         "Rarity": 0,
+        "Price": 0,
         "Name": "Heal"
       }
     ],
     "PlayerGold": {
       "Quantity": 191,
       "Rarity": 0,
+      "Price": 0,
       "Name": "Gold"
     },
     "ATK": 5,
-    "MaxHP": 35,
-    "HP": 15,
-    "MaxMP": 10,
-    "MP": 10,
+    "MaxHP": 25,
+    "HP": 25,
+    "MaxMP": 25,
+    "MP": 25,
     "Name": "Hero"
   },
-  "SavedTime": "00:01:57.2055689"
+  "SavedTime": "00:05:30.2740715"
 }

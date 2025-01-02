@@ -13,16 +13,17 @@ class Skill : Item
 
     public Skill() {}
 
-    public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, TargetType type = TargetType.Single)
-        : base(name, rarity)
+    public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, TargetType type = TargetType.Single, int price = -1)
+        : base(name, rarity, price)
     {
         Damage = dmg;
         Heal = heal;
         MPCost = mpcost;
         Type = type;
+        Price *= (100 + SkillMultiplier) / 100;
     }
 
-    public Skill(Skill other) : base(other.Name, other.Rarity)
+    public Skill(Skill other) : base(other.Name, other.Rarity, other.Price)
     {
         Damage = other.Damage;
         Heal = other.Heal;
@@ -45,6 +46,28 @@ class Skill : Item
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write($" [ + {Heal} ]");
+        }
+
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine($" ({MPCost} MP)  ");
+        Console.ResetColor();
+    }
+
+    public override void PrintPrice(bool buying)
+    {
+        base.PrintPrice(buying);
+        Console.Write($"| Skill | {Type} |");
+
+        if (Damage > 0)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.Write($" [{Damage}]");
+        }
+
+        if (Heal > 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($" [{Heal}]");
         }
 
         Console.ForegroundColor = ConsoleColor.Blue;
