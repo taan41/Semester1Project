@@ -32,7 +32,13 @@ class EventManager
                 continue;
             }
 
-            if (_gameData.Progress.Room % 10 == 0)
+            if (curRoom % 10 == 5)
+            {
+                events.Add([new(EventType.Treasure)]);
+                continue;
+            }
+
+            if (curRoom % 10 == 0)
             {
                 events.Add([new(EventType.Camp)]);
                 continue;

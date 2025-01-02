@@ -12,7 +12,7 @@ class Gold : Item
     public override void Print()
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($" Gold ({Quantity})");
+        Console.WriteLine($" Gold ({Quantity})  ");
         Console.ResetColor();
     }
 }

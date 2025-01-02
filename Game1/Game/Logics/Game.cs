@@ -5,11 +5,12 @@ class Game
 {
     public static void Start()
     {
+        bool clear = true;
         List<string> welcomeOptions = ["PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
-        GameUI.WelcomeScreen(welcomeOptions, true);
 
         while(true)
         {
+            GameUI.WelcomeScreen(welcomeOptions, clear);
             GameUI.StartTitleAnim();
 
             Console.ReadKey(true);
@@ -17,18 +18,17 @@ class Game
             {
                 case 0:
                 case 1:
-                    StartGame();
+                    clear = StartGame();
                     break;
                 
                 case 2: case null:
                     return;
             }
-
-            GameUI.WelcomeScreen(welcomeOptions);
         }
     }
 
-    private static void StartGame()
+    // Return false if return without starting a game
+    private static bool StartGame()
     {
         List<string> playOptions = ["NEW GAME", "LOAD GAME", "RETURN"];
         GameUI.StartScreen(playOptions);
@@ -43,7 +43,7 @@ class Game
                 case 0:
                     GameUI.StopTitleAnim();
                     NewGame();
-                    return;
+                    return true;
 
                 case 1:
                     GameUI.StopTitleAnim();
@@ -52,10 +52,10 @@ class Game
                         GameUI.StartScreen(playOptions, true);
                         continue;
                     }
-                    return;
+                    return true;
                 
                 case 2: case null:
-                    return;
+                    return false;
             }
         }
     }
@@ -176,6 +176,13 @@ class Game
             {
                 case EventType.Camp:
                     gameData.Player.Regenerate();
+                    break;
+
+                case EventType.Treasure:
+                    gameData.Save();
+                    GameUI.TreasureOpening2(gameData);
+                    if (!HandleRewards(gameData, [new Gold(1000)]))
+                        return;
                     break;
             }
             
@@ -329,18 +336,25 @@ class Game
             fightEvent.Monsters.RemoveAll(monster => monster.HP == 0);
         }
 
-        while(fightEvent.Rewards.Count > 0)
+        return HandleRewards(gameData, fightEvent.Rewards);
+    }
+
+
+    // Return false if quit during picking rewards
+    private static bool HandleRewards(GameData gameData, List<Item> rewards)
+    {
+        while(rewards.Count > 0)
         {
-            GameUI.RewardScreen(gameData, fightEvent.Rewards);
-            int? pickedRewardInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, fightEvent.Rewards);
+            GameUI.RewardScreen(gameData, rewards);
+            int? pickedRewardInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, rewards);
             if (pickedRewardInd == null)
                 if (HanldePause(gameData)) continue;
                 else return false;
             
-            Item pickedReward = fightEvent.Rewards[(int) pickedRewardInd];
+            Item pickedReward = rewards[(int) pickedRewardInd];
 
             gameData.Player.AddItem(pickedReward);
-            fightEvent.Rewards.Remove(pickedReward);
+            rewards.Remove(pickedReward);
         }
 
         return true;

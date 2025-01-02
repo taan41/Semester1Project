@@ -296,4 +296,146 @@ static class GameUI
         gameData.Player.Print();
         UIMisc.DrawLine('-');
     }
+
+    public static void TreasureOpening(GameData gameData)
+    {
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        WriteLine();
+        WriteLine();
+        UIMisc.WriteCenter(@"╔╤═══════════════════╤╗");
+        UIMisc.WriteCenter(@"║├─────   ─── ──  ───┤║");
+        UIMisc.WriteCenter(@"║├─   ──╔════╗ ──── ─┤║");
+        UIMisc.WriteCenter(@"╠╪══════╬╤══╤╬═══════╪╣");
+        UIMisc.WriteCenter(@"║│───  ─╢└──┘║  ─ ── │║");
+        UIMisc.WriteCenter(@"║├── ── ╚════╝ ─  ───┤║");
+        UIMisc.WriteCenter(@"║└───────────────────┘║");
+        UIMisc.WriteCenter(@"╚═════════════════════╝");
+        WriteLine();
+        UIMisc.DrawLine('-');
+        gameData.Player.Print();
+        UIMisc.DrawLine('-');
+        ReadKey(true);
+
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        UIMisc.WriteCenter(@"╲  ╲  ╲  ╲  ╲   ╱  ╱  ╱  ╱  ╱");
+        UIMisc.WriteCenter(@"╲   ╔╤══════╦════╦═══════╤╗   ╱");
+        UIMisc.WriteCenter(@"╠╧══════╩════╩═══════╧╣");
+        UIMisc.WriteCenter(@"║   ╲ ╲ ╲ ╲ ╱ ╱ ╱ ╱   ║");
+        UIMisc.WriteCenter(@"║╲ ╲ ╲ ╲ ╲ ╳ ╱ ╱ ╱ ╱ ╱║");
+        UIMisc.WriteCenter(@"╠╤══════╦╤══╤╦═══════╤╣");
+        UIMisc.WriteCenter(@"║│───  ─╢└──┘║  ─ ── │║");
+        UIMisc.WriteCenter(@"║├── ── ╚════╝ ─  ───┤║");
+        UIMisc.WriteCenter(@"║└───────────────────┘║");
+        UIMisc.WriteCenter(@"╚═════════════════════╝");
+        WriteLine();
+        UIMisc.DrawLine('-');
+        gameData.Player.Print();
+        UIMisc.DrawLine('-');
+        ReadKey(true);
+    }
+
+    public static void TreasureOpening2(GameData gameData)
+    {
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        WriteLine();
+        UIMisc.WriteCenter(@"       _ _                                  ");
+        UIMisc.WriteCenter(@"    .' '.: '*:=. _                          ");
+        UIMisc.WriteCenter(@"  .' .'            '* :=. _                 ");
+        UIMisc.WriteCenter(@" /  /                      . *: -__         ");
+        UIMisc.WriteCenter(@":  :                     .'  .:     ' .     ");
+        UIMisc.WriteCenter(@":  '=._                 /  .'          \    ");
+        UIMisc.WriteCenter(@":._     '*:=._         '  /             :   ");
+        UIMisc.WriteCenter(@":  +'* =._     '* =._ :  :           _(#)   ");
+        UIMisc.WriteCenter(@":O +     : '*:=._     '  ::     _ .=*+  :   ");
+        UIMisc.WriteCenter(@":  +     | '@,-:   '* : -..=:*'      + O:   ");
+        UIMisc.WriteCenter(@":O +      ' # ,|      +''::' +       +  :   ");
+        UIMisc.WriteCenter(@":  +-._               + O::O +       + O:   ");
+        UIMisc.WriteCenter(@" *=:._  '+-._         +  ::  +       +  :   ");
+        UIMisc.WriteCenter(@"     ''*=:._  '+-._   + O::O +   _.=*'  :   ");
+        UIMisc.WriteCenter(@"           ''*=:._  ''+  ::  +*' _.;=*'     ");
+        UIMisc.DrawLine('-');
+        ReadKey(true);
+        
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        UIMisc.WriteCenter(@"  .* .'_       '*::=._                      ");
+        UIMisc.WriteCenter(@" /. _    '*:=-._      ''*::=._              ");
+        UIMisc.WriteCenter(@"' * _ '*=-._     '*:=._     :'*::=.__       ");
+        UIMisc.WriteCenter(@"     ' =_    '*=-._     '-:'  .*      `.    ");
+        UIMisc.WriteCenter(@"          *=_       '*=-._  /            \  ");
+        UIMisc.WriteCenter(@"           _(#)_           ' ._           . ");
+        UIMisc.WriteCenter(@"     _-+*'₀ ₁ ₀₀ '*=. _         *=_       : ");
+        UIMisc.WriteCenter(@".+*' ₁₀ ₁ ₁ ₀₀₁  ₀   ₁ ₁'*=-._      *=_  /  ");
+        UIMisc.WriteCenter(@": *+= _₁ ₁  ₀₁₁  ₁ ₀ ₁  ₀₁₁ ₁  ₀'*=-._(#)   ");
+        UIMisc.WriteCenter(@":O +    '*+= _ ₁₁ ₀  ₀₁₀ ₁   ₀₀ ₁  _.+' :   ");
+        UIMisc.WriteCenter(@":  +     | '@, '*+= _₀₁ ₀ ₀ ₁_.+:'   + O:   ");
+        UIMisc.WriteCenter(@":O +      ' # ,|      +''::' +       +  :   ");
+        UIMisc.WriteCenter(@":  +-._               + O::O +       + O:   ");
+        UIMisc.WriteCenter(@" *=:._  '+-._         +  ::  +       +  :   ");
+        UIMisc.WriteCenter(@"     ''*=:._  '+-._   + O::O +   _.=*'  :   ");
+        UIMisc.WriteCenter(@"           ''*=:._  ''+  ::  +*' _.;=*'     ");
+        UIMisc.DrawLine('-');
+        ReadKey(true);
+    }
+
+    public static void TreasureOpening3(GameData gameData)
+    {
+
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        WriteLine();
+        WriteLine();
+        UIMisc.WriteCenter(@"    .:::::..                                ");
+        UIMisc.WriteCenter(@"  :=: .:-=-:-=-:.:::.                       ");
+        UIMisc.WriteCenter(@" -- .=:              .-=-..::.              ");
+        UIMisc.WriteCenter(@" +  =.                   .-=:.::=+-.:.      ");
+        UIMisc.WriteCenter(@" +  ==:...             :-: .=-.      :=:    ");
+        UIMisc.WriteCenter(@".===-.   .::==:.      .:: =-           *:   ");
+        UIMisc.WriteCenter(@":= ==:  .:-==:    .:-==: ::         :==*:   ");
+        UIMisc.WriteCenter(@":=.=     :=+@*.  :-=-:.  ::  :-=-.  :: *:   ");
+        UIMisc.WriteCenter(@":= +      .*@%- .:-=-:.  --  ::=-:  .: *:   ");
+        UIMisc.WriteCenter(@":= =        :.        :: :: =-      .: *:   ");
+        UIMisc.WriteCenter(@":= :-=-..             :: :: =:      .: *:   ");
+        UIMisc.WriteCenter(@" ::..-=:.:..:=-.      :: :: =-    :=:. *:   ");
+        UIMisc.WriteCenter(@"         :::.:=-.::.:-+- :: =+:.:.:=:.:.    ");
+        UIMisc.WriteCenter(@"                .:::.:--.:: :-:::.          ");
+        UIMisc.DrawLine('-');
+        ReadKey(true);
+        
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        UIMisc.WriteCenter(@"      :::::-::.                             ");
+        UIMisc.WriteCenter(@"    ::-.:::-:  ::::::::..                   ");
+        UIMisc.WriteCenter(@"  .*:. .:=:::::..       :--::::..           ");
+        UIMisc.WriteCenter(@"   :=-+=:.:::. .:=:.:::.      ::=+=::-:.    ");
+        UIMisc.WriteCenter(@"       .=::.  :==:..:.  .-=---.::=:    :=:  ");
+        UIMisc.WriteCenter(@"          .:=: ...    .:==:..--.         :: ");
+        UIMisc.WriteCenter(@"    ...-=:.      ..:==:....   :=:.       :-.");
+        UIMisc.WriteCenter(@".+-:.                     .::==:..:=:.  :-. ");
+        UIMisc.WriteCenter(@":= ==:                             .:-*#:   ");
+        UIMisc.WriteCenter(@":=.=     :=+@*.-==-.           .:==:   *:   ");
+        UIMisc.WriteCenter(@":= +      .*@%-=-::  .:=-===-. .:-  =: *:   ");
+        UIMisc.WriteCenter(@":= =        :.        :: :: =-      .: *:   ");
+        UIMisc.WriteCenter(@":= :-=-..             :: :: =:      .: *:   ");
+        UIMisc.WriteCenter(@" ::..-=:.:..:=-.      :: :: =-    :=:. *:   ");
+        UIMisc.WriteCenter(@"         :::.:=-.::.:-+- :: =+:.:.:=:.:.    ");
+        UIMisc.WriteCenter(@"                .:::.:--.:: :-:::.          ");
+        UIMisc.DrawLine('-');
+        ReadKey(true);
+    }
 }

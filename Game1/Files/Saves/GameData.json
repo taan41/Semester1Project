@@ -1,0 +1,156 @@
+{
+  "Seed": 42,
+  "Progress": {
+    "Floor": 1,
+    "Room": 4
+  },
+  "Player": {
+    "EquippedWeapon": {
+      "Type": 0,
+      "BonusATK": 2,
+      "BonusMaxHP": 10,
+      "BonusMaxMP": 0,
+      "Rarity": 0,
+      "Name": "Starter Sword"
+    },
+    "EquippedArmor": null,
+    "EquippedRing": null,
+    "EquipInventory": [],
+    "Skills": [
+      {
+        "Type": 0,
+        "Damage": 0,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 0,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 1,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 1,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 2,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 2,
+        "Name": "Heal"
+      }
+    ],
+    "SkillInventory": [
+      {
+        "Type": 0,
+        "Damage": 3,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 3,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 7,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 3,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 11,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 3,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 6,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 2,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 10,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 2,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 14,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 2,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 5,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 1,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 9,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 1,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 13,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 1,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 4,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 0,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 8,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 0,
+        "Name": "Heal"
+      },
+      {
+        "Type": 0,
+        "Damage": 12,
+        "Heal": 5,
+        "MPCost": 5,
+        "Rarity": 0,
+        "Name": "Heal"
+      }
+    ],
+    "PlayerGold": {
+      "Quantity": 191,
+      "Rarity": 0,
+      "Name": "Gold"
+    },
+    "ATK": 5,
+    "MaxHP": 35,
+    "HP": 15,
+    "MaxMP": 10,
+    "MP": 10,
+    "Name": "Hero"
+  },
+  "SavedTime": "00:01:57.2055689"
+}
