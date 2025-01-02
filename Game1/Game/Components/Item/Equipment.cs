@@ -27,7 +27,7 @@ class Equipment : Item
     {
         BonusATK = other.BonusATK;
         BonusMaxHP = other.BonusMaxHP;
-        BonusMaxHP = other.BonusMaxMP;
+        BonusMaxMP = other.BonusMaxMP;
         Type = other.Type;
     }
 

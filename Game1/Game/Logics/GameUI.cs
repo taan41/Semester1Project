@@ -6,6 +6,8 @@ static class GameUI
 {
     public const string GameTitle = "CONSOLE CONQUER";
 
+    private static CancellationTokenSource? titleAnimTokenSource = null;
+
     private static readonly string[] background0 = [
         "₁     ₀₀  ₁ ₁     ₀  ₁ ₁₀     ₀₁  ₁ ₀₀₁  ₁   ₁₀  ₀₁₁     ₀    ₀₁    ₁₀",
         "₀₁₀₀   ₁  ₀₁   ₀₁    ₀₁₁  ₀₁       ₀₁₁   ₁      ₀₀₁   ₁₀₁₁   ₀₁ ₁  ₀₀ ",
@@ -42,7 +44,7 @@ static class GameUI
         ""
     ];
 
-    public static async Task TitleAnimation(int cursorTop, CancellationToken stopToken)
+    private static async Task TitleAnimation(CancellationToken stopToken)
     {
         int lineIndex = 0, lineLength = background[0].Length;
 
@@ -50,12 +52,7 @@ static class GameUI
         {
             while(!stopToken.IsCancellationRequested)
             {
-                SetCursorPosition(0, cursorTop);
-                // foreach(var line in background)
-                //     WriteLine($"{line[lineIndex..]}{line[0..lineIndex]}");
-                // SetCursorPosition(0, cursorTop + 1);
-                // foreach(var line in title)
-                //     UIMisc.WriteCenter(line);
+                SetCursorPosition(0, CursorPos.MainTitleTop);
                 for (int i = 0; i < background.Length; i++)
                 {
                     Write($"{background[i][lineIndex..]}{background[i][0..lineIndex]}");
@@ -70,187 +67,205 @@ static class GameUI
         catch (OperationCanceledException) {}
     }
 
-    public static (int cursorLeft, int cursorTop, CancellationTokenSource animToken) WelcomeScreen(List<string> options)
+    public static void StartTitleAnim()
     {
-        CancellationTokenSource animTokenSource = new();
+        if (titleAnimTokenSource != null)
+            return;
 
-        Clear();
+        titleAnimTokenSource = new();
+        _ = Task.Run(() => TitleAnimation(titleAnimTokenSource.Token));
+    }
+
+    public static void StopTitleAnim()
+    {
+        if (titleAnimTokenSource == null)
+            return;
+
+        titleAnimTokenSource.Cancel();
+        titleAnimTokenSource = null;
+    }
+
+    public static void WelcomeScreen(List<string> options)
+    {
         SetCursorPosition(0, 0);
         UIMisc.DrawLine('=');
-        int titleCursorTop = CursorTop;
         CursorTop += 9;
         UIMisc.DrawLine('=');
         WriteLine();
         ResetColor();
 
-        int optionsCursorLeft = UIConstants.UIWidth / 10 * 4;
-        int optionsCursorTop = CursorTop;
-
         foreach (var option in options)
         {
-            CursorLeft = optionsCursorLeft;
-            WriteLine($" {option}");
+            CursorLeft = CursorPos.MainMenuLeft;
+            WriteLine($" {option}        ");
         }
 
         WriteLine();
         UIMisc.DrawLine('-');
 
-        _ = Task.Run(() => TitleAnimation(titleCursorTop, animTokenSource.Token));
-
-        return (optionsCursorLeft, optionsCursorTop, animTokenSource);
+        return;
     }
 
-    public static int? PlayOnline()
+    public static int? PlayOnlineScreen()
     {
         WriteLine("WIP");
         return null;
     }
 
-    public static (int cursorLeft, int cursorTop) StartGameScreen(List<string> options)
+    public static void StartScreen(List<string> options)
     {
-        Clear();
-        int optionsCursorLeft = 0;
-        int optionsCursorTop = CursorTop;
-
+        CursorTop = CursorPos.MainMenuTop;
         foreach (var option in options)
         {
-            CursorLeft = optionsCursorLeft;
-            WriteLine($" {option}");
+            CursorLeft = CursorPos.MainMenuLeft;
+            WriteLine($" {option}        ");
         }
-
-        return (optionsCursorLeft, optionsCursorTop);
     }
 
-    public static (int cursorLeft, int cursorTop) PickComponentScreen<T>(GameData gameData, List<T> components, string? pickMsg = null) where T: Component
+    public static void PauseScreen(List<string> pauseOptions, TimeSpan? elapsedTime = null)
     {
-        Clear();
-        UIMisc.DrawLine('=');
-        ForegroundColor = ConsoleColor.Cyan;
-        UIMisc.WriteCenter(GameTitle);
-        ResetColor();
-        UIMisc.DrawLine('=');
-        gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        if (pickMsg != null)
-            WriteLine(pickMsg);
-        
-        int optionsCursorLeft = 0;
-        int optionsCursorTop = CursorTop;
-        
-        foreach (var component in components)
+        CursorTop = CursorPos.PauseBorderTop;
+        UIMisc.WriteCenter($"╔{new string('═', UIConstants.PauseWidth)}╗");
+        for (int i = 0; i < UIConstants.PauseHeight - 2; i++)
+            UIMisc.WriteCenter($"║{new string(' ', UIConstants.PauseWidth)}║");
+        UIMisc.WriteCenter($"╚{new string('═', UIConstants.PauseWidth)}╝");
+
+        CursorTop = CursorPos.PauseOptionTop;
+        foreach(var option in pauseOptions)
         {
-            CursorLeft = optionsCursorLeft;
-            component.Print();
+            CursorLeft = CursorPos.PauseOptionLeft;
+            WriteLine(option);
         }
 
-        UIMisc.DrawLine('-');
-        gameData.Player.Print();
-        UIMisc.DrawLine('-');
-
-        return (optionsCursorLeft, optionsCursorTop);
+        if (elapsedTime != null)
+        {
+            CursorTop = CursorPos.PauseTimeTop;
+            UIMisc.WriteCenter("Run Time:");
+            UIMisc.WriteCenter($"{elapsedTime:hh\\:mm\\:ss\\.fff}");
+        }
     }
 
-    public static (int routeCurTop, int invCurTop) PickRouteScreen(GameData gameData, List<Event> routes, List<string> invOptions)
+    public static void PrintComponents<T>(List<T> components, int zoneHeight, string? msg = null, int? cursorTop = null) where T: Component
     {
-        Clear();
+        if (cursorTop != null)
+            CursorTop = (int) cursorTop;
+
+        if (msg != null)
+            WriteLine(msg);
+        
+        components.ForEach(component => component.Print());
+
+        if (zoneHeight > components.Count + (msg == null ? 0 : 1))
+            Write(new string('\n', zoneHeight - components.Count - (msg == null ? 0 : 1)));
+    }
+
+    public static void PrintOptions(List<string> options, int zoneHeight, string? msg = null, int? cursorTop = null)
+    {
+        if (cursorTop != null)
+            CursorTop = (int) cursorTop;
+
+        if (msg != null)
+            WriteLine(msg);
+        
+        options.ForEach(option => WriteLine($" {option}"));
+
+        if (zoneHeight > options.Count + (msg == null ? 0 : 1))
+            Write(new string('\n', zoneHeight - options.Count - (msg == null ? 0 : 1)));
+    }
+
+    public static void DrawHeader(bool setCursor = false)
+    {
+        if (setCursor)
+            SetCursorPosition(0, 0);
+
         UIMisc.DrawLine('=');
         ForegroundColor = ConsoleColor.Cyan;
         UIMisc.WriteCenter(GameTitle);
         ResetColor();
         UIMisc.DrawLine('=');
-        gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        
-        WriteLine(" -- Pick a route:");
-        int routeCurTop = CursorTop;
-        routes.ForEach(route => route.Print());
-        UIMisc.DrawLine('-');
-
-        int invCurTop = CursorTop;
-        invOptions.ForEach(option => WriteLine($" {option}"));
-        UIMisc.DrawLine('-');
-
-        gameData.Player.Print();
-        UIMisc.DrawLine('-');
-
-        return (routeCurTop, invCurTop);
     }
 
-    public static (int invCurTop, int equippedCurTop) PickInventoryScreen<T>(GameData gameData, List<T> inv, List<T> equipped) where T : Item
+    public static void GenericGameScreen(GameData gameData)
     {
         Clear();
-        UIMisc.DrawLine('=');
-        ForegroundColor = ConsoleColor.Cyan;
-        UIMisc.WriteCenter(GameTitle);
-        ResetColor();
-        UIMisc.DrawLine('=');
+        DrawHeader();
         gameData.Progress.Print();
         UIMisc.DrawLine('-');
-        
-        WriteLine(" -- Inventory:");
-        int invCurTop = CursorTop;
-        inv.ForEach(item => item.Print());
+        Write(new string('\n', UIConstants.MainZoneHeight));
         UIMisc.DrawLine('-');
-
-        WriteLine(" -- Currently equipped:");
-        int equippedCurTop = CursorTop;
-        equipped.ForEach(item => item.Print());
+        Write(new string('\n', UIConstants.SubZoneHeight));
         UIMisc.DrawLine('-');
-
         gameData.Player.Print();
         UIMisc.DrawLine('-');
-
-        return (invCurTop, equippedCurTop);
     }
 
-    public static (int monsterCurTop, int actionCurTop) FightScreen(GameData gameData, FightEvent fightEvent, List<string> actions)
+    public static void RouteScreen(GameData gameData, List<Event> routes, List<string> invOptions)
     {
         Clear();
-        UIMisc.DrawLine('=');
-        ForegroundColor = ConsoleColor.Cyan;
-        UIMisc.WriteCenter(GameTitle);
-        ResetColor();
-        UIMisc.DrawLine('=');
+        DrawHeader();
         gameData.Progress.Print();
         UIMisc.DrawLine('-');
-        
-        int monsterCurTop = CursorTop;
-        fightEvent.Monsters.ForEach(monster => monster.Print());
+        PrintComponents(routes, UIConstants.MainZoneHeight, " -- Pick a Route:");
         UIMisc.DrawLine('-');
-
-        int actionCurTop = CursorTop;
-        actions.ForEach(action => WriteLine($" {action}"));
+        PrintOptions(invOptions, UIConstants.SubZoneHeight, " -- Inventory:");
         UIMisc.DrawLine('-');
-
         gameData.Player.Print();
         UIMisc.DrawLine('-');
-
-        return (monsterCurTop, actionCurTop);
     }
 
-    public static (int skillCurTop, int noticeCurTop) SkillFightScreen(GameData gameData, FightEvent fightEvent)
+    public static void InventoryScreen<T>(GameData gameData, List<T> inv, List<T> equipped) where T : Item
     {
         Clear();
-        UIMisc.DrawLine('=');
-        ForegroundColor = ConsoleColor.Cyan;
-        UIMisc.WriteCenter(GameTitle);
-        ResetColor();
-        UIMisc.DrawLine('=');
+        DrawHeader(false);
         gameData.Progress.Print();
         UIMisc.DrawLine('-');
-        
-        fightEvent.Monsters.ForEach(monster => monster.Print());
+        PrintComponents(inv, UIConstants.MainZoneHeight, " -- Inventory:");
         UIMisc.DrawLine('-');
-
-        int skillCurTop = CursorTop;
-        gameData.Player.Skills.ForEach(skill => skill.Print());
-        int noticeCurTop = CursorTop;
-        WriteLine();
+        PrintComponents(equipped, UIConstants.SubZoneHeight, " -- Currently Equipped:");
         UIMisc.DrawLine('-');
-
         gameData.Player.Print();
         UIMisc.DrawLine('-');
+    }
 
-        return (skillCurTop, noticeCurTop);
+    public static void FightScreen(GameData gameData, List<Monster> monsters, List<string> actions)
+    {
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        PrintComponents(monsters, UIConstants.MainZoneHeight);
+        UIMisc.DrawLine('-');
+        PrintOptions(actions, UIConstants.SubZoneHeight, " -- Actions:");
+        UIMisc.DrawLine('-');
+        gameData.Player.Print();
+        UIMisc.DrawLine('-');
+    }
+
+    public static void FightSkillScreen(GameData gameData, List<Monster> monsters, List<Skill> skills)
+    {
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        PrintComponents(monsters, UIConstants.MainZoneHeight);
+        UIMisc.DrawLine('-');
+        PrintComponents(skills, UIConstants.SubZoneHeight);
+        UIMisc.DrawLine('-');
+        gameData.Player.Print();
+        UIMisc.DrawLine('-');
+    }
+
+    public static void RewardScreen(GameData gameData, List<Item> rewards)
+    {
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        UIMisc.DrawLine('-');
+        PrintComponents(rewards, UIConstants.MainZoneHeight, " -- Rewards:");
+        UIMisc.DrawLine('-');
+        Write(new string('\n', UIConstants.SubZoneHeight));
+        UIMisc.DrawLine('-');
+        gameData.Player.Print();
+        UIMisc.DrawLine('-');
     }
 }

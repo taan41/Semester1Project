@@ -7,7 +7,10 @@ static class UIHelper
 {
     public static class UIConstants
     {
-        public const int UIWidth = 70;
+        public const int
+            UIWidth = 70,
+            PauseWidth = 34, PauseHeight = 15,
+            MainZoneHeight = 6, SubZoneHeight = 4;
 
         public const int
             NameLen = 25,
@@ -18,7 +21,17 @@ static class UIHelper
             MonsterBarLen = 10,
             EliteBarLen = 15,
             BossBarLen = 20;
+    }
 
+    public static class CursorPos
+    {
+        public const int
+            MainMenuLeft = UIWidth / 10 * 4, MainMenuTop = 12,
+            MainTitleTop = 1, ProgressTop = 3,
+            MainZoneTop = 6, SubZoneTop = 13, PlayerZoneTop = 18,
+            PauseBorderTop = 4,
+            PauseOptionLeft = UIWidth / 10 * 4, PauseOptionTop = 7,
+            PauseTimeTop = 13;
     }
 
     public static class UIMisc

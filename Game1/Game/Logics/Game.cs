@@ -5,22 +5,24 @@ class Game
 {
     public static void Start()
     {
+        
         List<string> welcomeOptions = ["PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
+
         while(true)
         {
-            var (cursorLeft, cursorTop, animTokenSource) = GameUI.WelcomeScreen(welcomeOptions);
+            Console.Clear();
+            GameUI.WelcomeScreen(welcomeOptions);
+            GameUI.StartTitleAnim();
+
             Console.ReadKey(true);
-            
-            switch(InteractiveUI.PickOption(cursorLeft, cursorTop, welcomeOptions))
+            switch(InteractiveUI.PickOption(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, welcomeOptions))
             {
                 case 0:
                 case 1:
-                    animTokenSource.Cancel();
                     StartGame();
-                    continue;
+                    break;
                 
                 case 2: case null:
-                    animTokenSource.Cancel();
                     return;
             }
         }
@@ -29,16 +31,17 @@ class Game
     private static void StartGame()
     {
         List<string> playOptions = ["NEW GAME", "LOAD GAME", "RETURN"];
-        var (cursorLeft, cursorTop) = GameUI.StartGameScreen(playOptions);
-        
-        switch(InteractiveUI.PickOption(cursorLeft, cursorTop, playOptions))
+        GameUI.StartScreen(playOptions);
+
+        Console.ReadKey(true);
+        switch(InteractiveUI.PickOption(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, playOptions))
         {
             case 0:
+                GameUI.StopTitleAnim();
                 NewGame();
                 break;
 
             case 1:
-                StartGame();
                 break;
             
             case 2: case null:
@@ -48,17 +51,18 @@ class Game
 
     private static void NewGame()
     {
-        GameData gameData = new();
         List<Equipment> starters =
         [
             GameAssets.GetEquipment("Starter Sword"),
             GameAssets.GetEquipment("Starter Bow"),
             GameAssets.GetEquipment("Starter Staff")
         ];
+        GameData gameData = new(42);
+        GameUI.GenericGameScreen(gameData);
 
-        var (cursorLeft, cursorTop) = GameUI.PickComponentScreen(gameData, starters, " Choose one starter item:");
+        GameUI.PrintComponents(starters, UIConstants.MainZoneHeight, " -- Choose Starter Item:", CursorPos.MainZoneTop);
         
-        int? pickedEquipInd = InteractiveUI.PickComponent(cursorLeft, cursorTop, starters);
+        int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, starters);
         if (pickedEquipInd == null)
             return;
 
@@ -66,32 +70,39 @@ class Game
 
         gameData.Player.Equip(new(pickedEquip));
         gameData.Progress.Next();
+        gameData.SetTime(true);
+        gameData.ToggleShowingTime(true);
         GameLoop(gameData);
     }
 
     private static void GameLoop(GameData gameData)
     {
         EventManager eventManager = new(gameData);
-        List<string> inventoryOptions = ["Change equipment", "Change skill"];
+        List<string> invOptions = ["Change Equipment", "Change Skill"];
         bool pickFromEnd = false;
 
         while (true)
         {
             List<Event> routes = eventManager.GetEvents();
-            var (routeCurTop, invCurTop) = GameUI.PickRouteScreen(gameData, routes, inventoryOptions);
+            
+            GameUI.RouteScreen(gameData, routes, invOptions);
 
-            int? pickedRouteInd = InteractiveUI.PickComponent(routeCurTop, routes, false, true, pickFromEnd);
+            int? pickedRouteInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, routes, false, true, pickFromEnd);
             pickFromEnd = false;
             if (pickedRouteInd == null)
-                return;
+            {
+                if (HanldePause(gameData)) continue;
+                else return;
+            }
 
             if (pickedRouteInd == routes.Count) // Move down to inventory options
             {
-                int? pickedInvInd = InteractiveUI.PickOption(invCurTop, inventoryOptions, true);
+                int? pickedInvInd = InteractiveUI.PickOption(CursorPos.SubZoneTop + 1, invOptions, true);
                 switch (pickedInvInd)
                 {
                     case null:
-                        return;
+                        if (HanldePause(gameData)) continue;
+                        else return;
 
                     case -1:
                         pickFromEnd = true;
@@ -126,15 +137,37 @@ class Game
         }
     }
 
+    // return false if quit
+    private static bool HanldePause(GameData gameData)
+    {
+        List<string> pauseOptions = ["Resume", "Save & Exit"];
+
+        gameData.SetTime(false);
+        GameUI.PauseScreen(pauseOptions, gameData.GetElapsedTime());
+
+        int? optionInd = InteractiveUI.PickOption(CursorPos.PauseOptionLeft, CursorPos.PauseOptionTop, pauseOptions);
+        switch(optionInd)
+        {
+            case 1:
+                return false;
+
+            case 0: default:
+                gameData.SetTime(true);
+                return true;
+        }
+    }
+
     private static void HandleInventory<T>(GameData gameData, List<T> inv, List<T> equipped) where T : Item
     {
-        int displayCount = 5;
+        int displayCount = UIConstants.MainZoneHeight - 1;
         int startInd = 0, endInd = inv.Count > displayCount ? displayCount : inv.Count;
         bool pickFromEnd = false;
+
         while(true)
         {
-            var (invCurTop, equippedCurTop) = GameUI.PickInventoryScreen(gameData, inv[startInd..endInd], equipped);
-            int? pickedEquipInd = InteractiveUI.PickComponent(invCurTop, inv[startInd..endInd], startInd > 0, endInd < inv.Count, pickFromEnd);
+            GameUI.InventoryScreen(gameData, inv[startInd..endInd], equipped);
+
+            int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, inv[startInd..endInd], startInd > 0, endInd < inv.Count, pickFromEnd);
 
             if (pickedEquipInd == null)
                 return;
@@ -156,8 +189,11 @@ class Game
             }
 
             Item pickedItem = inv[startInd + (int) pickedEquipInd];
+
             if (pickedItem is Equipment pickedEquip)
+            {
                 gameData.Player.Equip(pickedEquip);
+            }
             else if (pickedItem is Skill pickedSkill)
             {
                 if (equipped.Count < 3)
@@ -166,7 +202,7 @@ class Game
                     continue;
                 }
 
-                int? equippedSkillInd = InteractiveUI.PickComponent(equippedCurTop, equipped);
+                int? equippedSkillInd = InteractiveUI.PickComponent(CursorPos.SubZoneTop + 1, equipped);
                 if (equippedSkillInd != null)
                     gameData.Player.ChangeSkill((int) equippedSkillInd, pickedSkill);
 
@@ -176,16 +212,16 @@ class Game
 
     private static void HandleFightEvent(GameData gameData, FightEvent fightEvent)
     {
-        List<string> fightActions = ["Attack", "Skills"];
+        List<string> fightActions = ["Attack", "Use Skill"];
 
         while (fightEvent.Monsters.Count > 0)
         {
-            var (monsterCurTop, actionCurTop) = GameUI.FightScreen(gameData, fightEvent, fightActions);
+            GameUI.FightScreen(gameData, fightEvent.Monsters, fightActions);
 
-            switch (InteractiveUI.PickOption(actionCurTop, fightActions))
+            switch (InteractiveUI.PickOption(CursorPos.SubZoneTop + 1, fightActions))
             {
                 case 0:
-                    int? pickedMonsterInd = InteractiveUI.PickComponent(monsterCurTop, fightEvent.Monsters);
+                    int? pickedMonsterInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop, fightEvent.Monsters);
                     if (pickedMonsterInd == null)
                         continue;
                     
@@ -195,8 +231,8 @@ class Game
                     break;
 
                 case 1:
-                    var (skillCurTop, endCurTop) = GameUI.SkillFightScreen(gameData, fightEvent);
-                    int? pickedSkillInd = InteractiveUI.PickComponent(skillCurTop, gameData.Player.Skills);
+                    GameUI.FightSkillScreen(gameData, fightEvent.Monsters, gameData.Player.Skills);
+                    int? pickedSkillInd = InteractiveUI.PickComponent(CursorPos.SubZoneTop, gameData.Player.Skills);
                     if (pickedSkillInd == null)
                         continue;
 
@@ -204,7 +240,7 @@ class Game
 
                     if (pickedSkill.MPCost > gameData.Player.MP)
                     {
-                        Console.SetCursorPosition(0, endCurTop);
+                        Console.SetCursorPosition(0, CursorPos.SubZoneTop + 3);
                         Console.Write(" Not enough MP!");
                         Console.ReadKey(true);
                         goto case 1;
@@ -215,7 +251,7 @@ class Game
                         switch (pickedSkill.Type)
                         {
                             case TargetType.Single:
-                                pickedMonsterInd = InteractiveUI.PickComponent(monsterCurTop, fightEvent.Monsters);
+                                pickedMonsterInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop, fightEvent.Monsters);
                                 if (pickedMonsterInd == null)
                                     continue;
 
@@ -239,7 +275,8 @@ class Game
                     break;
                 
                 case null:
-                    return;
+                    if (HanldePause(gameData)) continue;
+                    else return;
             }
             
             fightEvent.Monsters.RemoveAll(monster => monster.HP == 0);
@@ -247,8 +284,8 @@ class Game
 
         while(fightEvent.Rewards.Count > 0)
         {
-            var (_, rewardCurTop) = GameUI.PickComponentScreen(gameData, fightEvent.Rewards, " Rewards:");
-            int? pickedRewardInd = InteractiveUI.PickComponent(rewardCurTop, fightEvent.Rewards);
+            GameUI.RewardScreen(gameData, fightEvent.Rewards);
+            int? pickedRewardInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, fightEvent.Rewards);
             if (pickedRewardInd == null)
                 return;
             

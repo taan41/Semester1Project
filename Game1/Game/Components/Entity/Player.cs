@@ -16,6 +16,9 @@ class Player : Entity
         PlayerGold = new(goldQuantity);
     }
 
+    public static Player DefaultPlayer() 
+        => new("Player", 3, 25, 10, 100);
+
     public List<Equipment> GetEquipped()
     {
         List<Equipment> equipped = [];
