@@ -137,12 +137,12 @@ class Player : Entity
             if (item is Equipment equip)
             {
                 if (EquipInventory.Remove(equip))
-                    PlayerGold.Quantity += (int) (equip.Price * (double) Item.SellPricePercentage / 100);
+                    PlayerGold.Quantity += equip.Price * Item.SellPricePercentage / 100;
             }
             else if (item is Skill skill)
             {
                 if (SkillInventory.Remove(skill))
-                    PlayerGold.Quantity += (int) (skill.Price * (double) Item.SellPricePercentage / 100);
+                    PlayerGold.Quantity += skill.Price * Item.SellPricePercentage / 100;
 
             }
         }

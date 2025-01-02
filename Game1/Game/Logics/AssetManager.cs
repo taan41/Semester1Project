@@ -27,9 +27,9 @@ class AssetManager
     public List<Monster> EliteMonsters = [];
     public List<Monster> BossMonsters = [];
 
-    public AssetManager()
+    public AssetManager(bool setup = true)
     {
-        Setup();
+        if (setup) Setup();
     }
 
     public Equipment? GetEquipment(string name)

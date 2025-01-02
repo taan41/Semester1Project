@@ -21,7 +21,7 @@ class Equipment : Item
         BonusMaxHP = hp;
         BonusMaxMP = mp;
         Type = type;
-        Price *= (100 + EquipMultiplier) / 100;
+        Price = Price * (100 + EquipMultiplier) / 100;
     }
 
     public Equipment(Equipment other) : base(other.Name, other.Rarity, other.Price)

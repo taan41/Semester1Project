@@ -1,50 +1,56 @@
 [
   {
     "Type": 0,
-    "BonusATK": 2,
+    "BonusATK": 8,
     "BonusMaxHP": 10,
-    "BonusMaxMP": 0,
-    "Rarity": 0,
-    "Name": "Starter Sword"
+    "BonusMaxMP": 50,
+    "Rarity": 3,
+    "Price": 422,
+    "Name": "Legendary Staff"
   },
   {
     "Type": 0,
-    "BonusATK": 3,
+    "BonusATK": 6,
     "BonusMaxHP": 0,
-    "BonusMaxMP": 0,
-    "Rarity": 0,
-    "Name": "Starter Bow"
+    "BonusMaxMP": 35,
+    "Rarity": 2,
+    "Price": 325,
+    "Name": "Epic Staff"
   },
   {
     "Type": 0,
-    "BonusATK": 1,
+    "BonusATK": 4,
     "BonusMaxHP": 0,
-    "BonusMaxMP": 10,
-    "Rarity": 0,
-    "Name": "Starter Staff"
-  },
-  {
-    "Type": 0,
-    "BonusATK": 2,
-    "BonusMaxHP": 0,
-    "BonusMaxMP": 15,
+    "BonusMaxMP": 20,
     "Rarity": 1,
+    "Price": 227,
     "Name": "Rare Staff"
   },
   {
     "Type": 0,
-    "BonusATK": 3,
+    "BonusATK": 6,
     "BonusMaxHP": 0,
-    "BonusMaxMP": 20,
-    "Rarity": 2,
-    "Name": "Epit Staff"
+    "BonusMaxMP": 0,
+    "Rarity": 0,
+    "Price": 130,
+    "Name": "Starter Bow"
   },
   {
     "Type": 0,
-    "BonusATK": 3,
+    "BonusATK": 2,
     "BonusMaxHP": 0,
-    "BonusMaxMP": 30,
-    "Rarity": 3,
-    "Name": "Legendary Staff"
+    "BonusMaxMP": 10,
+    "Rarity": 0,
+    "Price": 130,
+    "Name": "Starter Staff"
+  },
+  {
+    "Type": 0,
+    "BonusATK": 4,
+    "BonusMaxHP": 10,
+    "BonusMaxMP": 0,
+    "Rarity": 0,
+    "Price": 130,
+    "Name": "Starter Sword"
   }
 ]

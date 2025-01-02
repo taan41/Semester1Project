@@ -9,17 +9,17 @@ class EventManager
     };
     private const int BasePower = 15;
 
-    private readonly Random _random;
+    private readonly Random _rng;
     private readonly GameData _gameData;
-    private readonly AssetManager _assetManager;
+    private readonly AssetManager _assets;
     private readonly List<List<Event>> _events;
 
     public EventManager(GameData gameData, AssetManager assetManager)
     {
         _gameData = gameData;
-        _assetManager = assetManager;
-        _random = new(_gameData.Seed);
-        _events = GenerateEvents(_random);
+        _assets = assetManager;
+        _rng = new(_gameData.Seed);
+        _events = GenerateEvents(_rng);
     }
 
     public List<Event> GetEvents()
@@ -67,7 +67,7 @@ class EventManager
 
     private Event GenerateNormalEvent(int room, int floor, int monsterPower)
     {
-        int randomValue = _random.Next(1, 101);
+        int randomValue = _rng.Next(1, 101);
 
         if (randomValue > 80 && room > 5)
             return GenerateEliteFight(floor, monsterPower);
@@ -77,7 +77,7 @@ class EventManager
 
     private FightEvent GenerateNormalFight(int floor, int monsterPower)
     {
-        int randomValue = _random.Next(1, 101);
+        int randomValue = _rng.Next(1, 101);
         int normalQuantity = randomValue > 35 ? (randomValue > 90 ? 4 : 3) : 2;
         
         Gold gold = CalculateGold(monsterPower, normalQuantity, 0, 0, randomValue);
@@ -88,7 +88,7 @@ class EventManager
 
     private FightEvent GenerateEliteFight(int floor, int monsterPower)
     {
-        int randomValue = _random.Next(1, 101);
+        int randomValue = _rng.Next(1, 101);
         int eliteQuantity = randomValue > 90 ? 2 : 1;
         int normalQuantity = randomValue > 50 ? (randomValue > 75 ? 0 : 1) : 2;
         
@@ -100,7 +100,7 @@ class EventManager
 
     private FightEvent GenerateBossFight(int floor, int monsterPower)
     {
-        int randomValue = _random.Next(1, 101);
+        int randomValue = _rng.Next(1, 101);
         int bossQuantity = randomValue > 99 ? 2 : 1;
         int eliteQuantity = randomValue > 15 ? (randomValue > 99 ? 0 : 1) : 2;
         int normalQuantity = randomValue > 15 ? (randomValue > 99 ? 0 : 3) : 2;
@@ -114,25 +114,25 @@ class EventManager
     private List<Monster> GenerateMonsters(int floor, int monsterPower, int normalQuantity, int eliteQuantity = 0, int bossQuantity = 0)
     {
         List<Monster> monsters = [];
-        List<Monster> availableMonsters = _assetManager.BossMonsters.FindAll(monster => monster.Floor == floor);
+        List<Monster> availableMonsters = _assets.BossMonsters.FindAll(monster => monster.Floor == floor);
 
         while(bossQuantity-- > 0)
         {
-            Monster pickedMonster = availableMonsters[_random.Next(0, availableMonsters.Count)];
+            Monster pickedMonster = availableMonsters[_rng.Next(0, availableMonsters.Count)];
             monsters.Add(new(pickedMonster, monsterPower * 5));
         }
 
-        availableMonsters = _assetManager.EliteMonsters.FindAll(monster => monster.Floor == floor);
+        availableMonsters = _assets.EliteMonsters.FindAll(monster => monster.Floor == floor);
         while(eliteQuantity-- > 0)
         {
-            Monster pickedMonster = availableMonsters[_random.Next(0, availableMonsters.Count)];
+            Monster pickedMonster = availableMonsters[_rng.Next(0, availableMonsters.Count)];
             monsters.Add(new(pickedMonster, monsterPower * 2));
         }
 
-        availableMonsters = _assetManager.NormalMonsters.FindAll(monster => monster.Floor == floor);
+        availableMonsters = _assets.NormalMonsters.FindAll(monster => monster.Floor == floor);
         while(normalQuantity-- > 0)
         {
-            Monster pickedMonster = availableMonsters[_random.Next(0, availableMonsters.Count)];
+            Monster pickedMonster = availableMonsters[_rng.Next(0, availableMonsters.Count)];
             monsters.Add(new(pickedMonster, monsterPower));
         }
 
@@ -158,7 +158,7 @@ class EventManager
                 totalWeight += weight + monsterPower * powerMultiplier / 100;
         }
 
-        int randomValue = _random.Next(totalWeight);
+        int randomValue = _rng.Next(totalWeight);
         int cumulativeWeight = 0;
         ItemRarity rarity = ItemRarity.Common;
 
@@ -178,13 +178,13 @@ class EventManager
 
         return rarity switch
         {
-            ItemRarity.Rare => _assetManager.RareEquipments.ElementAt(_random.Next(_assetManager.RareEquipments.Count)),
-            ItemRarity.Epic => _assetManager.EpicEquipments.ElementAt(_random.Next(_assetManager.EpicEquipments.Count)),
-            ItemRarity.Legendary => _assetManager.LegendaryEquipments.ElementAt(_random.Next(_assetManager.LegendaryEquipments.Count)),
-            _ => _assetManager.CommonEquipments.ElementAt(_random.Next(_assetManager.CommonEquipments.Count)),
+            ItemRarity.Rare => _assets.RareEquipments.ElementAt(_rng.Next(_assets.RareEquipments.Count)),
+            ItemRarity.Epic => _assets.EpicEquipments.ElementAt(_rng.Next(_assets.EpicEquipments.Count)),
+            ItemRarity.Legendary => _assets.LegendaryEquipments.ElementAt(_rng.Next(_assets.LegendaryEquipments.Count)),
+            _ => _assets.CommonEquipments.ElementAt(_rng.Next(_assets.CommonEquipments.Count)),
         };
     }
 
     private static Gold CalculateGold(int monsterPower, int normalQuantity, int eliteQuantity, int bossQuantity, int randomValue)
-        => new((int) (monsterPower * (1.25 + 0.25 * normalQuantity + 0.6 * eliteQuantity + 2 * bossQuantity) * (0.85 + 0.3 * randomValue / 100)));
+        => new(monsterPower * (125 + 25 * normalQuantity + 60 * eliteQuantity + 200 * bossQuantity) / 100 * (85 + 30 * randomValue) / 100);
 }

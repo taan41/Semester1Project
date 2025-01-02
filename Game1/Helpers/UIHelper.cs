@@ -51,7 +51,7 @@ static class UIHelper
         public static void DrawBar(int currentValue, int maxValue, bool includeValue, int barLength, ConsoleColor color)
         {
             StringBuilder sb = new("[");
-            sb.Append(new string('■', (int) ((double) currentValue / maxValue * barLength)).PadRight(barLength, '-'));
+            sb.Append(new string('■', currentValue * barLength / maxValue).PadRight(barLength, '-'));
             sb.Append(']');
             if (includeValue)
                 sb.Append($" {currentValue}/{maxValue}");

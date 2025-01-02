@@ -2,22 +2,22 @@
   {
     "Type": 0,
     "Floor": 1,
-    "ATK": 10,
-    "MaxHP": 100,
-    "HP": 100,
-    "MaxMP": 1,
-    "MP": 0,
-    "Name": "Slime"
-  },
-  {
-    "Type": 0,
-    "Floor": 1,
     "ATK": 40,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
     "Name": "Rat"
+  },
+  {
+    "Type": 0,
+    "Floor": 1,
+    "ATK": 10,
+    "MaxHP": 100,
+    "HP": 100,
+    "MaxMP": 1,
+    "MP": 0,
+    "Name": "Slime"
   },
   {
     "Type": 1,

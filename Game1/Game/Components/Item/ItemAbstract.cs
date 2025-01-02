@@ -7,8 +7,8 @@ enum ItemRarity
 abstract class Item : Component
 {
     public const int
-        BasePrice = 100, RarityMultiplier = 30,
-        EquipMultiplier = 50, SkillMultiplier = 0,
+        BasePrice = 100, RarityMultiplier = 75,
+        EquipMultiplier = 30, SkillMultiplier = 10,
         SellPricePercentage = 60;
 
 

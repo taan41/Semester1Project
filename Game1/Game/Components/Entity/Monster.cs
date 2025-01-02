@@ -35,10 +35,9 @@ class Monster : Entity
 
     public void ScaleStat(int targetPower)
     {
-        double multiplier = (double) targetPower / Power;
-        ATK = (int) (ATK * multiplier);
-        MaxHP = (int) (MaxHP * multiplier);
-        HP = (int) (HP * multiplier);
+        ATK = ATK * targetPower / Power;
+        MaxHP = MaxHP * targetPower / Power;
+        HP = HP * targetPower / Power;
         Power = ATK * 5 + MaxHP;
     }
 
@@ -54,5 +53,23 @@ class Monster : Entity
         base.Print();
         Console.Write($"| ATK: {ATK,-3} ");
         UIHelper.UIMisc.DrawBar(HP, MaxHP, true, barLen, ConsoleColor.Red);
+    }
+}
+
+class MonsterComparer : IComparer<Monster>
+{
+    public int Compare(Monster? x, Monster? y)
+    {
+        if (x == null && y == null) return 0;
+        if (x == null) return 1;
+        if (y == null) return -1;
+
+        int floorComparison = x.Floor.CompareTo(y.Floor);
+        if (floorComparison != 0) return floorComparison;
+
+        int typeComparison = x.Type.CompareTo(y.Type);
+        if (typeComparison != 0) return typeComparison;
+
+        return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
     }
 }

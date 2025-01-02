@@ -20,7 +20,7 @@ class Skill : Item
         Heal = heal;
         MPCost = mpcost;
         Type = type;
-        Price *= (100 + SkillMultiplier) / 100;
+        Price = Price * (100 + SkillMultiplier) / 100;
     }
 
     public Skill(Skill other) : base(other.Name, other.Rarity, other.Price)

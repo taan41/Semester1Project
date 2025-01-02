@@ -73,7 +73,7 @@ abstract class Entity : Component
     {
         target.HP -= ATK;
         HP -= target.ATK;
-        MP += (int) (MaxMP * 0.15);
+        MP += MaxMP * 10 / 100;
     }
 
     public void UseSkill(Skill skill, List<Monster> targets)

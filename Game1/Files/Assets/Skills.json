@@ -2,9 +2,19 @@
   {
     "Type": 0,
     "Damage": 0,
+    "Heal": 25,
+    "MPCost": 10,
+    "Rarity": 2,
+    "Price": 275,
+    "Name": "Revitalize"
+  },
+  {
+    "Type": 0,
+    "Damage": 0,
     "Heal": 5,
     "MPCost": 5,
     "Rarity": 0,
-    "Name": "Heal"
+    "Price": 110,
+    "Name": "Bandage"
   }
 ]
