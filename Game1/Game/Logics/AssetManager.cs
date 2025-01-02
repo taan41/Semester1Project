@@ -29,11 +29,7 @@ class AssetManager
 
     public AssetManager()
     {
-        try
-        {
-            Setup();
-        }
-        catch (Exception) {}
+        Setup();
     }
 
     public Equipment? GetEquipment(string name)

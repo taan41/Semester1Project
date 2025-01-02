@@ -7,7 +7,17 @@ class Program
     public static void Main()
     {
         CursorVisible = false;
-        Game.Start();
+        try
+        {
+            Game.Start();
+        }
+        catch (Exception ex)
+        {
+            WriteLine(ex);
+        }
+
+        // Clear();
+        // await GameUI.DrawCampfire(CancellationToken.None);
 
 //         WriteLine(@"
 // _________                            .__            

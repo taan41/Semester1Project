@@ -176,6 +176,7 @@ class Game
             {
                 case EventType.Camp:
                     gameData.Player.Regenerate();
+                    GameUI.CampfireScreen(gameData);
                     break;
 
                 case EventType.Treasure:

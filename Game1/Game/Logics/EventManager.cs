@@ -20,10 +20,10 @@ class EventManager
     {
         List<List<Event>> events = [];
 
-        for (int room = 1; room <= GameProgress.MaxRoom * GameProgress.MaxFloor; room++)
+        for (int room = 0; room < GameProgress.MaxRoom * GameProgress.MaxFloor; room++)
         {
-            int curRoom = room % GameProgress.MaxRoom;
-            int curFloor = (room - 1) / GameProgress.MaxRoom + 1;
+            int curRoom = room % GameProgress.MaxRoom + 1;
+            int curFloor = room / GameProgress.MaxRoom + 1;
             int monsterPower = 15 + (curRoom - 1) * 1 + (curFloor - 1) * GameProgress.MaxRoom;
 
             if (curRoom % GameProgress.MaxRoom == 0)
@@ -60,7 +60,7 @@ class EventManager
     {
         int randomValue = _random.Next(1, 101);
 
-        if (randomValue > 80 && room > 4)
+        if (randomValue > 80 && room > 5)
             return GenerateEliteFight(floor, monsterPower);
 
         return GenerateNormalFight(floor, monsterPower);
