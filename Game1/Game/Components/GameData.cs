@@ -1,8 +1,12 @@
 using System.Diagnostics;
+using System.Text.Json;
 
 [Serializable]
 class GameData
 {
+    public const string DirPath = FileHelper.FileConstants.DirPath + @"Saves\";
+    public const string DataFile = "GameData.json";
+
     public int Seed { get; set; } = 42;
     public GameProgress Progress { get; set; } = new();
     public Player Player { get; set; } = Player.DefaultPlayer();
@@ -23,7 +27,7 @@ class GameData
         Progress = new();
         Player = new("Hero", 3, 25, 10, 100);
         for (int i = 0; i < 15; i++)
-            Player.AddSkill(new(GameAssets.SkillList.ElementAt(0)){ Damage = i, Rarity = (ItemRarity) (i % 4) });
+            Player.AddSkill(new("Heal", 0, 5, 5){ Damage = i, Rarity = (ItemRarity) (i % 4) });
         
         // _ = Task.Run(() => ShowTime(_stopwatchTokenSource.Token));
     }
@@ -49,6 +53,25 @@ class GameData
 
     public TimeSpan GetElapsedTime()
         => SavedTime + _stopwatch.Elapsed;
+        
+    public void Save()
+    {
+        SavedTime += _stopwatch.Elapsed;
+        
+        Directory.CreateDirectory(DirPath);
+        var jsonOption = new JsonSerializerOptions { WriteIndented = true };
+        File.WriteAllText(DirPath + DataFile, JsonSerializer.Serialize(this, jsonOption));
+    }
+
+    public static bool Load(out GameData? loadedData)
+    {
+        loadedData = null;
+        if (!File.Exists(DirPath + DataFile))
+            return false;
+
+        loadedData = JsonSerializer.Deserialize<GameData>(File.ReadAllText(DirPath + DataFile));
+        return true;
+    }
 
     private async Task ShowTime(CancellationToken stopToken)
     {

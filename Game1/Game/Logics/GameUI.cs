@@ -85,14 +85,34 @@ static class GameUI
         titleAnimTokenSource = null;
     }
 
-    public static void WelcomeScreen(List<string> options)
+    public static void WarningPopup(string warning)
     {
-        SetCursorPosition(0, 0);
+        CursorTop = CursorPos.WarningTop;
+        UIMisc.WriteCenter($"╔{new string('═', UIConstants.WarningWidth)}╗");
+        for (int i = 0; i < UIConstants.WarningHeight - 2; i++)
+            UIMisc.WriteCenter($"║{new string(' ', UIConstants.WarningWidth)}║");
+        UIMisc.WriteCenter($"╚{new string('═', UIConstants.WarningWidth)}╝");
+
+        CursorTop = CursorPos.WarningTop + 2;
+        UIMisc.WriteCenter(@".");
+        UIMisc.WriteCenter(@"/ \");
+        UIMisc.WriteCenter(@"/ ┃ \");
+        UIMisc.WriteCenter(@"/  •  \");
+        UIMisc.WriteCenter(@"‾‾‾‾‾‾‾");
+
+        CursorTop++;
+        UIMisc.WriteCenter(warning);
+    }
+
+    public static void WelcomeScreen(List<string> options, bool clear = false)
+    {
+        if (clear) Clear();
+        else SetCursorPosition(0, 0);
+
         UIMisc.DrawLine('=');
         CursorTop += 9;
         UIMisc.DrawLine('=');
         WriteLine();
-        ResetColor();
 
         foreach (var option in options)
         {
@@ -102,8 +122,6 @@ static class GameUI
 
         WriteLine();
         UIMisc.DrawLine('-');
-
-        return;
     }
 
     public static int? PlayOnlineScreen()
@@ -112,17 +130,27 @@ static class GameUI
         return null;
     }
 
-    public static void StartScreen(List<string> options)
+    public static void StartScreen(List<string> options, bool clear = false)
     {
-        CursorTop = CursorPos.MainMenuTop;
+        if (clear) Clear();
+        else SetCursorPosition(0, 0);
+
+        UIMisc.DrawLine('=');
+        CursorTop += 9;
+        UIMisc.DrawLine('=');
+        WriteLine();
+
         foreach (var option in options)
         {
             CursorLeft = CursorPos.MainMenuLeft;
             WriteLine($" {option}        ");
         }
+
+        WriteLine();
+        UIMisc.DrawLine('-');
     }
 
-    public static void PauseScreen(List<string> pauseOptions, TimeSpan? elapsedTime = null)
+    public static void PausePopup(List<string> pauseOptions, TimeSpan? elapsedTime = null)
     {
         CursorTop = CursorPos.PauseBorderTop;
         UIMisc.WriteCenter($"╔{new string('═', UIConstants.PauseWidth)}╗");

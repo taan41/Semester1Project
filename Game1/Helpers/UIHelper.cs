@@ -9,6 +9,7 @@ static class UIHelper
     {
         public const int
             UIWidth = 70,
+            WarningWidth = 40, WarningHeight = 11,
             PauseWidth = 34, PauseHeight = 15,
             MainZoneHeight = 6, SubZoneHeight = 4;
 
@@ -27,7 +28,9 @@ static class UIHelper
     {
         public const int
             MainMenuLeft = UIWidth / 10 * 4, MainMenuTop = 12,
-            MainTitleTop = 1, ProgressTop = 3,
+            MainTitleTop = 1,
+            WarningTop = 4,
+            ProgressTop = 3,
             MainZoneTop = 6, SubZoneTop = 13, PlayerZoneTop = 18,
             PauseBorderTop = 4,
             PauseOptionLeft = UIWidth / 10 * 4, PauseOptionTop = 7,
@@ -67,8 +70,6 @@ static class UIHelper
 
         public static int? PickComponent<T>(int startCursorLeft, int startCursorTop, List<T> components, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false) where T : Component
         {
-            int curIndex = startUpwards ? components.Count - 1 : 0, oldIndex;
-
             if (components.Count == 0)
             {
                 while (true)
@@ -76,6 +77,7 @@ static class UIHelper
                         return null;
             }
 
+            int curIndex = startUpwards ? components.Count - 1 : 0, oldIndex;
             ConsoleKeyInfo keyPressed;
 
             SetCursorPosition(startCursorLeft, startCursorTop + curIndex);
@@ -144,6 +146,13 @@ static class UIHelper
 
         public static int? PickOption(int startCursorLeft, int startCursorTop, List<string> options, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false)
         {
+            if (options.Count == 0)
+            {
+                while (true)
+                    if (ReadKey(true).Key == ConsoleKey.Escape)
+                        return null;
+            }
+
             int curIndex = startUpwards ? options.Count - 1 : 0, oldIndex;
             ConsoleKeyInfo keyPressed;
 

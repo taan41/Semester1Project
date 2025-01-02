@@ -5,13 +5,11 @@ class Game
 {
     public static void Start()
     {
-        
         List<string> welcomeOptions = ["PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
+        GameUI.WelcomeScreen(welcomeOptions, true);
 
         while(true)
         {
-            Console.Clear();
-            GameUI.WelcomeScreen(welcomeOptions);
             GameUI.StartTitleAnim();
 
             Console.ReadKey(true);
@@ -25,6 +23,8 @@ class Game
                 case 2: case null:
                     return;
             }
+
+            GameUI.WelcomeScreen(welcomeOptions);
         }
     }
 
@@ -33,29 +33,42 @@ class Game
         List<string> playOptions = ["NEW GAME", "LOAD GAME", "RETURN"];
         GameUI.StartScreen(playOptions);
 
-        Console.ReadKey(true);
-        switch(InteractiveUI.PickOption(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, playOptions))
+        while (true)
         {
-            case 0:
-                GameUI.StopTitleAnim();
-                NewGame();
-                break;
+            GameUI.StartTitleAnim();
 
-            case 1:
-                break;
-            
-            case 2: case null:
-                return;
+            Console.ReadKey(true);
+            switch(InteractiveUI.PickOption(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, playOptions))
+            {
+                case 0:
+                    GameUI.StopTitleAnim();
+                    NewGame();
+                    return;
+
+                case 1:
+                    GameUI.StopTitleAnim();
+                    if (!LoadGame())
+                    {
+                        GameUI.StartScreen(playOptions, true);
+                        continue;
+                    }
+                    return;
+                
+                case 2: case null:
+                    return;
+            }
         }
     }
 
     private static void NewGame()
     {
+        AssetManager assetManager = new();
+
         List<Equipment> starters =
         [
-            GameAssets.GetEquipment("Starter Sword"),
-            GameAssets.GetEquipment("Starter Bow"),
-            GameAssets.GetEquipment("Starter Staff")
+            assetManager.GetEquipment("Starter Sword"),
+            assetManager.GetEquipment("Starter Bow"),
+            assetManager.GetEquipment("Starter Staff")
         ];
         GameData gameData = new(42);
         GameUI.GenericGameScreen(gameData);
@@ -70,16 +83,35 @@ class Game
 
         gameData.Player.Equip(new(pickedEquip));
         gameData.Progress.Next();
-        gameData.SetTime(true);
-        gameData.ToggleShowingTime(true);
         GameLoop(gameData);
+    }
+
+    private static bool LoadGame()
+    {
+        if (GameData.Load(out GameData? loadedData))
+        {
+            if (loadedData != null)
+            {
+                GameLoop(loadedData);
+                return true;
+            }
+
+            GameUI.WarningPopup("Corrupted Data");
+        }
+        else
+            GameUI.WarningPopup("No Save Found");
+        
+        Console.ReadKey(true);
+        return false;
     }
 
     private static void GameLoop(GameData gameData)
     {
-        EventManager eventManager = new(gameData);
+        AssetManager assetManager = new();
+        EventManager eventManager = new(gameData, assetManager);
         List<string> invOptions = ["Change Equipment", "Change Skill"];
         bool pickFromEnd = false;
+        gameData.SetTime(true);
 
         while (true)
         {
@@ -92,7 +124,11 @@ class Game
             if (pickedRouteInd == null)
             {
                 if (HanldePause(gameData)) continue;
-                else return;
+                else 
+                {
+                    gameData.Save();
+                    return;
+                }
             }
 
             if (pickedRouteInd == routes.Count) // Move down to inventory options
@@ -102,7 +138,11 @@ class Game
                 {
                     case null:
                         if (HanldePause(gameData)) continue;
-                        else return;
+                        else
+                        {
+                            gameData.Save();
+                            return;
+                        }
 
                     case -1:
                         pickFromEnd = true;
@@ -124,7 +164,13 @@ class Game
             Event pickedRoute = routes[(int) pickedRouteInd];
 
             if (pickedRoute is FightEvent fightEvent)
-                HandleFightEvent(gameData, fightEvent);
+            {
+                gameData.Save();
+                if (!HandleFightEvent(gameData, fightEvent))
+                {
+                    return;
+                }
+            }
 
             else switch (pickedRoute.Type)
             {
@@ -143,7 +189,7 @@ class Game
         List<string> pauseOptions = ["Resume", "Save & Exit"];
 
         gameData.SetTime(false);
-        GameUI.PauseScreen(pauseOptions, gameData.GetElapsedTime());
+        GameUI.PausePopup(pauseOptions, gameData.GetElapsedTime());
 
         int? optionInd = InteractiveUI.PickOption(CursorPos.PauseOptionLeft, CursorPos.PauseOptionTop, pauseOptions);
         switch(optionInd)
@@ -210,7 +256,8 @@ class Game
         }
     }
 
-    private static void HandleFightEvent(GameData gameData, FightEvent fightEvent)
+    // Return false if quit mid-fight
+    private static bool HandleFightEvent(GameData gameData, FightEvent fightEvent)
     {
         List<string> fightActions = ["Attack", "Use Skill"];
 
@@ -276,7 +323,7 @@ class Game
                 
                 case null:
                     if (HanldePause(gameData)) continue;
-                    else return;
+                    else return false;
             }
             
             fightEvent.Monsters.RemoveAll(monster => monster.HP == 0);
@@ -287,7 +334,8 @@ class Game
             GameUI.RewardScreen(gameData, fightEvent.Rewards);
             int? pickedRewardInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, fightEvent.Rewards);
             if (pickedRewardInd == null)
-                return;
+                if (HanldePause(gameData)) continue;
+                else return false;
             
             Item pickedReward = fightEvent.Rewards[(int) pickedRewardInd];
 
@@ -295,5 +343,6 @@ class Game
             fightEvent.Rewards.Remove(pickedReward);
         }
 
+        return true;
     }
 }

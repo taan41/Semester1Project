@@ -2,11 +2,13 @@ class EventManager
 {
     private readonly Random _random;
     private readonly GameData _gameData;
+    private readonly AssetManager _assetManager;
     private readonly List<List<Event>> _events;
 
-    public EventManager(GameData gameData)
+    public EventManager(GameData gameData, AssetManager assetManager)
     {
         _gameData = gameData;
+        _assetManager = assetManager;
         _random = new(_gameData.Seed);
         _events = GenerateEvents(_random);
     }
@@ -26,7 +28,7 @@ class EventManager
 
             if (curRoom % GameProgress.MaxRoom == 0)
             {
-                events.Add([GenerateBossFight(rng, curFloor, monsterPower)]);
+                events.Add([GenerateBossFight(curFloor, monsterPower)]);
                 continue;
             }
 
@@ -40,7 +42,7 @@ class EventManager
 
             List<Event> possibleEvents = [];
             while(eventQuantity-- > 0)
-                possibleEvents.Add(GenerateNormalEvent(rng, curRoom, curFloor, monsterPower));
+                possibleEvents.Add(GenerateNormalEvent(curRoom, curFloor, monsterPower));
 
             events.Add(possibleEvents);
         }
@@ -48,74 +50,74 @@ class EventManager
         return events;
     }
 
-    private static Event GenerateNormalEvent(Random rng, int room, int floor, int monsterPower)
+    private Event GenerateNormalEvent(int room, int floor, int monsterPower)
     {
-        int randomValue = rng.Next(1, 101);
+        int randomValue = _random.Next(1, 101);
 
-        if (randomValue > 75 && room > 3)
-            return GenerateEliteFight(rng, floor, monsterPower);
+        if (randomValue > 80 && room > 4)
+            return GenerateEliteFight(floor, monsterPower);
 
-        return GenerateNormalFight(rng, floor, monsterPower);
+        return GenerateNormalFight(floor, monsterPower);
     }
 
-    private static FightEvent GenerateNormalFight(Random rng, int floor, int monsterPower)
+    private FightEvent GenerateNormalFight(int floor, int monsterPower)
     {
-        int randomValue = rng.Next(1, 101);
+        int randomValue = _random.Next(1, 101);
         int normalQuantity = randomValue > 35 ? (randomValue > 90 ? 4 : 3) : 2;
         
         Gold gold = CalculateGold(monsterPower, normalQuantity, 0, 0, randomValue);
-        List<Monster> monsters = GenerateMonsters(rng, floor, monsterPower, normalQuantity);
+        List<Monster> monsters = GenerateMonsters(floor, monsterPower, normalQuantity);
 
         return new FightEvent(monsters, [gold]);
     }
 
-    private static FightEvent GenerateEliteFight(Random rng, int floor, int monsterPower)
+    private FightEvent GenerateEliteFight(int floor, int monsterPower)
     {
-        int randomValue = rng.Next(1, 101);
+        int randomValue = _random.Next(1, 101);
         int eliteQuantity = randomValue > 90 ? 2 : 1;
         int normalQuantity = randomValue > 50 ? (randomValue > 75 ? 0 : 1) : 2;
         
         Gold gold = CalculateGold(monsterPower, normalQuantity, eliteQuantity, 0, randomValue);
-        List<Monster> monsters = GenerateMonsters(rng, floor, monsterPower, normalQuantity, eliteQuantity);
+        List<Monster> monsters = GenerateMonsters(floor, monsterPower, normalQuantity, eliteQuantity);
 
         return new FightEvent(monsters, [gold]);
     }
 
-    private static FightEvent GenerateBossFight(Random rng, int floor, int monsterPower)
+    private FightEvent GenerateBossFight(int floor, int monsterPower)
     {
-        int randomValue = rng.Next(1, 101);
+        int randomValue = _random.Next(1, 101);
         int bossQuantity = randomValue > 99 ? 2 : 1;
         int eliteQuantity = randomValue > 15 ? (randomValue > 99 ? 0 : 1) : 2;
         int normalQuantity = randomValue > 15 ? (randomValue > 99 ? 0 : 3) : 2;
         
         Gold gold = CalculateGold(monsterPower, normalQuantity, eliteQuantity, bossQuantity, randomValue);
-        List<Monster> monsters = GenerateMonsters(rng, floor, monsterPower, normalQuantity, eliteQuantity, bossQuantity);
+        List<Monster> monsters = GenerateMonsters(floor, monsterPower, normalQuantity, eliteQuantity, bossQuantity);
 
         return new FightEvent(monsters, [gold]);
     }
 
-    private static List<Monster> GenerateMonsters(Random rng, int floor, int monsterPower, int normalQuantity, int eliteQuantity = 0, int bossQuantity = 0)
+    private List<Monster> GenerateMonsters(int floor, int monsterPower, int normalQuantity, int eliteQuantity = 0, int bossQuantity = 0)
     {
         List<Monster> monsters = [];
-        List<Monster> availableMonsters = GameAssets.BossMonsterList.FindAll(monster => monster.Floor == floor);
+        List<Monster> availableMonsters = _assetManager.BossMonsters.FindAll(monster => monster.Floor == floor);
 
         while(bossQuantity-- > 0)
         {
-            Monster pickedMonster = availableMonsters[rng.Next(0, availableMonsters.Count)];
+            Monster pickedMonster = availableMonsters[_random.Next(0, availableMonsters.Count)];
             monsters.Add(new(pickedMonster, monsterPower * 5));
         }
 
-        availableMonsters = GameAssets.EliteMonsterList.FindAll(monster => monster.Floor == floor);
+        availableMonsters = _assetManager.EliteMonsters.FindAll(monster => monster.Floor == floor);
         while(eliteQuantity-- > 0)
         {
-            Monster pickedMonster = availableMonsters[rng.Next(0, availableMonsters.Count)];
+            Monster pickedMonster = availableMonsters[_random.Next(0, availableMonsters.Count)];
             monsters.Add(new(pickedMonster, monsterPower * 2));
         }
 
-        availableMonsters = GameAssets.NormalMonsterList.FindAll(monster => monster.Floor == floor);
+        availableMonsters = _assetManager.NormalMonsters.FindAll(monster => monster.Floor == floor);
         while(normalQuantity-- > 0)
         {
-            Monster pickedMonster = availableMonsters[rng.Next(0, availableMonsters.Count)];
+            Monster pickedMonster = availableMonsters[_random.Next(0, availableMonsters.Count)];
             monsters.Add(new(pickedMonster, monsterPower));
         }
 

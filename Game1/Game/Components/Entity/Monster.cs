@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 enum MonsterType
 {
     Normal, Elite, Boss
@@ -7,8 +9,10 @@ enum MonsterType
 class Monster : Entity
 {
     public MonsterType Type { get; set; }
-    public int Power { get; set; } = 1;
     public int Floor { get; set; } = 1;
+    
+    [JsonIgnore]
+    public int Power { get; set; } = 1;
 
     public Monster() {}
 
@@ -23,7 +27,8 @@ class Monster : Entity
     {
         Type = other.Type;
         Floor = other.Floor;
-        Power = other.Power;
+        Power = ATK * 5 + MaxHP;
+        
         if (targetPower != null)
             ScaleStat((int) targetPower);
     }

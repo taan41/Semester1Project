@@ -7,8 +7,21 @@ class Program
     public static void Main()
     {
         CursorVisible = false;
-        // UIHelper.Menu.Welcome();
         Game.Start();
+        
+        // AssetManager assetManager = new();
+        // assetManager.SerializeToFile();
+        // assetManager.Setup();
+        // WriteLine(assetManager.Version);
+
+        // GameData gameData = new();
+        // gameData.Save();
+
+        // UIHelper.UIMisc.WriteCenter(".");
+        // UIHelper.UIMisc.WriteCenter(@"/ \");
+        // UIHelper.UIMisc.WriteCenter(@"/ ┃ \");
+        // UIHelper.UIMisc.WriteCenter(@"/  •  \");
+        // UIHelper.UIMisc.WriteCenter(@"‾‾‾‾‾‾‾");
     }
 
     static void JsonTest()

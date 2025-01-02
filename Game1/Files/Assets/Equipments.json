@@ -1,0 +1,26 @@
+[
+  {
+    "Type": 0,
+    "BonusATK": 2,
+    "BonusMaxHP": 10,
+    "BonusMaxMP": 0,
+    "Rarity": 0,
+    "Name": "Starter Sword"
+  },
+  {
+    "Type": 0,
+    "BonusATK": 3,
+    "BonusMaxHP": 0,
+    "BonusMaxMP": 0,
+    "Rarity": 0,
+    "Name": "Starter Bow"
+  },
+  {
+    "Type": 0,
+    "BonusATK": 1,
+    "BonusMaxHP": 0,
+    "BonusMaxMP": 10,
+    "Rarity": 0,
+    "Name": "Starter Staff"
+  }
+]
