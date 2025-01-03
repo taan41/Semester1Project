@@ -1,56 +1,62 @@
-[
-  {
-    "Type": 0,
-    "BonusATK": 8,
-    "BonusMaxHP": 10,
-    "BonusMaxMP": 50,
-    "Rarity": 3,
-    "Price": 422,
-    "Name": "Legendary Staff"
-  },
-  {
-    "Type": 0,
-    "BonusATK": 6,
-    "BonusMaxHP": 0,
-    "BonusMaxMP": 35,
-    "Rarity": 2,
-    "Price": 325,
-    "Name": "Epic Staff"
-  },
-  {
+{
+  "1": {
     "Type": 0,
     "BonusATK": 4,
-    "BonusMaxHP": 0,
-    "BonusMaxMP": 20,
-    "Rarity": 1,
-    "Price": 227,
-    "Name": "Rare Staff"
+    "BonusMaxHP": 10,
+    "BonusMaxMP": 0,
+    "ID": 1,
+    "Rarity": 0,
+    "Price": 130,
+    "Name": "Starter Sword"
   },
-  {
+  "2": {
     "Type": 0,
     "BonusATK": 6,
     "BonusMaxHP": 0,
     "BonusMaxMP": 0,
+    "ID": 2,
     "Rarity": 0,
     "Price": 130,
     "Name": "Starter Bow"
   },
-  {
+  "3": {
     "Type": 0,
     "BonusATK": 2,
     "BonusMaxHP": 0,
     "BonusMaxMP": 10,
+    "ID": 3,
     "Rarity": 0,
     "Price": 130,
     "Name": "Starter Staff"
   },
-  {
+  "101": {
     "Type": 0,
-    "BonusATK": 4,
-    "BonusMaxHP": 10,
+    "BonusATK": 6,
+    "BonusMaxHP": 30,
     "BonusMaxMP": 0,
-    "Rarity": 0,
-    "Price": 130,
-    "Name": "Starter Sword"
+    "ID": 101,
+    "Rarity": 1,
+    "Price": 227,
+    "Name": "Rare Sword"
+  },
+  "201": {
+    "Type": 0,
+    "BonusATK": 10,
+    "BonusMaxHP": 40,
+    "BonusMaxMP": 5,
+    "ID": 201,
+    "Rarity": 2,
+    "Price": 325,
+    "Name": "Epic Sword"
+  },
+  "301": {
+    "Type": 0,
+    "BonusATK": 14,
+    "BonusMaxHP": 60,
+    "BonusMaxMP": 10,
+    "ID": 301,
+    "Rarity": 3,
+    "Price": 422,
+    "Name": "Legendary Sword"
   }
-]
+}

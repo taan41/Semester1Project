@@ -10,33 +10,14 @@ class AssetManager
 
     public string Version = "";
 
-    public List<Equipment> Equipments = [];
-    public List<Equipment> CommonEquipments = [];
-    public List<Equipment> RareEquipments = [];
-    public List<Equipment> EpicEquipments = [];
-    public List<Equipment> LegendaryEquipments = [];
-
-    public List<Skill> Skills = [];
-    public List<Skill> CommonSkills = [];
-    public List<Skill> RareSkills = [];
-    public List<Skill> EpicSkills = [];
-    public List<Skill> LegendarySkills = [];
-
-    public List<Monster> Monsters = [];
-    public List<Monster> NormalMonsters = [];
-    public List<Monster> EliteMonsters = [];
-    public List<Monster> BossMonsters = [];
+    public Dictionary<int, Equipment> Equipments = [];
+    public Dictionary<int, Skill> Skills = [];
+    public Dictionary<int, Monster> Monsters = [];
 
     public AssetManager(bool setup = true)
     {
         if (setup) Setup();
     }
-
-    public Equipment? GetEquipment(string name)
-        => Equipments.Find(equip => equip.Name.Equals(name));
-
-    public Monster? GetMonster(string name)
-        => Monsters.Find(monster => monster.Name.Equals(name));
 
     public void SerializeToFile()
     {
@@ -51,22 +32,17 @@ class AssetManager
     private void Setup()
     {
         Version = JsonSerializer.Deserialize<string>(File.ReadAllText(DirPath + VersionFile)) ?? "";
-        Equipments = JsonSerializer.Deserialize<List<Equipment>>(File.ReadAllText(DirPath + EquipmentsFile)) ?? [];
-        Skills = JsonSerializer.Deserialize<List<Skill>>(File.ReadAllText(DirPath + SkillsFile)) ?? [];
-        Monsters = JsonSerializer.Deserialize<List<Monster>>(File.ReadAllText(DirPath + MonstersFile)) ?? [];
-        
-        CommonEquipments.AddRange(Equipments.FindAll(equip => equip.Rarity == ItemRarity.Common));
-        RareEquipments.AddRange(Equipments.FindAll(equip => equip.Rarity == ItemRarity.Rare));
-        EpicEquipments.AddRange(Equipments.FindAll(equip => equip.Rarity == ItemRarity.Epic));
-        LegendaryEquipments.AddRange(Equipments.FindAll(equip => equip.Rarity == ItemRarity.Legendary));
-        
-        CommonSkills.AddRange(Skills.FindAll(skill => skill.Rarity == ItemRarity.Common));
-        RareSkills.AddRange(Skills.FindAll(skill => skill.Rarity == ItemRarity.Rare));
-        EpicSkills.AddRange(Skills.FindAll(skill => skill.Rarity == ItemRarity.Epic));
-        LegendarySkills.AddRange(Skills.FindAll(skill => skill.Rarity == ItemRarity.Legendary));
+        Equipments = JsonSerializer.Deserialize<Dictionary<int, Equipment>>(File.ReadAllText(DirPath + EquipmentsFile)) ?? [];
+        Skills = JsonSerializer.Deserialize<Dictionary<int, Skill>>(File.ReadAllText(DirPath + SkillsFile)) ?? [];
+        Monsters = JsonSerializer.Deserialize<Dictionary<int, Monster>>(File.ReadAllText(DirPath + MonstersFile)) ?? [];
 
-        NormalMonsters.AddRange(Monsters.FindAll(monster => monster.Type == MonsterType.Normal));
-        EliteMonsters.AddRange(Monsters.FindAll(monster => monster.Type == MonsterType.Elite));
-        BossMonsters.AddRange(Monsters.FindAll(monster => monster.Type == MonsterType.Boss));
+        foreach(int id in Equipments.Keys)
+            if (id >= Equipment.IDTracker[id / 100]) Equipment.IDTracker[id / 100] = id + 1;
+
+        foreach(int id in Skills.Keys)
+            if (id >= Skill.IDTracker[id / 100]) Skill.IDTracker[id / 100] = id + 1;
+
+        foreach(int id in Monsters.Keys)
+            if (id >= Monster.IDTracker[id / 1000][id % 1000 / 100]) Monster.IDTracker[id / 1000][id % 1000 / 100] = id + 1;
     }
 }

@@ -60,6 +60,7 @@ class Player : Entity
             HP -= oldEquipment.BonusMaxHP;
             MaxMP -= oldEquipment.BonusMaxMP;
             MP -= oldEquipment.BonusMaxMP;
+            
             EquipInventory.Add(oldEquipment);
         }
 
@@ -68,6 +69,8 @@ class Player : Entity
         HP += equipment.BonusMaxHP;
         MaxMP += equipment.BonusMaxMP;
         MP += equipment.BonusMaxMP;
+
+        EquipInventory.Remove(equipment);
     }
 
     public void ChangeSkill(int index, Skill skillToChange)

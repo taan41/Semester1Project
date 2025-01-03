@@ -1,15 +1,6 @@
-[
-  {
-    "Type": 0,
-    "Floor": 1,
-    "ATK": 40,
-    "MaxHP": 100,
-    "HP": 100,
-    "MaxMP": 1,
-    "MP": 0,
-    "Name": "Rat"
-  },
-  {
+{
+  "1": {
+    "ID": 1,
     "Type": 0,
     "Floor": 1,
     "ATK": 10,
@@ -19,7 +10,30 @@
     "MP": 0,
     "Name": "Slime"
   },
-  {
+  "1001": {
+    "ID": 1001,
+    "Type": 0,
+    "Floor": 2,
+    "ATK": 15,
+    "MaxHP": 100,
+    "HP": 100,
+    "MaxMP": 1,
+    "MP": 0,
+    "Name": "Fish"
+  },
+  "2": {
+    "ID": 2,
+    "Type": 0,
+    "Floor": 1,
+    "ATK": 20,
+    "MaxHP": 100,
+    "HP": 100,
+    "MaxMP": 1,
+    "MP": 0,
+    "Name": "Rat"
+  },
+  "101": {
+    "ID": 101,
     "Type": 1,
     "Floor": 1,
     "ATK": 15,
@@ -29,74 +43,70 @@
     "MP": 0,
     "Name": "Mother Slime"
   },
-  {
+  "201": {
+    "ID": 201,
     "Type": 2,
     "Floor": 1,
-    "ATK": 20,
+    "ATK": 17,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
     "Name": "King Slime"
   },
-  {
-    "Type": 0,
-    "Floor": 2,
-    "ATK": 10,
-    "MaxHP": 100,
-    "HP": 100,
-    "MaxMP": 1,
-    "MP": 0,
-    "Name": "Fish"
-  },
-  {
+  "1101": {
+    "ID": 1101,
     "Type": 1,
     "Floor": 2,
-    "ATK": 10,
+    "ATK": 20,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "Killer Whale"
+    "Name": "Shark"
   },
-  {
+  "1201": {
+    "ID": 1201,
     "Type": 2,
     "Floor": 2,
-    "ATK": 10,
+    "ATK": 13,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "Poisedon"
+    "Name": "Poseidon"
   },
-  {
+  "2001": {
+    "ID": 2001,
     "Type": 0,
     "Floor": 3,
-    "ATK": 10,
+    "ATK": 11,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
     "Name": "Skeleton"
   },
-  {
+  "2101": {
+    "ID": 2101,
     "Type": 1,
     "Floor": 3,
-    "ATK": 10,
+    "ATK": 25,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "Gravedigger"
+    "Name": "Grave Digger"
   },
-  {
+  "2201": {
+    "ID": 2201,
     "Type": 2,
     "Floor": 3,
-    "ATK": 10,
+    "ATK": 15,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "Undead king"
+    "Name": "Grand Necromancer"
   }
-]
+}

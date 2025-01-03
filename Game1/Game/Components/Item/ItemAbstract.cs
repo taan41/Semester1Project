@@ -11,7 +11,7 @@ abstract class Item : Component
         EquipMultiplier = 30, SkillMultiplier = 10,
         SellPricePercentage = 60;
 
-
+    public int ID { get; set; }
     public ItemRarity Rarity { get; set; } = ItemRarity.Common;
     public int Price { get; set; }
 

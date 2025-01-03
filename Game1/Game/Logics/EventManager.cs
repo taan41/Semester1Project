@@ -14,12 +14,18 @@ class EventManager
     private readonly AssetManager _assets;
     private readonly List<List<Event>> _events;
 
+    private readonly int _normalScale, _eliteScale, _bossScale;
+
     public EventManager(GameData gameData, AssetManager assetManager)
     {
         _gameData = gameData;
         _assets = assetManager;
         _rng = new(_gameData.Seed);
         _events = GenerateEvents(_rng);
+
+        _normalScale = 1;
+        _eliteScale = 2;
+        _bossScale = 5;
     }
 
     public List<Event> GetEvents()
@@ -114,26 +120,23 @@ class EventManager
     private List<Monster> GenerateMonsters(int floor, int monsterPower, int normalQuantity, int eliteQuantity = 0, int bossQuantity = 0)
     {
         List<Monster> monsters = [];
-        List<Monster> availableMonsters = _assets.BossMonsters.FindAll(monster => monster.Floor == floor);
 
         while(bossQuantity-- > 0)
         {
-            Monster pickedMonster = availableMonsters[_rng.Next(0, availableMonsters.Count)];
-            monsters.Add(new(pickedMonster, monsterPower * 5));
+            Monster pickedMonster = _assets.Monsters[_rng.Next((floor - 1) * 1000 + 201, Monster.IDTracker[floor - 1][2])];
+            monsters.Add(new(pickedMonster, monsterPower * _bossScale));
         }
 
-        availableMonsters = _assets.EliteMonsters.FindAll(monster => monster.Floor == floor);
         while(eliteQuantity-- > 0)
         {
-            Monster pickedMonster = availableMonsters[_rng.Next(0, availableMonsters.Count)];
-            monsters.Add(new(pickedMonster, monsterPower * 2));
+            Monster pickedMonster = _assets.Monsters[_rng.Next((floor - 1) * 1000 + 101, Monster.IDTracker[floor - 1][1])];
+            monsters.Add(new(pickedMonster, monsterPower * _eliteScale));
         }
 
-        availableMonsters = _assets.NormalMonsters.FindAll(monster => monster.Floor == floor);
         while(normalQuantity-- > 0)
         {
-            Monster pickedMonster = availableMonsters[_rng.Next(0, availableMonsters.Count)];
-            monsters.Add(new(pickedMonster, monsterPower));
+            Monster pickedMonster = _assets.Monsters[_rng.Next((floor - 1) * 1000 + 1, Monster.IDTracker[floor - 1][0])];
+            monsters.Add(new(pickedMonster, monsterPower * _normalScale));
         }
 
         return monsters;
@@ -141,12 +144,17 @@ class EventManager
 
     private ShopEvent GenerateShop(int monsterPower)
     {
-        List<Item> sellingItems = [];
+        List<Equipment> equipments = [];
 
         for (int i = 0; i < 5; i++)
-            sellingItems.Add(GenerateEquip(monsterPower));
+            equipments.Add(GenerateEquip(monsterPower));
 
-        return new(sellingItems);
+        equipments.Sort(new EquipmentComparer());
+
+        List<Item> items = [];
+        items.AddRange(equipments);
+
+        return new(items);
     }
 
     private Equipment GenerateEquip(int monsterPower)
@@ -176,15 +184,9 @@ class EventManager
             }
         }
 
-        return rarity switch
-        {
-            ItemRarity.Rare => _assets.RareEquipments.ElementAt(_rng.Next(_assets.RareEquipments.Count)),
-            ItemRarity.Epic => _assets.EpicEquipments.ElementAt(_rng.Next(_assets.EpicEquipments.Count)),
-            ItemRarity.Legendary => _assets.LegendaryEquipments.ElementAt(_rng.Next(_assets.LegendaryEquipments.Count)),
-            _ => _assets.CommonEquipments.ElementAt(_rng.Next(_assets.CommonEquipments.Count)),
-        };
+        return new(_assets.Equipments[_rng.Next((int) rarity * 100 + 1, Equipment.IDTracker[(int) rarity])]);
     }
 
     private static Gold CalculateGold(int monsterPower, int normalQuantity, int eliteQuantity, int bossQuantity, int randomValue)
-        => new(monsterPower * (125 + 25 * normalQuantity + 60 * eliteQuantity + 200 * bossQuantity) / 100 * (85 + 30 * randomValue) / 100);
+        => new(monsterPower * (125 + 25 * normalQuantity + 60 * eliteQuantity + 200 * bossQuantity) * (85 + 30 * randomValue) / 100 / 100);
 }

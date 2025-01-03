@@ -6,6 +6,7 @@ enum EquipType
 [Serializable]
 class Equipment : Item
 {
+    public static readonly int[] IDTracker = [1, 101, 201, 301];
 
     public EquipType Type { get; set; } = EquipType.Weapon;
     public int BonusATK { get; set; } = 0;
@@ -17,10 +18,12 @@ class Equipment : Item
     public Equipment(string name, int atk, int hp, int mp, ItemRarity rarity = ItemRarity.Common, EquipType type = EquipType.Weapon, int price = -1)
         : base(name, rarity, price)
     {
+        Type = type;
         BonusATK = atk;
         BonusMaxHP = hp;
         BonusMaxMP = mp;
-        Type = type;
+
+        ID = IDTracker[(int) Rarity]++;
         Price = Price * (100 + EquipMultiplier) / 100;
     }
 
@@ -30,6 +33,7 @@ class Equipment : Item
         BonusMaxHP = other.BonusMaxHP;
         BonusMaxMP = other.BonusMaxMP;
         Type = other.Type;
+        ID = other.ID;
     }
 
     public override void Print()
@@ -61,7 +65,11 @@ class Equipment : Item
 
     public override void PrintPrice(bool buying)
     {
-        base.PrintPrice(buying);
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write($" ({Price * (buying ? 100 : SellPricePercentage) / 100} G)");
+        Console.ResetColor();
+
+        base.Print();
         Console.Write($"| {Type} |");
 
         if (BonusATK != 0)
@@ -100,6 +108,9 @@ class EquipmentComparer : IComparer<Equipment>
 
         int typeComparison = x.Type.CompareTo(y.Type);
         if (typeComparison != 0) return typeComparison;
+
+        int idComparison = x.ID.CompareTo(y.ID);
+        if (idComparison != 0) return idComparison;
 
         return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
     }

@@ -86,13 +86,14 @@ class Program
                             Write("hp: ");
                             int hp = Convert.ToInt32(ReadLine());
 
-                            manager.Monsters.Add(new(name, atk, hp, floor, type));
+                            Monster monster = new(name, atk, hp, floor, type);
+                            manager.Monsters[monster.ID] = monster;
                             WriteLine("Added");
                             ReadKey(true);
                             continue;
 
                         case "2":
-                            manager.Monsters.ForEach(monster => WriteLine($"{monster.Name, -25} {monster.Type, -6} floor: {monster.Floor}, atk: {monster.ATK}, hp: {monster.HP}"));
+                            manager.Monsters.Values.ToList().ForEach(monster => WriteLine($"{monster.ID:d4} {monster.Name, -25} {monster.Type, -6} floor: {monster.Floor}, atk: {monster.ATK}, hp: {monster.HP}"));
                             ReadKey(true);
                             continue;
 
@@ -101,7 +102,6 @@ class Program
                             continue;
 
                         case "0":
-                            manager.Monsters.Sort(new MonsterComparer());
                             return;
 
                         default: continue;
@@ -163,13 +163,14 @@ class Program
                             int mpPt = Convert.ToInt32(ReadLine());
                             point -= mpPt;
 
-                            manager.Equipments.Add(new(name, atk * 2, hpPt * 10, mpPt * 5, rarity, type));
+                            Equipment equipment = new(name, atk * 2, hpPt * 10, mpPt * 5, rarity, type);
+                            manager.Equipments[equipment.ID] = equipment;
                             WriteLine("Added");
                             ReadKey(true);
                             continue;
 
                         case "2":
-                            manager.Equipments.ForEach(equip => WriteLine($"{equip.Name, -25} {equip.Rarity, -10} {equip.Type, -6} {equip.BonusATK} atk, {equip.BonusMaxHP} hp, {equip.BonusMaxMP} mp, {equip.Price} g"));
+                            manager.Equipments.Values.ToList().ForEach(equip => WriteLine($"{equip.ID:d3} {equip.Name, -25} {equip.Rarity, -10} {equip.Type, -6} {equip.BonusATK} atk, {equip.BonusMaxHP} hp, {equip.BonusMaxMP} mp, {equip.Price} g"));
                             ReadKey(true);
                             continue;
 
@@ -178,7 +179,6 @@ class Program
                             continue;
 
                         case "0":
-                            manager.Equipments.Sort(new EquipmentComparer());
                             return;
 
                         default: continue;
@@ -237,13 +237,14 @@ class Program
                             Write("heal point (1 pt = 1 mp = 1 heal): ");
                             int healPt = Convert.ToInt32(ReadLine());
 
-                            manager.Skills.Add(new(name, dmgPt * 2 * multiplier / 100, healPt * multiplier / 100, mp, rarity, type));
+                            Skill skill = new(name, dmgPt * 2 * multiplier / 100, healPt * multiplier / 100, mp, rarity, type);
+                            manager.Skills[skill.ID] = skill;
                             WriteLine("Added");
                             ReadKey(true);
                             continue;
 
                         case "2":
-                            manager.Skills.ForEach(skill => WriteLine($"{skill.Name, -25} {skill.Rarity, -10} {skill.Type, -6} {skill.Damage} dmg, {skill.Heal} heal, {skill.MPCost} mp, {skill.Price} g"));
+                            manager.Skills.Values.ToList().ForEach(skill => WriteLine($"{skill.ID:d3} {skill.Name, -25} {skill.Rarity, -10} {skill.Type, -6} {skill.Damage} dmg, {skill.Heal} heal, {skill.MPCost} mp, {skill.Price} g"));
                             ReadKey(true);
                             continue;
 
@@ -252,7 +253,6 @@ class Program
                             continue;
 
                         case "0":
-                            manager.Skills.Sort(new SkillComparer());
                             return;
 
                         default: continue;

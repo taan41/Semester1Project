@@ -66,9 +66,9 @@ class Game
 
         List<Equipment> starters =
         [
-            assetManager.GetEquipment("Starter Sword"),
-            assetManager.GetEquipment("Starter Bow"),
-            assetManager.GetEquipment("Starter Staff")
+            assetManager.Equipments[1],
+            assetManager.Equipments[2],
+            assetManager.Equipments[3],
         ];
         GameData gameData = new(42);
         GameUI.GenericGameScreen(gameData);
@@ -110,6 +110,7 @@ class Game
         AssetManager assetManager = new();
         EventManager eventManager = new(gameData, assetManager);
         List<string> invOptions = ["Change Equipment", "Change Skill"];
+        List<string> loseOptions = ["Retry", "Return To Title"];
         bool pickFromEnd = false;
         gameData.SetTime(true);
 
@@ -124,11 +125,7 @@ class Game
             if (pickedRouteInd == null)
             {
                 if (HanldePause(gameData)) continue;
-                else 
-                {
-                    gameData.Save();
-                    return;
-                }
+                else return;
             }
 
             if (pickedRouteInd == routes.Count) // Move down to inventory options
@@ -138,11 +135,7 @@ class Game
                 {
                     case null:
                         if (HanldePause(gameData)) continue;
-                        else
-                        {
-                            gameData.Save();
-                            return;
-                        }
+                        else return;
 
                     case -1:
                         pickFromEnd = true;
@@ -165,8 +158,30 @@ class Game
 
             if (pickedRoute is FightEvent fightEvent)
             {
-                if (!HandleFightEvent(gameData, fightEvent))
+                int hpPreFight = gameData.Player.HP;
+                int mpPreFight = gameData.Player.MP;
+                List<Monster> monstersPreFight = [];
+                fightEvent.Monsters.ForEach(monster => monstersPreFight.Add(new(monster)));
+
+                var fightResult = HandleFightEvent(gameData, fightEvent);
+
+                if (fightResult == null)
                     return;
+                else if (fightResult == false)
+                {
+                    GameUI.GameOverScreen(loseOptions);
+
+                    switch(InteractiveUI.PickAction(CursorPos.MainMenuLeft, 13, loseOptions))
+                    {
+                        case 0:
+                            gameData.Player.HP = hpPreFight;
+                            gameData.Player.MP = mpPreFight;
+                            fightEvent.Monsters = monstersPreFight;
+                            continue;
+                        
+                        case 1: case null: default: return;
+                    }
+                }
             }
             else if (pickedRoute is ShopEvent shopEvent)
                 HandleShop(gameData, shopEvent);
@@ -179,7 +194,6 @@ class Game
                     break;
 
                 case EventType.Treasure:
-                    gameData.Save();
                     GameUI.TreasureOpening(gameData);
                     if (!HandleRewards(gameData, [new Gold(1000)]))
                         return;
@@ -245,6 +259,7 @@ class Game
 
             Equipment pickedEquip = equipInv[startInd + (int) pickedEquipInd];
             gameData.Player.Equip(pickedEquip);
+            equipInv = gameData.Player.EquipInventory;
         }
     }
 
@@ -285,17 +300,19 @@ class Game
             if (gameData.Player.Skills.Count < 3)
             {
                 gameData.Player.AddSkill(pickedSkill);
-                continue;
             }
-
-            int? equippedSkillInd = InteractiveUI.PickComponent(CursorPos.SubZoneTop + 1, gameData.Player.Skills);
-            if (equippedSkillInd != null)
-                gameData.Player.ChangeSkill((int) equippedSkillInd, pickedSkill);
+            else
+            {
+                int? equippedSkillInd = InteractiveUI.PickComponent(CursorPos.SubZoneTop + 1, gameData.Player.Skills);
+                if (equippedSkillInd != null)
+                    gameData.Player.ChangeSkill((int) equippedSkillInd, pickedSkill);
+            }
+            skillInv = gameData.Player.SkillInventory;
         }
     }
 
-    // Return false if quit mid-fight
-    private static bool HandleFightEvent(GameData gameData, FightEvent fightEvent)
+    // Return null if quit mid-fight, false if lose, true if win
+    private static bool? HandleFightEvent(GameData gameData, FightEvent fightEvent)
     {
         List<string> fightActions = ["Attack", "Use Skill"];
 
@@ -361,13 +378,16 @@ class Game
                 
                 case null:
                     if (HanldePause(gameData)) continue;
-                    else return false;
+                    else return null;
             }
             
+            if (gameData.Player.HP <= 0)
+                return false;
+
             fightEvent.Monsters.RemoveAll(monster => monster.HP == 0);
         }
 
-        return HandleRewards(gameData, fightEvent.Rewards);
+        return HandleRewards(gameData, fightEvent.Rewards) ? true : null;
     }
 
     // Return false if quit during picking rewards
@@ -514,6 +534,7 @@ class Game
             Item pickedItem = playerItems[startInd + (int) pickedEquipInd];
             gameData.Player.TradeItem(pickedItem, false);
             playerItems.Remove(pickedItem);
+            endInd = playerItems.Count > displayCount ? displayCount : playerItems.Count;
         }
     }
 }

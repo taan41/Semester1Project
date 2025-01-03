@@ -300,6 +300,32 @@ static class GameUI
         UIMisc.DrawLine('-');
     }
 
+    public static void GameOverScreen(List<string> options)
+    {
+        Clear();
+        DrawHeader();
+        WriteLine();
+        UIMisc.WriteCenter(@" _______ _______ _______ _______      _______ ___ ___ _______ ______ ");
+        UIMisc.WriteCenter(@"|     __|   _   |   |   |    ___|    |       |   |   |    ___|   __ \");
+        UIMisc.WriteCenter(@"|    |  |       |       |    ___|    |   -   |   |   |    ___|      <");
+        UIMisc.WriteCenter(@"|_______|___|___|__|_|__|_______|    |_______|\_____/|_______|___|__|");
+        WriteLine();
+        WriteLine();
+        UIMisc.DrawLine('-');
+        WriteLine();
+        WriteLine();
+
+        foreach (var option in options)
+        {
+            CursorLeft = CursorPos.MainMenuLeft;
+            WriteLine($" {option}        ");
+        }
+        
+        WriteLine();
+        WriteLine();
+        UIMisc.DrawLine('-');
+    }
+
     public static void ShopMainScreen(GameData gameData, List<string> actions)
     {
         Clear();

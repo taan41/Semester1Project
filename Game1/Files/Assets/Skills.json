@@ -1,20 +1,12 @@
-[
-  {
-    "Type": 0,
-    "Damage": 0,
-    "Heal": 25,
-    "MPCost": 10,
-    "Rarity": 2,
-    "Price": 275,
-    "Name": "Revitalize"
-  },
-  {
+{
+  "1": {
     "Type": 0,
     "Damage": 0,
     "Heal": 5,
     "MPCost": 5,
+    "ID": 1,
     "Rarity": 0,
     "Price": 110,
     "Name": "Bandage"
   }
-]
+}
