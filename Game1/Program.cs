@@ -20,31 +20,29 @@ class Program
     {
         public static void Start()
         {
-            AssetManager manager = new();
-
             while (true)
             {
                 Clear();
-                WriteLine("Assets manager");
+                WriteLine("Asset Manager");
                 WriteLine("0 = exit, 1 = monster, 2 = equipment, 3 = skill, 4 = save & exit");
                 Write("enter: ");
 
                 switch(ReadLine())
                 {
                     case "1":
-                        Monsters(manager);
+                        Monsters();
                         break;
 
                     case "2":
-                        Equipments(manager);
+                        Equipments();
                         break;
 
                     case "3":
-                        Skills(manager);
+                        Skills();
                         break;
 
                     case "4":
-                        manager.SerializeToFile();
+                        AssetManager.SerializeToFile();
                         return;
 
                     case "0": return;
@@ -54,13 +52,13 @@ class Program
             }
         }
 
-        private static void Monsters(AssetManager manager)
+        private static void Monsters()
         {
 
             while (true)
             {
                 Clear();
-                WriteLine("Assets manager");
+                WriteLine("Asset Manager");
                 WriteLine("Monster");
                 WriteLine("0 = exit, 1 = create, 2 = show list, 3 = clear list");
                 Write("enter: ");
@@ -87,18 +85,18 @@ class Program
                             int hp = Convert.ToInt32(ReadLine());
 
                             Monster monster = new(name, atk, hp, floor, type);
-                            manager.Monsters[monster.ID] = monster;
+                            AssetManager.Monsters[monster.ID] = monster;
                             WriteLine("Added");
                             ReadKey(true);
                             continue;
 
                         case "2":
-                            manager.Monsters.Values.ToList().ForEach(monster => WriteLine($"{monster.ID:d4} {monster.Name, -25} {monster.Type, -6} floor: {monster.Floor}, atk: {monster.ATK}, hp: {monster.HP}"));
+                            AssetManager.Monsters.Values.ToList().ForEach(monster => WriteLine($"{monster.ID:d4} {monster.Name, -25} {monster.Type, -6} floor: {monster.Floor}, atk: {monster.ATK}, hp: {monster.HP}"));
                             ReadKey(true);
                             continue;
 
                         case "3":
-                            manager.Monsters.Clear();
+                            AssetManager.Monsters.Clear();
                             continue;
 
                         case "0":
@@ -114,13 +112,13 @@ class Program
             }
         }
 
-        private static void Equipments(AssetManager manager)
+        private static void Equipments()
         {
 
             while (true)
             {
                 Clear();
-                WriteLine("Assets manager");
+                WriteLine("Asset Manager");
                 WriteLine("Equipment");
                 WriteLine("0 = exit, 1 = create, 2 = show list, 3 = clear list");
                 Write("enter: ");
@@ -164,18 +162,18 @@ class Program
                             point -= mpPt;
 
                             Equipment equipment = new(name, atk * 2, hpPt * 10, mpPt * 5, rarity, type);
-                            manager.Equipments[equipment.ID] = equipment;
+                            AssetManager.Equipments[equipment.ID] = equipment;
                             WriteLine("Added");
                             ReadKey(true);
                             continue;
 
                         case "2":
-                            manager.Equipments.Values.ToList().ForEach(equip => WriteLine($"{equip.ID:d3} {equip.Name, -25} {equip.Rarity, -10} {equip.Type, -6} {equip.BonusATK} atk, {equip.BonusMaxHP} hp, {equip.BonusMaxMP} mp, {equip.Price} g"));
+                            AssetManager.Equipments.Values.ToList().ForEach(equip => WriteLine($"{equip.ID:d3} {equip.Name, -25} {equip.Rarity, -10} {equip.Type, -6} {equip.BonusATK} atk, {equip.BonusMaxHP} hp, {equip.BonusMaxMP} mp, {equip.Price} g"));
                             ReadKey(true);
                             continue;
 
                         case "3":
-                            manager.Equipments.Clear();
+                            AssetManager.Equipments.Clear();
                             continue;
 
                         case "0":
@@ -191,13 +189,13 @@ class Program
             }
         }
 
-        private static void Skills(AssetManager manager)
+        private static void Skills()
         {
 
             while (true)
             {
                 Clear();
-                WriteLine("Assets manager");
+                WriteLine("Asset Manager");
                 WriteLine("Equipment");
                 WriteLine("0 = exit, 1 = create, 2 = show list, 3 = clear list");
                 Write("enter: ");
@@ -238,18 +236,18 @@ class Program
                             int healPt = Convert.ToInt32(ReadLine());
 
                             Skill skill = new(name, dmgPt * 2 * multiplier / 100, healPt * multiplier / 100, mp, rarity, type);
-                            manager.Skills[skill.ID] = skill;
+                            AssetManager.Skills[skill.ID] = skill;
                             WriteLine("Added");
                             ReadKey(true);
                             continue;
 
                         case "2":
-                            manager.Skills.Values.ToList().ForEach(skill => WriteLine($"{skill.ID:d3} {skill.Name, -25} {skill.Rarity, -10} {skill.Type, -6} {skill.Damage} dmg, {skill.Heal} heal, {skill.MPCost} mp, {skill.Price} g"));
+                            AssetManager.Skills.Values.ToList().ForEach(skill => WriteLine($"{skill.ID:d3} {skill.Name, -25} {skill.Rarity, -10} {skill.Type, -6} {skill.Damage} dmg, {skill.Heal} heal, {skill.MPCost} mp, {skill.Price} g"));
                             ReadKey(true);
                             continue;
 
                         case "3":
-                            manager.Skills.Clear();
+                            AssetManager.Skills.Clear();
                             continue;
 
                         case "0":

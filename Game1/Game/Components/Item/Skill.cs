@@ -39,7 +39,7 @@ class Skill : Item
     public override void Print()
     {
         base.Print();
-        Console.Write($"| {Type} |");
+        Console.Write($"| {Type, -6} |");
 
         if (Damage > 0)
         {

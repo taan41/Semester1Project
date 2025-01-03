@@ -70,7 +70,7 @@ class Equipment : Item
         Console.ResetColor();
 
         base.Print();
-        Console.Write($"| {Type} |");
+        Console.Write($"| {Type, -6} |");
 
         if (BonusATK != 0)
         {

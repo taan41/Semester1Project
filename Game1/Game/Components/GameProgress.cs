@@ -30,6 +30,10 @@ class GameProgress
         }
     }
 
+    /// <summary>
+    /// Move forwards in game's progress
+    /// </summary>
+    /// <returns> False if having reached the end </returns>
     public bool Next()
     {
         if (Room == MaxRoom)

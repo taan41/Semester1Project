@@ -7,37 +7,31 @@ class GameData
     public const string DirPath = FileHelper.FileConstants.DirPath + @"Saves\";
     public const string DataFile = "GameData.json";
 
-    public int Seed { get; set; } = 42;
+    private static readonly JsonSerializerOptions jsonOption = new(){ WriteIndented = true };
+
+    public int? Seed { get; set; } = null;
     public GameProgress Progress { get; set; } = new();
     public Player Player { get; set; } = Player.DefaultPlayer();
     public TimeSpan SavedTime { get; set; } = new(0);
 
     private readonly Stopwatch _stopwatch = new();
     private readonly CancellationTokenSource _stopwatchTokenSource = new();
+
+    private TimeSpan _lastSavedTime = new(0);
     private bool _showingTime = false;
 
-    public GameData()
-    {
-        // _ = Task.Run(() => ShowTime(_stopwatchTokenSource.Token));
-    }
+    public GameData() {}
 
-    public GameData(int seed = 42)
+    public GameData(int? seed)
     {
         Seed = seed;
-        Progress = new();
-        Player = new("Hero", 3, 25, 10, 100);
-        for (int i = 0; i < 15; i++)
-            Player.AddSkill(new("Heal", 0, 5, 5){ Damage = i, Rarity = (ItemRarity) (i % 4) });
-        
         // _ = Task.Run(() => ShowTime(_stopwatchTokenSource.Token));
     }
 
     public void SetTime(bool start)
     {
-        if (start)
-            _stopwatch.Start();
-        else
-            _stopwatch.Stop();
+        if (start) _stopwatch.Start();
+        else _stopwatch.Stop();
     }
 
     public void ToggleShowingTime(bool? toggle = null)
@@ -52,14 +46,14 @@ class GameData
     }
 
     public TimeSpan GetElapsedTime()
-        => SavedTime + _stopwatch.Elapsed;
+        => SavedTime + _stopwatch.Elapsed - _lastSavedTime;
         
     public void Save()
     {
-        SavedTime += _stopwatch.Elapsed;
+        SavedTime += _stopwatch.Elapsed - _lastSavedTime;
+        _lastSavedTime = _stopwatch.Elapsed;
         
         Directory.CreateDirectory(DirPath);
-        var jsonOption = new JsonSerializerOptions { WriteIndented = true };
         File.WriteAllText(DirPath + DataFile, JsonSerializer.Serialize(this, jsonOption));
     }
 
@@ -79,7 +73,7 @@ class GameData
         {
             if (_showingTime)
             {
-                string time = $"{SavedTime + _stopwatch.Elapsed:hh\\:mm\\:ss}";
+                string time = $"{SavedTime + _stopwatch.Elapsed - _lastSavedTime:hh\\:mm\\:ss}";
                 Console.SetCursorPosition(UIHelper.UIConstants.UIWidth - time.Length, 3);
                 Console.Write(time);
             }

@@ -34,7 +34,8 @@ static class UIHelper
             MainZoneTop = 6, SubZoneTop = 13, PlayerZoneTop = 18,
             PauseBorderTop = 4,
             PauseOptionLeft = UIWidth / 10 * 4, PauseOptionTop = 7,
-            PauseTimeTop = 13;
+            PauseTimeTop = 13,
+            EndMenuTop = 13;
     }
 
     public static class UIMisc
@@ -217,10 +218,10 @@ static class UIHelper
             }
         }
 
-        public static int? PickAction(int startCursorTop, List<string> actions, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false)
-            => PickAction(0, startCursorTop, actions, exitUpwards, exitDownwards, startUpwards);
+        public static int? PickString(int startCursorTop, List<string> actions, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false)
+            => PickString(0, startCursorTop, actions, exitUpwards, exitDownwards, startUpwards);
 
-        public static int? PickAction(int startCursorLeft, int startCursorTop, List<string> actions, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false)
+        public static int? PickString(int startCursorLeft, int startCursorTop, List<string> actions, bool exitUpwards = false, bool exitDownwards = false, bool startUpwards = false)
         {
             if (actions.Count == 0)
             {

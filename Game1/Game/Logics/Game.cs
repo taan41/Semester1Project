@@ -5,20 +5,19 @@ class Game
 {
     public static void Start()
     {
-        bool clear = true;
         List<string> welcomeOptions = ["PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
 
         while(true)
         {
-            GameUI.WelcomeScreen(welcomeOptions, clear);
+            GameUI.WelcomeScreen(welcomeOptions);
             GameUI.StartTitleAnim();
 
             Console.ReadKey(true);
-            switch(InteractiveUI.PickAction(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, welcomeOptions))
+            switch(InteractiveUI.PickString(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, welcomeOptions))
             {
                 case 0:
                 case 1:
-                    clear = StartGame();
+                    StartGame();
                     break;
                 
                 case 2: case null:
@@ -30,7 +29,7 @@ class Game
     // Return false if return without starting a game
     private static bool StartGame()
     {
-        List<string> playOptions = ["NEW GAME", "LOAD GAME", "RETURN"];
+        List<string> playOptions = ["NEW GAME", "LOAD GAME", "CUSTOM SEED", "RETURN"];
         GameUI.StartScreen(playOptions);
 
         while (true)
@@ -38,7 +37,7 @@ class Game
             GameUI.StartTitleAnim();
 
             Console.ReadKey(true);
-            switch(InteractiveUI.PickAction(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, playOptions))
+            switch(InteractiveUI.PickString(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, playOptions))
             {
                 case 0:
                     GameUI.StopTitleAnim();
@@ -49,39 +48,70 @@ class Game
                     GameUI.StopTitleAnim();
                     if (!LoadGame())
                     {
-                        GameUI.StartScreen(playOptions, true);
+                        GameUI.StartScreen(playOptions);
                         continue;
                     }
                     return true;
+
+                case 2:
+                    GameUI.StopTitleAnim();
+                    GameUI.StartScreen(["", "", "", ""], false);
+                    Console.CursorTop = CursorPos.MainMenuTop;
+                    Console.CursorLeft = CursorPos.MainMenuLeft * 70 / 100;
+                    Console.Write("ENTER SEED: ");
+                    string? input = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(input))
+                    {
+                        GameUI.StartScreen(playOptions);
+                        continue;
+                    }
+                    
+                    NewGame(input);
+                    return true;
                 
-                case 2: case null:
+                case 3: case null:
                     return false;
             }
         }
     }
 
-    private static void NewGame()
+    private static void NewGame(string? seed = null)
     {
-        AssetManager assetManager = new();
-
-        List<Equipment> starters =
+        List<Equipment> startEquips =
         [
-            assetManager.Equipments[1],
-            assetManager.Equipments[2],
-            assetManager.Equipments[3],
+            AssetManager.Equipments[1],
+            AssetManager.Equipments[2],
+            AssetManager.Equipments[3],
         ];
-        GameData gameData = new(42);
-        GameUI.GenericGameScreen(gameData);
+        List<Skill> startSkills =
+        [
+            AssetManager.Skills[1],
+            AssetManager.Skills[2],
+            AssetManager.Skills[3]
+        ];
 
-        GameUI.PrintComponents(starters, UIConstants.MainZoneHeight, " -- Choose Starter Item:", CursorPos.MainZoneTop);
+        GameData gameData = new(seed?.GetHashCode() ?? null);
+
+        GameUI.GenericGameScreen(gameData);
+        GameUI.PrintComponents(startEquips, UIConstants.MainZoneHeight, " -- Choose Starting Item:", CursorPos.MainZoneTop);
         
-        int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, starters);
+        int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, startEquips);
         if (pickedEquipInd == null)
             return;
 
-        Equipment pickedEquip = starters[(int) pickedEquipInd];
-
+        Equipment pickedEquip = startEquips[(int) pickedEquipInd];
         gameData.Player.Equip(new(pickedEquip));
+
+        GameUI.GenericGameScreen(gameData);
+        GameUI.PrintComponents(startSkills, UIConstants.MainZoneHeight, " -- Choose Starting Skill:", CursorPos.MainZoneTop);
+        
+        int? pickedSkillInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, startSkills);
+        if (pickedSkillInd == null)
+            return;
+
+        Skill pickedSkill = startSkills[(int) pickedEquipInd];
+        gameData.Player.AddSkill(new(pickedSkill));
+
         gameData.Progress.Next();
         GameLoop(gameData);
     }
@@ -107,10 +137,9 @@ class Game
 
     private static void GameLoop(GameData gameData)
     {
-        AssetManager assetManager = new();
-        EventManager eventManager = new(gameData, assetManager);
+        EventManager eventManager = new(gameData);
         List<string> invOptions = ["Change Equipment", "Change Skill"];
-        List<string> loseOptions = ["Retry", "Return To Title"];
+        List<string> loseOptions = ["RETRY", "RETURN TO TITLE"];
         bool pickFromEnd = false;
         gameData.SetTime(true);
 
@@ -130,7 +159,7 @@ class Game
 
             if (pickedRouteInd == routes.Count) // Move down to inventory options
             {
-                int? pickedInvInd = InteractiveUI.PickAction(CursorPos.SubZoneTop + 1, invOptions, true);
+                int? pickedInvInd = InteractiveUI.PickString(CursorPos.SubZoneTop + 1, invOptions, true);
                 switch (pickedInvInd)
                 {
                     case null:
@@ -156,51 +185,62 @@ class Game
 
             Event pickedRoute = routes[(int) pickedRouteInd];
 
-            if (pickedRoute is FightEvent fightEvent)
+            switch (pickedRoute)
             {
-                int hpPreFight = gameData.Player.HP;
-                int mpPreFight = gameData.Player.MP;
-                List<Monster> monstersPreFight = [];
-                fightEvent.Monsters.ForEach(monster => monstersPreFight.Add(new(monster)));
+                case FightEvent fightEvent:
+                    int hpPreFight = gameData.Player.HP;
+                    int mpPreFight = gameData.Player.MP;
+                    List<Monster> monstersPreFight = [];
+                    fightEvent.Monsters.ForEach(monster => monstersPreFight.Add(new(monster)));
 
-                var fightResult = HandleFightEvent(gameData, fightEvent);
+                    var fightResult = HandleFightEvent(gameData, fightEvent);
 
-                if (fightResult == null)
-                    return;
-                else if (fightResult == false)
-                {
-                    GameUI.GameOverScreen(loseOptions);
-
-                    switch(InteractiveUI.PickAction(CursorPos.MainMenuLeft, 13, loseOptions))
-                    {
-                        case 0:
-                            gameData.Player.HP = hpPreFight;
-                            gameData.Player.MP = mpPreFight;
-                            fightEvent.Monsters = monstersPreFight;
-                            continue;
-                        
-                        case 1: case null: default: return;
-                    }
-                }
-            }
-            else if (pickedRoute is ShopEvent shopEvent)
-                HandleShop(gameData, shopEvent);
-
-            else switch (pickedRoute.Type)
-            {
-                case EventType.Camp:
-                    gameData.Player.Regenerate();
-                    GameUI.CampfireScreen(gameData);
-                    break;
-
-                case EventType.Treasure:
-                    GameUI.TreasureOpening(gameData);
-                    if (!HandleRewards(gameData, [new Gold(1000)]))
+                    if (fightResult == null)
                         return;
+                    else if (fightResult == false)
+                    {
+                        GameUI.GameOverScreen(loseOptions);
+
+                        switch(InteractiveUI.PickString(CursorPos.MainMenuLeft, CursorPos.EndMenuTop, loseOptions))
+                        {
+                            case 0:
+                                gameData.Player.HP = hpPreFight;
+                                gameData.Player.MP = mpPreFight;
+                                fightEvent.Monsters = monstersPreFight;
+                                continue;
+                            
+                            case 1: case null: default: return;
+                        }
+                    }
                     break;
-            }
+
+                    case ShopEvent shopEvent:
+                        HandleShop(gameData, shopEvent);
+                        break;
+
+                    case TreasureEvent treasureEvent:
+                        GameUI.TreasureOpening(gameData);
+                        if (!HandleRewards(gameData, treasureEvent.Treasures))
+                            return;
+                        break;
+
+                    default:
+                        switch (pickedRoute.Type)
+                        {
+                            case EventType.Camp:
+                                gameData.Player.Regenerate();
+                                GameUI.CampfireScreen(gameData);
+                                break;
+                        }
+                        break;
+            };
             
-            gameData.Progress.Next();
+            // No room left
+            if (!gameData.Progress.Next())
+            {
+                HandleVictory(gameData);
+                return;
+            }
             gameData.Save();
         }
     }
@@ -208,12 +248,12 @@ class Game
     // return false if quit
     private static bool HanldePause(GameData gameData)
     {
-        List<string> pauseOptions = ["Resume", "Save & Exit"];
+        List<string> pauseOptions = ["RESUME", "SAVE & EXIT"];
 
         gameData.SetTime(false);
         GameUI.PausePopup(pauseOptions, gameData.GetElapsedTime());
 
-        int? optionInd = InteractiveUI.PickAction(CursorPos.PauseOptionLeft, CursorPos.PauseOptionTop, pauseOptions);
+        int? optionInd = InteractiveUI.PickString(CursorPos.PauseOptionLeft, CursorPos.PauseOptionTop, pauseOptions);
         switch(optionInd)
         {
             case 1:
@@ -320,7 +360,7 @@ class Game
         {
             GameUI.FightScreen(gameData, fightEvent.Monsters, fightActions);
 
-            switch (InteractiveUI.PickAction(CursorPos.SubZoneTop + 1, fightActions))
+            switch (InteractiveUI.PickString(CursorPos.SubZoneTop + 1, fightActions))
             {
                 case 0:
                     int? pickedMonsterInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop, fightEvent.Monsters);
@@ -419,7 +459,7 @@ class Game
         {
             GameUI.ShopMainScreen(gameData, shopActions);
             
-            switch (InteractiveUI.PickAction(CursorPos.SubZoneTop, shopActions))
+            switch (InteractiveUI.PickString(CursorPos.SubZoneTop, shopActions))
             {
                 case null:
                     return;
@@ -435,7 +475,7 @@ class Game
                 case 2:
                     GameUI.ShopMainScreen(gameData, invActions);
 
-                    int? pickedInvInd = InteractiveUI.PickAction(CursorPos.SubZoneTop, invActions);
+                    int? pickedInvInd = InteractiveUI.PickString(CursorPos.SubZoneTop, invActions);
                     switch (pickedInvInd)
                     {
                         case 0:
@@ -535,6 +575,24 @@ class Game
             gameData.Player.TradeItem(pickedItem, false);
             playerItems.Remove(pickedItem);
             endInd = playerItems.Count > displayCount ? displayCount : playerItems.Count;
+        }
+    }
+
+    private static void HandleVictory(GameData gameData)
+    {
+        gameData.SetTime(false);
+
+        List<string> winOptions = ["POST SCORE", "RETURN TO TITLE"];
+
+        GameUI.VictoryScreen(gameData.GetElapsedTime(), winOptions);
+
+        switch(InteractiveUI.PickString(CursorPos.MainMenuLeft, CursorPos.EndMenuTop + 2, winOptions))
+        {
+            case 0:
+                // Post score
+                break;
+            
+            case 1: case null: default: return;
         }
     }
 }

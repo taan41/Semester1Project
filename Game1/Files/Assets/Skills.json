@@ -8,5 +8,55 @@
     "Rarity": 0,
     "Price": 110,
     "Name": "Bandage"
+  },
+  "2": {
+    "Type": 0,
+    "Damage": 10,
+    "Heal": 0,
+    "MPCost": 5,
+    "ID": 2,
+    "Rarity": 0,
+    "Price": 110,
+    "Name": "Light Jab"
+  },
+  "3": {
+    "Type": 2,
+    "Damage": 6,
+    "Heal": 0,
+    "MPCost": 5,
+    "ID": 3,
+    "Rarity": 0,
+    "Price": 110,
+    "Name": "Quick Slash"
+  },
+  "101": {
+    "Type": 0,
+    "Damage": 0,
+    "Heal": 7,
+    "MPCost": 5,
+    "ID": 101,
+    "Rarity": 1,
+    "Price": 192,
+    "Name": "Cure"
+  },
+  "201": {
+    "Type": 0,
+    "Damage": 0,
+    "Heal": 25,
+    "MPCost": 10,
+    "ID": 201,
+    "Rarity": 2,
+    "Price": 275,
+    "Name": "Revitalize"
+  },
+  "301": {
+    "Type": 0,
+    "Damage": 0,
+    "Heal": 40,
+    "MPCost": 10,
+    "ID": 301,
+    "Rarity": 3,
+    "Price": 357,
+    "Name": "Revive"
   }
 }

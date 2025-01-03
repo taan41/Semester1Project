@@ -107,24 +107,23 @@ static class GameUI
         UIMisc.WriteCenter(warning);
     }
 
-    public static void WelcomeScreen(List<string> options, bool clear = false)
+    public static void WelcomeScreen(List<string> options)
     {
-        if (clear) Clear();
-        else SetCursorPosition(0, 0);
-
+        Clear();
         UIMisc.DrawLine('=');
         CursorTop += 9;
         UIMisc.DrawLine('=');
-        WriteLine();
+        int optionsCursorTop = CursorTop;
+        CursorTop += 6;
+        UIMisc.DrawLine('-');
 
+        CursorTop = optionsCursorTop;
+        WriteLine();
         foreach (var option in options)
         {
             CursorLeft = CursorPos.MainMenuLeft;
             WriteLine($" {option}        ");
         }
-
-        WriteLine();
-        UIMisc.DrawLine('-');
     }
 
     public static int? PlayOnlineScreen()
@@ -133,24 +132,24 @@ static class GameUI
         return null;
     }
 
-    public static void StartScreen(List<string> options, bool clear = false)
+    public static void StartScreen(List<string> options, bool clear = true)
     {
         if (clear) Clear();
         else SetCursorPosition(0, 0);
-
         UIMisc.DrawLine('=');
         CursorTop += 9;
         UIMisc.DrawLine('=');
-        WriteLine();
+        int optionsCursorTop = CursorTop;
+        CursorTop += 6;
+        UIMisc.DrawLine('-');
 
+        CursorTop = optionsCursorTop;
+        WriteLine();
         foreach (var option in options)
         {
             CursorLeft = CursorPos.MainMenuLeft;
-            WriteLine($" {option}        ");
+            WriteLine($" {option}                 ");
         }
-
-        WriteLine();
-        UIMisc.DrawLine('-');
     }
 
     public static void PausePopup(List<string> pauseOptions, TimeSpan? elapsedTime = null)
@@ -312,18 +311,40 @@ static class GameUI
         WriteLine();
         WriteLine();
         UIMisc.DrawLine('-');
-        WriteLine();
-        WriteLine();
+        CursorTop += 7;
+        UIMisc.DrawLine('-');
 
+        CursorTop = CursorPos.EndMenuTop;
         foreach (var option in options)
         {
             CursorLeft = CursorPos.MainMenuLeft;
             WriteLine($" {option}        ");
         }
-        
+    }
+
+    public static void VictoryScreen(TimeSpan elapsedTime, List<string> options)
+    {
+        Clear();
+        DrawHeader();
+        WriteLine();
+        UIMisc.WriteCenter(@" ___ ___ _______ ______ _______ _______ ______ ___ ___ __ ");
+        UIMisc.WriteCenter(@"|   |   |_     _|      |_     _|       |   __ \   |   |  |");
+        UIMisc.WriteCenter(@"|   |   |_|   |_|   ---| |   | |   -   |      <\     /|__|");
+        UIMisc.WriteCenter(@" \_____/|_______|______| |___| |_______|___|__| |___| |__|");
         WriteLine();
         WriteLine();
         UIMisc.DrawLine('-');
+        CursorTop += 7;
+        UIMisc.DrawLine('-');
+
+        CursorTop = CursorPos.EndMenuTop;
+        UIMisc.WriteCenter($"Run duration: {elapsedTime:hh\\:mm\\:ss\\.fff}");
+        WriteLine();
+        foreach (var option in options)
+        {
+            CursorLeft = CursorPos.MainMenuLeft;
+            WriteLine($" {option}        ");
+        }
     }
 
     public static void ShopMainScreen(GameData gameData, List<string> actions)

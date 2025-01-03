@@ -37,7 +37,7 @@ class Monster : Entity
         Power = ATK * 5 + MaxHP;
     }
 
-    public Monster(Monster other, int? targetPower = null) : base(other.Name, other.ATK, other.HP, 0)
+    public Monster(Monster other, int targetPower = 0) : base(other.Name, other.ATK, other.HP, 0)
     {
         Type = other.Type;
         Floor = other.Floor;
@@ -45,8 +45,8 @@ class Monster : Entity
         ID = other.ID;
         Power = ATK * 5 + MaxHP;
         
-        if (targetPower != null)
-            ScaleStat((int) targetPower);
+        if (targetPower != 0)
+            ScaleStat(targetPower);
     }
 
     public void ScaleStat(int targetPower)
