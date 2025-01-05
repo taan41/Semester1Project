@@ -11,6 +11,20 @@ class Server
 
     public static void Main()
     {
+        // StartProgram();
+        Test();
+    }
+
+    static void Test()
+    {
+        // WriteLine(Player.DefaultPlayer().ToJson());
+        // WriteLine(0 & int.MaxValue);
+        WriteLine(new GameData().ToJson());
+    }
+
+    static void StartProgram()
+    {
+        
         string? serverIP = null;
         int port = defaultPort;
 
