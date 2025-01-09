@@ -61,7 +61,7 @@ class Game
                     break;
 
                 case 2:
-                    // ResetPassword();
+                    GameUI.ResetPasswordScreen(networkHandler);
                     break;
 
                 default:
@@ -74,7 +74,7 @@ class Game
 
     private static void OnlinePlay()
     {
-        List<string> onlineOptions = ["NEW GAME", "LOAD GAME", "VIEW SCORE", "LOG OUT"];
+        List<string> onlineOptions = ["NEW GAME", "LOAD GAME", "VIEW SCORE", "UPDATE USER INFO", "LOG OUT"];
 
         while (true)
         {
@@ -83,6 +83,11 @@ class Game
 
             GameUI.TitleScreenBorders(false, true);
             GameUI.StartTitleAnim();
+            lock (ConsoleLock)
+            {
+                Console.CursorTop = CursorPos.BottomBorderTop - 1;
+                WriteCenter($"Logged in as {user.Username}");
+            }
 
             switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, onlineOptions))
             {
@@ -92,6 +97,14 @@ class Game
 
                 case 1:
                     LoadGame();
+                    break;
+
+                case 2:
+                    // view score
+                    break;
+
+                case 3:
+                    // update user info
                     break;
 
                 default:

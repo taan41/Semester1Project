@@ -76,7 +76,7 @@ static class UserDB
 
             using var reader = await cmd.ExecuteReaderAsync();
 
-            if (! await reader.ReadAsync()) // User not found
+            if (!await reader.ReadAsync()) // User not found
                 return (null, $"No user with username '{username}' found");
 
             PasswordSet? pwdSet = null;
@@ -178,6 +178,50 @@ static class UserDB
 
             using MySqlCommand cmd = new(query.ToString(), conn);
             cmd.Parameters.AddWithValue("@userID", userID);
+
+            if (newNickname != null)
+                cmd.Parameters.AddWithValue("@newNickname", newNickname);
+            
+            if (newEmail != null)
+                cmd.Parameters.AddWithValue("@newEmail", newEmail);
+
+            if (newPwd != null)
+            {
+                cmd.Parameters.AddWithValue("@newPwdHash", newPwd.PwdHash);
+                cmd.Parameters.AddWithValue("@newSalt", newPwd.PwdSalt);
+            }
+
+            await cmd.ExecuteNonQueryAsync();
+
+            return (true, "");
+        }
+        catch (MySqlException ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public static async Task<(bool success, string errorMessage)> Update(string username, string? newNickname, string? newEmail, PasswordSet? newPwd)
+    {
+        if (newNickname == null && newEmail == null && newPwd == null)
+            return (false, "Invalid updated data");
+
+        List<string> querySets = [];
+        if (newNickname != null) querySets.Add(" Nickname = @newNickname");
+        if (newEmail != null) querySets.Add(" Email = @newEmail");
+        if (newPwd != null) querySets.Add(" PasswordHash = @newPwdHash, Salt = @newSalt");
+
+        StringBuilder query = new("UPDATE Users SET");
+        query.AppendJoin(',', querySets);
+        query.Append(" WHERE Username = @username");
+
+        try
+        {
+            using MySqlConnection conn = new(DBManager.ConnectionString);
+            await conn.OpenAsync();
+
+            using MySqlCommand cmd = new(query.ToString(), conn);
+            cmd.Parameters.AddWithValue("@username", username);
 
             if (newNickname != null)
                 cmd.Parameters.AddWithValue("@newNickname", newNickname);

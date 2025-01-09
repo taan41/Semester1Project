@@ -347,6 +347,7 @@ static class GameUI
                 }
                 else if (password != confirmPassword)
                 {
+                    password = null;
                     confirmPassword = null;
                     WarningPopup("Passwords do not match!");
                     continue;
@@ -489,6 +490,160 @@ static class GameUI
             return;
     }
 
+    public static void ResetPasswordScreen(NetworkHandler networkHandler)
+    {
+        if (networkHandler == null || !networkHandler.IsConnected)
+        {
+            WarningPopup("Can't connect to server!");
+            return;
+        }
+
+        string?
+            username = null,
+            email = null,
+            password = null,
+            confirmPassword = null,
+            errorMsg;
+        int tempCursorLeft, tempCursorTop;
+        bool emailCheck = false;
+
+        while (true)
+        {
+            if (!networkHandler.IsConnected)
+                return;
+
+            TitleScreenBorders(false, true);
+            StartTitleAnim();
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop;
+                WriteLine(" 'ESC' to return");
+                Write(" Username: ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                if (username != null)
+                    WriteLine(username);
+            }
+
+            if (username == null)
+            {
+                username = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.usernameMax);
+                
+                if (username == null)
+                    return;
+                else if (string.IsNullOrWhiteSpace(username))
+                {
+                    username = null;
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop + 2;
+                Write(" Email: ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                if (email != null)
+                    WriteLine(email);
+            }
+
+            if (email == null)
+            {
+                email = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.emailLen);
+                
+                if (email == null)
+                    return;
+                else if (string.IsNullOrWhiteSpace(email))
+                {
+                    email = null;
+                    continue;
+                }
+            }
+
+            User userToReset = new() { Username = username, Email = email };
+            if (!emailCheck)
+            {
+                if (!networkHandler.ValidateEmail(userToReset, out errorMsg))
+                {
+                    username = null;
+                    email = null;
+                    WarningPopup(errorMsg);
+                }
+                else
+                {
+                    SuccessPopup("Valid user info");
+                    emailCheck = true;
+                }
+
+                continue;
+            }
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop + 3;
+                Write($" Password ({DataConstants.passwordMin} ~ {DataConstants.passwordMax} characters): ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                if (password != null)
+                    WriteLine(new string('*', password.Length));
+            }
+
+            if (password == null)
+            {
+                password = ReadInput(tempCursorLeft, tempCursorTop, true, DataConstants.passwordMax);
+                
+                if (password == null)
+                    return;
+                else if (string.IsNullOrWhiteSpace(password) || password.Length < DataConstants.passwordMin)
+                {
+                    password = null;
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop + 4;
+                Write(" Confirm Password: ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                if (confirmPassword != null)
+                    WriteLine(new string('*', confirmPassword.Length));
+            }
+
+            if (confirmPassword == null)
+            {
+                CursorTop = tempCursorTop;
+                confirmPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DataConstants.passwordMax);
+                
+                if (confirmPassword == null)
+                    return;
+                else if (string.IsNullOrWhiteSpace(confirmPassword) || confirmPassword.Length < DataConstants.passwordMin)
+                {
+                    confirmPassword = null;
+                    continue;
+                }
+                else if (password != confirmPassword)
+                {
+                    password = null;
+                    confirmPassword = null;
+                    WarningPopup("Passwords do not match!");
+                    continue;
+                }
+            }
+
+            userToReset.PwdSet = new(password);
+
+            if (!networkHandler.ResetPwd(userToReset, out errorMsg))
+                WarningPopup(errorMsg);
+            else
+                SuccessPopup("Password reset successful!");
+
+            break;
+        }
+
+        TitleScreenBorders(false, true);
+        StartTitleAnim();
+    }
+
     public static string? EnterSeed()
     {
         int tempCursorTop;
@@ -502,46 +657,6 @@ static class GameUI
 
         return ReadInput(15, tempCursorTop, false, 40);
     }
-
-    // public static void OnlineScreen(List<string> options)
-    // {
-    //     Clear();
-    //     DrawHeader();
-    //     CursorTop = CursorPos.BottomBorderTop;
-    //     DrawLine('-');
-
-    //     CursorTop = CursorPos.StartScreenMainMenuTop;
-    //     foreach (var option in options)
-    //     {
-    //         WriteLine($" {option}                 ");
-    //     }
-    // }
-
-    // public static void StartRunMainMenuScreen(List<string> options)
-    // {
-    //     Clear();
-    //     DrawHeader();
-    //     CursorTop = CursorPos.BottomBorderTop;
-    //     DrawLine('-');
-
-    //     CursorTop = CursorPos.StartScreenMainMenuTop;
-    //     foreach (var option in options)
-    //     {
-    //         WriteLine($" {option}                 ");
-    //     }
-    // }
-
-    // public static void StartRunSubMenuScreen(List<string> options)
-    // {
-    //     SetCursorPosition(0, CursorPos.StartScreenSubMenuTop - 2);
-    //     DrawLine('-');
-
-    //     CursorTop = CursorPos.StartScreenSubMenuTop;
-    //     foreach (var option in options)
-    //     {
-    //         WriteLine($" {option}                 ");
-    //     }
-    // }
 
     public static void PrintComponents<T>(List<T> components, int zoneHeight, string? msg = null, int? cursorTop = null) where T: Component
     {

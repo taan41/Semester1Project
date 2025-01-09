@@ -21,7 +21,7 @@ class User
     }
     
     public override string ToString()
-        => $"User(ID: {UserID})";
+        => $"User({(UserID != -1 ? $"ID: {UserID}, " : "")}Username: {Username})";
 
     public string ToString(bool showFullInfo)
         => showFullInfo ? $"User(ID: {UserID}, Username: {Username}, Nickname: {Nickname})" : ToString();

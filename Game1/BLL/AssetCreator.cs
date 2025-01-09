@@ -200,9 +200,9 @@ class AssetCreator
                         ItemRarity rarity = (ItemRarity) Convert.ToInt32(ReadLine());
                         int multiplier = rarity switch
                         {
-                            ItemRarity.Rare => 150,
-                            ItemRarity.Epic => 250,
-                            ItemRarity.Legendary => 400,
+                            ItemRarity.Rare => 200,
+                            ItemRarity.Epic => 300,
+                            ItemRarity.Legendary => 450,
                             _ => 100
                         };
                         WriteLine($"Multiplier based on rairty : {multiplier}%");

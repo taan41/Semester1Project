@@ -69,6 +69,14 @@ class ClientHandler
                         cmdToSend = Logout(receivedCmd);
                         break;
 
+                    case CommandType.ValidateEmail:
+                        cmdToSend = await ValidateEmail(receivedCmd);
+                        break;
+
+                    case CommandType.ResetPwd:
+                        cmdToSend = await ResetPwd(receivedCmd);
+                        break;
+
                     case CommandType.ChangeNickname:
                         cmdToSend = await ChangeNickname(receivedCmd);
                         break;
@@ -115,7 +123,7 @@ class ClientHandler
     {
         var (success, errorMessage) = await UserDB.CheckUsername(cmd.Payload);
 
-        if(!success)
+        if (!success)
             return Helper.ErrorCmd(this, cmd, errorMessage, false);
 
         return new(cmd.CommandType);
@@ -125,12 +133,12 @@ class ClientHandler
     {
         User? registeredUser = User.FromJson(cmd.Payload);
 
-        if(registeredUser == null)
+        if (registeredUser == null)
             return Helper.ErrorCmd(this, cmd, "Invalid registering user");
 
         var (success, errorMessage) = await UserDB.Add(registeredUser);
 
-        if(!success)
+        if (!success)
             return Helper.ErrorCmd(this, cmd, errorMessage);
 
         LogHandler.AddLog($"Registered with Username '{registeredUser.Username}'", this);
@@ -141,10 +149,10 @@ class ClientHandler
     {
         var (requestedUser, errorMessage) = await UserDB.Get(cmd.Payload);
 
-        if(requestedUser == null)
+        if (requestedUser == null)
             return (Helper.ErrorCmd(this, cmd, errorMessage, false), null);
 
-        if(requestedUser.PwdSet == null)
+        if (requestedUser.PwdSet == null)
             return (Helper.ErrorCmd(this, cmd, "No password found"), null);
 
         return (new(cmd.CommandType, requestedUser.PwdSet.ToJson()), requestedUser);
@@ -170,16 +178,50 @@ class ClientHandler
         return new(cmd.CommandType);
     }
 
+    private async Task<Command> ValidateEmail(Command cmd)
+    {
+        User? requestedUser = User.FromJson(cmd.Payload);
+
+        if (requestedUser == null)
+            return Helper.ErrorCmd(this, cmd, "Invalid user data", false);
+
+        var (dbUser, errorMessage) = await UserDB.Get(requestedUser.Username);
+
+        if (dbUser == null)
+            return Helper.ErrorCmd(this, cmd, errorMessage, false);
+
+        if (dbUser.Email != requestedUser.Email)
+            return Helper.ErrorCmd(this, cmd, "Email doesn't match", false);
+
+        return new(cmd.CommandType);
+    }
+
+    private async Task<Command> ResetPwd(Command cmd)
+    {
+        User? requestedUser = User.FromJson(cmd.Payload);
+
+        if (requestedUser == null)
+            return Helper.ErrorCmd(this, cmd, "Invalid user data", false);
+
+        var (success, updateErrorMessage) = await UserDB.Update(requestedUser.Username, null, null, requestedUser.PwdSet);
+
+        if (!success)
+            return Helper.ErrorCmd(this, cmd, updateErrorMessage);
+
+        LogHandler.AddLog($"Reset password of {requestedUser}", this);
+        return new(cmd.CommandType);
+    }
+
     private async Task<Command> ChangeNickname(Command cmd)
     {
-        if(user == null || user.UserID < 1)
+        if (user == null || user.UserID < 1)
             return Helper.ErrorCmd(this, cmd, "Invalid user");
 
         string newNickname = cmd.Payload;
 
         var (success, errorMessage) = await UserDB.Update(user.UserID, newNickname, null, null);
 
-        if(!success)
+        if (!success)
             return Helper.ErrorCmd(this, cmd, errorMessage);
         
         LogHandler.AddLog($"Changed nickname of {user} from '{user.Nickname}' to '{newNickname}'", this);
@@ -189,14 +231,14 @@ class ClientHandler
 
     private async Task<Command> ChangeEmail(Command cmd)
     {
-        if(user == null || user.UserID < 1)
+        if (user == null || user.UserID < 1)
             return Helper.ErrorCmd(this, cmd, "Invalid user");
 
         string newEmail = cmd.Payload;
 
         var (success, errorMessage) = await UserDB.Update(user.UserID, newEmail, null, null);
 
-        if(!success)
+        if (!success)
             return Helper.ErrorCmd(this, cmd, errorMessage);
         
         LogHandler.AddLog($"Changed email of {user} from '{user.Email}' to '{newEmail}'", this);
@@ -206,14 +248,14 @@ class ClientHandler
 
     private async Task<Command> ChangePassword(Command cmd)
     {
-        if(user == null || user.UserID < 1)
+        if (user == null || user.UserID < 1)
             return Helper.ErrorCmd(this, cmd, "Invalid user");
 
         var newPwd = PasswordSet.FromJson(cmd.Payload);
 
         var (success, errorMessage) = await UserDB.Update(user.UserID, null, null, newPwd);
 
-        if(!success)
+        if (!success)
             return Helper.ErrorCmd(this, cmd, errorMessage);
         
         LogHandler.AddLog($"Changed password of {user}", this);

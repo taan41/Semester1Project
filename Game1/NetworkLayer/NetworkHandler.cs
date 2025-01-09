@@ -73,9 +73,9 @@ class NetworkHandler
         return HandleCommand(cmdToSend, out _, out errorMessage);
     }
 
-    public bool RequestResetPwd(User user, out string errorMessage)
+    public bool ValidateEmail(User user, out string errorMessage)
     {
-        Command cmdToSend = new(CommandType.RequestResetPwd, user.ToJson());
+        Command cmdToSend = new(CommandType.ValidateEmail, user.ToJson());
         return HandleCommand(cmdToSend, out _, out errorMessage);
     }
 

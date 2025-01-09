@@ -5,7 +5,7 @@ enum CommandType
     Empty, Ping, Error, GetAES,
     UpdateAsset,
     CheckUsername, Register,
-    GetUserPwd, Login, Logout, RequestResetPwd, ResetPwd,
+    GetUserPwd, Login, Logout, ValidateEmail, ResetPwd,
     ChangeNickname, ChangeEmail, ChangePassword,
     UploadScore, GetUserScores, GetMonthlyScores, GetAllTimeScores,
     UploadSave, DownloadSave,

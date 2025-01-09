@@ -6,6 +6,8 @@ static class GameDataDB
     public static async Task<(bool success, string errorMessage)> Save(int userID, GameData data)
     {
         string query = @"
+            DELETE FROM GameSaves
+            WHERE UserID = @userID;
             INSERT INTO GameSaves (UserID, Data)
             VALUES (@userID, @data);
         ";
