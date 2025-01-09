@@ -9,6 +9,8 @@ class Game
 
     public static void Start()
     {
+        GameUI.ConsoleSizeNotice();
+
         List<string> welcomeOptions = ["PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
         GameUI.TitleScreenBorders();
 
@@ -147,15 +149,15 @@ class Game
             switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, scoreOptions))
             {
                 case 0:
-                    GameUI.ViewPersonalScoreScreen(personal);
+                    GameUI.ViewScoresScreen(personal, "PERSONAL SCORES");
                     break;
 
                 case 1:
-                    GameUI.ViewMonthlyScoreScreen(monthly);
+                    GameUI.ViewScoresScreen(personal, "TOP MONTHLY");
                     break;
 
                 case 2:
-                    GameUI.ViewAllTimeScoreScreen(alltime);
+                    GameUI.ViewScoresScreen(personal, "TOP ALL TIME");
                     break;
 
                 default:
@@ -269,36 +271,36 @@ class Game
 
         List<Equipment> startEquips =
         [
-            AssetManager.Equipments[1],
-            AssetManager.Equipments[2],
-            AssetManager.Equipments[3],
+            new(AssetManager.Equipments[1]),
+            new(AssetManager.Equipments[2]),
+            new(AssetManager.Equipments[3])
         ];
         List<Skill> startSkills =
         [
-            AssetManager.Skills[1],
-            AssetManager.Skills[2],
-            AssetManager.Skills[3]
+            new(AssetManager.Skills[1]),
+            new(AssetManager.Skills[2]),
+            new(AssetManager.Skills[3])
         ];
 
         GameUI.GenericGameScreen(gameData);
-        GameUI.PrintComponents(startEquips, UIConstants.MainZoneHeight, " -- Choose Starting Item:", CursorPos.MainZoneTop);
+        GameUI.PrintMainZone(startEquips, "Choose Starting Item:");
         
         int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, startEquips);
         if (pickedEquipInd == null)
             return;
 
-        Equipment pickedEquip = new(startEquips[(int) pickedEquipInd]);
-        gameData.Player.AddItem(pickedEquip);
+        // Equipment pickedEquip = new();
+        gameData.Player.AddItem(startEquips[(int) pickedEquipInd]);
 
         GameUI.GenericGameScreen(gameData);
-        GameUI.PrintComponents(startSkills, UIConstants.MainZoneHeight, " -- Choose Starting Skill:", CursorPos.MainZoneTop);
+        GameUI.PrintMainZone(startSkills, "Choose Starting Skill:");
         
         int? pickedSkillInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, startSkills);
         if (pickedSkillInd == null)
             return;
 
-        Skill pickedSkill = new(startSkills[(int) pickedEquipInd]);
-        gameData.Player.AddItem(pickedSkill);
+        // Skill pickedSkill = new();
+        gameData.Player.AddItem(startSkills[(int) pickedEquipInd]);
 
         gameData.Progress.Next();
         GameLoop(gameSave);
@@ -318,7 +320,6 @@ class Game
             gameSave.Save("AutoSave");
             List<Event> routes = eventManager.GetEvents();
             
-            // GameUI.RouteScreen(gameData, routes, invOptions);
             GameUI.GenericGameScreen(gameData);
             GameUI.PrintMainZone(routes, "Routes:");
             GameUI.PrintSubZone(invOptions, "Inventory:");
@@ -459,8 +460,8 @@ class Game
 
         while(true)
         {
-            // GameUI.InventoryScreen(gameData, equipInv[startInd..endInd], gameData.Player.GetEquipped());
             GameUI.GenericGameScreen(gameData);
+            GameUI.PrintMainZone(equipInv[startInd..endInd], "Inventory:");
             GameUI.PrintSubZone(gameData.Player.GetEquipped(), "Currently Equipped:");
 
             int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, equipInv[startInd..endInd], startInd > 0, endInd < equipInv.Count, pickFromEnd);
@@ -499,8 +500,8 @@ class Game
 
         while(true)
         {
-            // GameUI.InventoryScreen(gameData, skillInv[startInd..endInd], gameData.Player.Skills);
             GameUI.GenericGameScreen(gameData);
+            GameUI.PrintMainZone(skillInv[startInd..endInd], "Inventory:");
             GameUI.PrintSubZone(gameData.Player.Skills, "Currently Equipped:");
 
             int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, skillInv[startInd..endInd], startInd > 0, endInd < skillInv.Count, pickFromEnd);
@@ -547,11 +548,10 @@ class Game
 
         while (fightEvent.Monsters.Count > 0)
         {
-            // GameUI.FightScreen(gameData, fightEvent.Monsters, fightActions);
             GameUI.GenericGameScreen(gameData);
             GameUI.PrintMainZone(fightEvent.Monsters);
 
-            switch (InteractiveUI.PickString(CursorPos.SubZoneTop + 1, fightActions))
+            switch (InteractiveUI.PickString(CursorPos.SubZoneTop, fightActions))
             {
                 case 0:
                     int? pickedMonsterInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop, fightEvent.Monsters);
@@ -564,7 +564,9 @@ class Game
                     break;
 
                 case 1:
-                    GameUI.FightSkillScreen(gameData, fightEvent.Monsters, gameData.Player.Skills);
+                    GameUI.GenericGameScreen(gameData);
+                    GameUI.PrintMainZone(fightEvent.Monsters);
+
                     int? pickedSkillInd = InteractiveUI.PickComponent(CursorPos.SubZoneTop, gameData.Player.Skills);
                     if (pickedSkillInd == null)
                         continue;
@@ -626,7 +628,9 @@ class Game
     {
         while(rewards.Count > 0)
         {
-            GameUI.RewardScreen(gameData, rewards);
+            GameUI.GenericGameScreen(gameData);
+            GameUI.PrintMainZone(rewards, "Rewards:");
+
             int? pickedRewardInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, rewards);
             if (pickedRewardInd == null)
                 if (HanldePause(gameData)) continue;
@@ -648,7 +652,8 @@ class Game
 
         while (true)
         {
-            GameUI.ShopMainScreen(gameData, shopActions);
+            GameUI.GenericGameScreen(gameData);
+            GameUI.ShopBanner();
             
             switch (InteractiveUI.PickString(CursorPos.SubZoneTop, shopActions))
             {
@@ -664,7 +669,8 @@ class Game
                     break;
 
                 case 2:
-                    GameUI.ShopMainScreen(gameData, invActions);
+                    GameUI.GenericGameScreen(gameData);
+                    GameUI.ShopBanner();
 
                     int? pickedInvInd = InteractiveUI.PickString(CursorPos.SubZoneTop, invActions);
                     switch (pickedInvInd)
@@ -784,7 +790,7 @@ class Game
 
         GameUI.VictoryScreen(gameData.GetElapsedTime(), winOptions);
 
-        switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.EndScreenMenuTop + 2, winOptions))
+        switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.EndScreenMenuTop + 3, winOptions))
         {
             default:
                 return;

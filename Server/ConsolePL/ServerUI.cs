@@ -120,7 +120,7 @@ static class ServerUI
 
     public static void ViewLog()
     {
-        while(true)
+        while (true)
         {
             Clear();
             DrawHeader(Header);
@@ -132,7 +132,8 @@ static class ServerUI
             LogHandler.WriteAllLog();
             LogHandler.ToggleLogView(true);
 
-            while(true)
+            bool validKey = false;
+            while (!validKey)
             {
                 ConsoleKey key = ReadKey(true).Key;
                 switch(key)
@@ -143,6 +144,7 @@ static class ServerUI
 
                     case ConsoleKey.Delete:
                         LogHandler.ClearLog();
+                        validKey = true;
                         break;
                 }
             }

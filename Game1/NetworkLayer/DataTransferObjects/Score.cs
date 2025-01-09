@@ -18,7 +18,7 @@ class Score
     }
 
     public override string ToString()
-        => $"{Nickname, -Utilities.DataConstants.nicknameMax} - {ClearTime:hh:mm:ss.fff} - {UploadedTime:yyyy-MM-dd HH:mm:ss}";
+        => $"{Nickname, -Utilities.DataConstants.nicknameMax} - {ClearTime:hh\\:mm\\:ss\\.fff} - {UploadedTime:yyyy-MM-dd HH\\:mm\\:ss}";
 
     public string ToJson()
         => JsonSerializer.Serialize(this);

@@ -318,7 +318,6 @@ class ClientHandler
         if (gameSave == null)
             return Helper.ErrorCmd(this, cmd, errorMessage);
 
-        LogHandler.AddLog($"Downloaded save", this);
         return new(cmd.CommandType, gameSave.ToJson());
     }
 
@@ -351,7 +350,6 @@ class ClientHandler
         if (personal == null)
             return Helper.ErrorCmd(this, cmd, errorMessage);
 
-        LogHandler.AddLog($"Got scores", this);
         return new(cmd.CommandType, JsonSerializer.Serialize(personal));
     }
 
@@ -365,7 +363,6 @@ class ClientHandler
         if (monthly == null)
             return Helper.ErrorCmd(this, cmd, errorMessage);
 
-        LogHandler.AddLog($"Got monthly scores", this);
         return new(cmd.CommandType, JsonSerializer.Serialize(monthly));
     }
 
@@ -379,7 +376,6 @@ class ClientHandler
         if (alltime == null)
             return Helper.ErrorCmd(this, cmd, errorMessage);
 
-        LogHandler.AddLog($"Got all time scores", this);
         return new(cmd.CommandType, JsonSerializer.Serialize(alltime));
     }
 

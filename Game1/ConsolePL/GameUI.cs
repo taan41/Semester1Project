@@ -93,6 +93,23 @@ static class GameUI
         titleAnimTokenSource = null;
     }
 
+    public static void ConsoleSizeNotice()
+    {
+        Clear();
+        DrawLine('-');
+        for (int i = 1; i < CursorPos.BottomBorderTop; i++)
+            WriteLine($"| {i}");
+        DrawLine('-');
+
+        CursorLeft = 5;
+        CursorTop -= 3;
+        Write("-- Please resize the console window to fit the game screen");
+        CursorLeft = 5;
+        CursorTop++;
+        Write("-- Press any key to continue...");
+        ReadKey(true);
+    }
+
     public static void WarningPopup(string warning)
     {
         StopTitleAnim();
@@ -658,18 +675,18 @@ static class GameUI
         return ReadInput(15, tempCursorTop, false, 40);
     }
 
-    public static void ViewPersonalScoreScreen(List<Score> personal)
+    public static void ViewScoresScreen(List<Score> scores, string listName)
     {
         StopTitleAnim();
         Clear();
         DrawHeader();
         CursorTop++;
 
-        WriteLine(" -- Your Scores:");
+        WriteLine($" -- {listName}:");
         for (int i = 1; i < 16; i++)
         {
-            if (i <= personal.Count)
-                WriteLine($" {i}. {personal[i - 1]}");
+            if (i <= scores.Count)
+                WriteLine($" {i}. {scores[i - 1]}");
             else
                 WriteLine($" {i}.");
         }
@@ -677,76 +694,6 @@ static class GameUI
         CursorTop = CursorPos.BottomBorderTop;
         DrawLine('-');
         ReadKey(true);
-    }
-
-    public static void ViewMonthlyScoreScreen(List<Score> monthly)
-    {
-        StopTitleAnim();
-        Clear();
-        DrawHeader();
-        CursorTop++;
-
-        WriteLine(" -- Monthly Scores:");
-        for (int i = 1; i < 16; i++)
-        {
-            if (i <= monthly.Count)
-                WriteLine($" {i}. {monthly[i - 1]}");
-            else
-                WriteLine($" {i}.");
-        }
-
-        CursorTop = CursorPos.BottomBorderTop;
-        DrawLine('-');
-        ReadKey(true);
-    }
-
-    public static void ViewAllTimeScoreScreen(List<Score> alltime)
-    {
-        StopTitleAnim();
-        Clear();
-        DrawHeader();
-        CursorTop++;
-
-        WriteLine(" -- All Time Scores:");
-        for (int i = 1; i < 16; i++)
-        {
-            if (i <= alltime.Count)
-                WriteLine($" {i}. {alltime[i - 1]}");
-            else
-                WriteLine($" {i}.");
-        }
-
-        CursorTop = CursorPos.BottomBorderTop;
-        DrawLine('-');
-        ReadKey(true);
-    }
-
-    public static void PrintComponents<T>(List<T> components, int zoneHeight, string? msg = null, int? cursorTop = null) where T: Component
-    {
-        if (cursorTop != null)
-            CursorTop = (int) cursorTop;
-
-        if (msg != null)
-            WriteLine(msg);
-        
-        components.ForEach(component => component.Print());
-
-        if (zoneHeight > components.Count + (msg == null ? 0 : 1))
-            Write(new string('\n', zoneHeight - components.Count - (msg == null ? 0 : 1)));
-    }
-
-    public static void PrintOptions(List<string> options, int zoneHeight, string? msg = null, int? cursorTop = null)
-    {
-        if (cursorTop != null)
-            CursorTop = (int) cursorTop;
-
-        if (msg != null)
-            WriteLine(msg);
-        
-        options.ForEach(option => WriteLine($" {option}"));
-
-        if (zoneHeight > options.Count + (msg == null ? 0 : 1))
-            Write(new string('\n', zoneHeight - options.Count - (msg == null ? 0 : 1)));
     }
 
     public static void DrawHeader(bool setCursor = false)
@@ -766,14 +713,14 @@ static class GameUI
         Clear();
         DrawHeader();
         gameData.Progress.Print();
-
         DrawLine('-');
+
         CursorTop += UIConstants.MainZoneHeight;
-    
         DrawLine('-');
-        CursorTop += UIConstants.SubZoneHeight;
 
+        CursorTop += UIConstants.SubZoneHeight;
         DrawLine('-');
+
         gameData.Player.Print();
         DrawLine('-');
     }
@@ -810,79 +757,15 @@ static class GameUI
         components.ForEach(components => components.Print());
     }
 
-    // public static void InventoryScreen<T>(GameData gameData, List<T> inv, List<T> equipped) where T : Item
-    // {
-    //     Clear();
-    //     DrawHeader(false);
-    //     gameData.Progress.Print();
-    //     DrawLine('-');
-    //     PrintComponents(inv, UIConstants.MainZoneHeight, " -- Inventory:");
-    //     DrawLine('-');
-    //     PrintComponents(equipped, UIConstants.SubZoneHeight, " -- Currently Equipped:");
-    //     DrawLine('-');
-    //     gameData.Player.Print();
-    //     DrawLine('-');
-    // }
-
-    // public static void FightScreen(GameData gameData, List<Monster> monsters, List<string> actions)
-    // {
-    //     Clear();
-    //     DrawHeader();
-    //     gameData.Progress.Print();
-    //     DrawLine('-');
-    //     PrintComponents(monsters, UIConstants.MainZoneHeight);
-    //     DrawLine('-');
-    //     PrintOptions(actions, UIConstants.SubZoneHeight, " -- Actions:");
-    //     DrawLine('-');
-    //     gameData.Player.Print();
-    //     DrawLine('-');
-    // }
-
-    public static void FightSkillScreen(GameData gameData, List<Monster> monsters, List<Skill> skills)
+    public static void ShopBanner()
     {
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        DrawLine('-');
-        PrintComponents(monsters, UIConstants.MainZoneHeight);
-        DrawLine('-');
-        PrintComponents(skills, UIConstants.SubZoneHeight);
-        DrawLine('-');
-        gameData.Player.Print();
-        DrawLine('-');
-    }
-
-    public static void RewardScreen(GameData gameData, List<Item> rewards)
-    {
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        DrawLine('-');
-        PrintComponents(rewards, UIConstants.MainZoneHeight, " -- Rewards:");
-        DrawLine('-');
-        Write(new string('\n', UIConstants.SubZoneHeight));
-        DrawLine('-');
-        gameData.Player.Print();
-        DrawLine('-');
-    }
-
-    public static void ShopMainScreen(GameData gameData, List<string> actions)
-    {
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        DrawLine('-');
+        CursorTop = CursorPos.MainZoneTop;
         WriteCenter(@"   _____________________________                            ");
         WriteCenter(@"  /    _____ _____ _____ _____  \            ┌─────────┐    ");
         WriteCenter(@" /   |   __|  |  |     |  _  |   \           │   ♦$♦   │    ");
         WriteCenter(@"|    |__   |     |  |  |   __|    |      ════╪═════════╪════");
         WriteCenter(@" \   |_____|__|__|_____|__|      /           │ █     █ │    ");
         WriteCenter(@"  \_____________________________/            ;  = ┴ =  ;    ");
-        DrawLine('-');
-        PrintOptions(actions, UIConstants.SubZoneHeight);
-        DrawLine('-');
-        gameData.Player.Print();
-        DrawLine('-');
     }
 
     public static void ShopTradingScreen<T>(GameData gameData, List<T> items, bool buying) where T : Item
@@ -897,24 +780,6 @@ static class GameUI
         DrawLine('-');
         gameData.Player.Print();
         DrawLine('-');
-    }
-
-    public static void CampfireScreen(GameData gameData)
-    {
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        DrawLine('-');
-        CursorTop += 11;
-        DrawLine('-');
-        gameData.Player.Print();
-        DrawLine('-');
-
-        CancellationTokenSource animTokenSource = new();
-        _ = Task.Run(() => DrawCampfire(animTokenSource.Token));
-
-        ReadKey(true);
-        animTokenSource.Cancel();
     }
 
     public static void TreasureOpening(GameData gameData)
@@ -1004,14 +869,30 @@ static class GameUI
         CursorTop += 7;
         DrawLine('-');
 
+        CursorLeft = CursorPos.EndScreenMenuLeft;
         CursorTop = CursorPos.EndScreenMenuTop;
-        WriteCenter($"Run duration: {elapsedTime:hh\\:mm\\:ss\\.fff}");
-        WriteLine();
+        WriteLine("RUN DURATION:");
+        CursorLeft = CursorPos.EndScreenMenuLeft;
+        WriteLine($"{elapsedTime:hh\\:mm\\:ss\\.fff}");
+        CursorTop++;
         foreach (var option in options)
         {
             CursorLeft = CursorPos.EndScreenMenuLeft;
             WriteLine($" {option}        ");
         }
+    }
+
+    public static void CampfireScreen(GameData gameData)
+    {
+        GenericGameScreen(gameData);
+        CursorTop = CursorPos.SubZoneTop;
+        DrawLine(' ');
+
+        CancellationTokenSource animTokenSource = new();
+        _ = Task.Run(() => DrawCampfire(animTokenSource.Token));
+
+        ReadKey(true);
+        animTokenSource.Cancel();
     }
 
     private static readonly string[][] campfireAnim =
