@@ -58,22 +58,22 @@ class Player : Entity
         if (oldEquipment != null)
         {
             ATK -= oldEquipment.BonusATK;
-            MaxHP -= oldEquipment.BonusMaxHP;
-            if (oldEquipment.BonusMaxHP < HP)
-                HP -= oldEquipment.BonusMaxHP;
+            MaxHP -= oldEquipment.BonusHP;
+            if (oldEquipment.BonusHP < HP)
+                HP -= oldEquipment.BonusHP;
             else
                 HP = 1;
-            MaxMP -= oldEquipment.BonusMaxMP;
-            MP -= oldEquipment.BonusMaxMP;
+            MaxMP -= oldEquipment.BonusMP;
+            MP -= oldEquipment.BonusMP;
             
             EquipInventory.Add(oldEquipment);
         }
 
         ATK += equipment.BonusATK;
-        MaxHP += equipment.BonusMaxHP;
-        HP += equipment.BonusMaxHP;
-        MaxMP += equipment.BonusMaxMP;
-        MP += equipment.BonusMaxMP;
+        MaxHP += equipment.BonusHP;
+        HP += equipment.BonusHP;
+        MaxMP += equipment.BonusMP;
+        MP += equipment.BonusMP;
 
         EquipInventory.Remove(equipment);
     }
@@ -169,9 +169,9 @@ class Player : Entity
         base.Print();
         Console.WriteLine($"| ATK: {ATK,-3}");
         Console.Write(" HP ");
-        GameUIHelper.UIMisc.DrawBar(HP, MaxHP, true, GameUIHelper.UIConstants.PlayerBarLen, ConsoleColor.Red);
+        GameUIHelper.DrawBar(HP, MaxHP, true, GameUIHelper.UIConstants.PlayerBarLen, ConsoleColor.Red);
         Console.Write(" MP ");
-        GameUIHelper.UIMisc.DrawBar(MP, MaxMP, true, GameUIHelper.UIConstants.PlayerBarLen, ConsoleColor.Blue);
+        GameUIHelper.DrawBar(MP, MaxMP, true, GameUIHelper.UIConstants.PlayerBarLen, ConsoleColor.Blue);
         Console.WriteLine($" Gold: {PlayerGold.Quantity}");
     }
 }

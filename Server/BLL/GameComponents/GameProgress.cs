@@ -27,4 +27,6 @@ class GameProgress
             _room = value;
         }
     }
+
+    public GameProgress() {}
 }

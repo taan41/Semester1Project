@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 
 static class Utilities
 {
@@ -12,7 +11,6 @@ static class Utilities
             nicknameMin = 1, nicknameMax = 25,
             pwdHashLen = 32, pwdSaltLen = 16,
             emailLen = 255,
-            inputLimit = 500,
             bufferSize = 2048;
     }
 
@@ -49,12 +47,5 @@ static class Utilities
 
         public static bool VerifyPassword(string pwd, PasswordSet pwdSet)
             => VerifyPassword(pwd, pwdSet.PwdHash, pwdSet.PwdSalt);
-    }
-
-    public static class Json
-    {
-        public static string Serialize(object obj) => JsonSerializer.Serialize(obj);
-
-        public static T? Deserialize<T>(string str) => JsonSerializer.Deserialize<T>(str);
     }
 }

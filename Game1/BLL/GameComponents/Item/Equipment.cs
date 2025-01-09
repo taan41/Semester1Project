@@ -10,8 +10,8 @@ class Equipment : Item
 
     public EquipType Type { get; set; } = EquipType.Weapon;
     public int BonusATK { get; set; } = 0;
-    public int BonusMaxHP { get; set; } = 0;
-    public int BonusMaxMP { get; set; } = 0;
+    public int BonusHP { get; set; } = 0;
+    public int BonusMP { get; set; } = 0;
 
     public Equipment() {}
 
@@ -20,8 +20,8 @@ class Equipment : Item
     {
         Type = type;
         BonusATK = atk;
-        BonusMaxHP = hp;
-        BonusMaxMP = mp;
+        BonusHP = hp;
+        BonusMP = mp;
 
         ID = IDTracker[(int) Rarity]++;
         Price = Price * (100 + EquipMultiplier) / 100;
@@ -30,8 +30,8 @@ class Equipment : Item
     public Equipment(Equipment other) : base(other.Name, other.Rarity, other.Price)
     {
         BonusATK = other.BonusATK;
-        BonusMaxHP = other.BonusMaxHP;
-        BonusMaxMP = other.BonusMaxMP;
+        BonusHP = other.BonusHP;
+        BonusMP = other.BonusMP;
         Type = other.Type;
         ID = other.ID;
     }
@@ -47,16 +47,16 @@ class Equipment : Item
             Console.Write($" [ {(BonusATK > 0 ? "+" : "-")}{BonusATK} ATK]");
         }
 
-        if (BonusMaxHP != 0)
+        if (BonusHP != 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write($" [ {(BonusMaxHP > 0 ? "+" : "-")}{BonusMaxHP} HP]");
+            Console.Write($" [ {(BonusHP > 0 ? "+" : "-")}{BonusHP} HP]");
         }
 
-        if (BonusMaxMP != 0)
+        if (BonusMP != 0)
         {
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write($" [ {(BonusMaxMP > 0 ? "+" : "-")}{BonusMaxMP} MP]");
+            Console.Write($" [ {(BonusMP > 0 ? "+" : "-")}{BonusMP} MP]");
         }
         
         Console.ResetColor();
@@ -78,20 +78,20 @@ class Equipment : Item
             Console.Write($" [{(BonusATK > 0 ? "+" : "-")}{BonusATK}]");
         }
 
-        if (BonusMaxHP != 0)
+        if (BonusHP != 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write($" [{(BonusMaxHP > 0 ? "+" : "-")}{BonusMaxHP}]");
+            Console.Write($" [{(BonusHP > 0 ? "+" : "-")}{BonusHP}]");
         }
 
-        if (BonusMaxMP != 0)
+        if (BonusMP != 0)
         {
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write($" [{(BonusMaxMP > 0 ? "+" : "-")}{BonusMaxMP}]");
+            Console.Write($" [{(BonusMP > 0 ? "+" : "-")}{BonusMP}]");
         }
         
         Console.ResetColor();
-        Console.WriteLine("  ");
+        Console.WriteLine("    ");
     }
 }
 

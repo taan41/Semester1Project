@@ -5,7 +5,7 @@ enum CommandType
     Empty, Ping, Error, GetAES,
     UpdateAsset,
     CheckUsername, Register,
-    GetUserPwd, Login, Logout,
+    GetUserPwd, Login, Logout, RequestResetPwd, ResetPwd,
     ChangeNickname, ChangeEmail, ChangePassword,
     UploadScore, GetUserScores, GetMonthlyScores, GetAllTimeScores,
     UploadSave, DownloadSave,
@@ -13,10 +13,18 @@ enum CommandType
 }
 
 [Serializable]
-class Command(CommandType cmdType = CommandType.Empty, string? payload = null)
+class Command
 {
-    public CommandType CommandType { get; set; } = cmdType;
-    public string Payload { get; set; } = payload ?? "";
+    public CommandType CommandType { get; set; } = CommandType.Empty;
+    public string Payload { get; set; } = "";
+
+    public Command() {}
+
+    public Command(CommandType cmdType, string? payload = null)
+    {
+        CommandType = cmdType;
+        Payload = payload ?? "";
+    }
 
     public void Set(CommandType cmdType, string? payload = null)
     {
@@ -30,9 +38,9 @@ class Command(CommandType cmdType = CommandType.Empty, string? payload = null)
     public string Name()
         => CommandType.ToString();
 
-    public string Serialize()
+    public string ToJson()
         => JsonSerializer.Serialize(this);
 
-    public static Command? Deserialize(string data) =>
+    public static Command? FromJson(string data) =>
         JsonSerializer.Deserialize<Command>(data);
 }

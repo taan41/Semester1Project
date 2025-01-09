@@ -24,8 +24,8 @@ register screen:
 -> login screen
 
 reset password screen:
-  + username -- check username & get email
-  + email
+  + username -- check username
+  + email -- confirm username & email
   + new password
   + confirm new password -- update user data
 -> login screen

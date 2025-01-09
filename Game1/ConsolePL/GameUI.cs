@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
-using static System.Console;
 
+using static System.Console;
 using static GameUIHelper;
 
 static class GameUI
@@ -55,13 +55,17 @@ static class GameUI
         {
             while(!stopToken.IsCancellationRequested)
             {
-                SetCursorPosition(0, CursorPos.MainTitleTop);
-                for (int i = 0; i < background.Length; i++)
+                lock (ConsoleLock)
                 {
-                    Write($"{background[i][lineIndex..]}{background[i][0..lineIndex]}");
-                    UIMisc.WriteCenter(titles[randomTitle][i]);
+                    SetCursorPosition(0, CursorPos.TitleAnimationTop);
+                    for (int i = 0; i < background.Length; i++)
+                    {
+                        Write($"{background[i][lineIndex..]}{background[i][0..lineIndex]}");
+                        WriteCenter(titles[randomTitle][i]);
+                    }
                 }
-                lineIndex += 1;
+
+                lineIndex++;
                 lineIndex %= lineLength;
                 
                 await Task.Delay(400, stopToken);
@@ -90,88 +94,195 @@ static class GameUI
 
     public static void WarningPopup(string warning)
     {
-        CursorTop = CursorPos.WarningTop;
-        UIMisc.WriteCenter($"╔{new string('═', UIConstants.WarningWidth)}╗");
-        for (int i = 0; i < UIConstants.WarningHeight - 2; i++)
-            UIMisc.WriteCenter($"║{new string(' ', UIConstants.WarningWidth)}║");
-        UIMisc.WriteCenter($"╚{new string('═', UIConstants.WarningWidth)}╝");
+        StopTitleAnim();
+        CursorTop = CursorPos.PopupTop;
+        WriteCenter($"╔{new string('═', UIConstants.PopupWidth)}╗");
+        for (int i = 0; i < UIConstants.PopupHeight - 2; i++)
+            WriteCenter($"║{new string(' ', UIConstants.PopupWidth)}║");
+        WriteCenter($"╚{new string('═', UIConstants.PopupWidth)}╝");
 
-        CursorTop = CursorPos.WarningTop + 2;
-        UIMisc.WriteCenter(@".");
-        UIMisc.WriteCenter(@"/ \");
-        UIMisc.WriteCenter(@"/ ┃ \");
-        UIMisc.WriteCenter(@"/  •  \");
-        UIMisc.WriteCenter(@"‾‾‾‾‾‾‾");
+        CursorTop = CursorPos.PopupTop + 2;
+        WriteCenter(@".");
+        WriteCenter(@"/ \");
+        WriteCenter(@"/ ┃ \");
+        WriteCenter(@"/  •  \");
+        WriteCenter(@"‾‾‾‾‾‾‾");
 
         CursorTop++;
-        UIMisc.WriteCenter(warning);
+        WriteCenter(warning);
+        ReadKey(true);
     }
 
-    public static void WelcomeScreen(List<string> options)
+    public static void SuccessPopup(string msg)
     {
-        Clear();
-        UIMisc.DrawLine('=');
-        CursorTop += 9;
-        UIMisc.DrawLine('=');
-        int optionsCursorTop = CursorTop;
-        CursorTop += 6;
-        UIMisc.DrawLine('-');
+        StopTitleAnim();
+        CursorTop = CursorPos.PopupTop;
+        WriteCenter($"╔{new string('═', UIConstants.PopupWidth)}╗");
+        for (int i = 0; i < UIConstants.PopupHeight - 2; i++)
+            WriteCenter($"║{new string(' ', UIConstants.PopupWidth)}║");
+        WriteCenter($"╚{new string('═', UIConstants.PopupWidth)}╝");
 
-        CursorTop = optionsCursorTop;
-        WriteLine();
-        foreach (var option in options)
+        CursorTop = CursorPos.PopupTop + 2;
+        WriteCenter(@"┌           ┐");
+        WriteCenter(@"│       ╱   │");
+        WriteCenter(@"│   ╲  ╱    │");
+        WriteCenter(@"│    ╲╱     │");
+        WriteCenter(@"└           ┘");
+
+        CursorTop++;
+        WriteCenter(msg);
+        ReadKey(true);
+    }
+
+    public static void TitleScreenBorders(bool clear = true, bool clearOptionsZone = false)
+    {
+        lock (ConsoleLock)
         {
-            CursorLeft = CursorPos.MainMenuLeft;
-            WriteLine($" {option}        ");
+            if (clear)
+                Clear();
+            else
+                SetCursorPosition(0, 0);
+
+            DrawLine('=');
+            CursorTop += 9;
+            DrawLine('=');
+
+            if (clearOptionsZone)
+            {
+                do
+                    WriteLine(new string(' ', UIConstants.UIWidth));
+                while (CursorTop < CursorPos.BottomBorderTop);
+            }
+            else
+                CursorTop = CursorPos.BottomBorderTop;
+
+            DrawLine('-');
         }
     }
 
-    public static int? PlayOnlineScreen()
+    public static void PrintTitleScreenOptions(List<string> options)
     {
-        WriteLine("WIP");
-        return null;
-    }
-
-    public static void StartScreen(List<string> options, bool clear = true)
-    {
-        if (clear) Clear();
-        else SetCursorPosition(0, 0);
-        UIMisc.DrawLine('=');
-        CursorTop += 9;
-        UIMisc.DrawLine('=');
-        int optionsCursorTop = CursorTop;
-        CursorTop += 6;
-        UIMisc.DrawLine('-');
-
-        CursorTop = optionsCursorTop;
-        WriteLine();
+        CursorTop = CursorPos.TitleScreenMenuTop;
         foreach (var option in options)
         {
-            CursorLeft = CursorPos.MainMenuLeft;
-            WriteLine($" {option}                 ");
+            CursorLeft = CursorPos.TitleScreenMenuLeft;
+            WriteLine($" {option,-(UIConstants.UIWidth - CursorPos.TitleScreenMenuLeft - 1)}");
         }
     }
+
+    public static void ConnectingScreen(ref NetworkHandler? networkHandler)
+    {
+        TitleScreenBorders(false, true);
+        int connectResultCursorTop;
+        lock (ConsoleLock)
+        {
+            SetCursorPosition(CursorPos.TitleScreenMenuLeft2, CursorPos.TitleScreenMenuTop);
+            WriteLine(" Connecting to server...");
+            connectResultCursorTop = CursorTop;
+        }
+
+        networkHandler = new(out string? error);
+        int updateDataCursorTop;
+        if (error != null)
+        {
+            networkHandler = null;
+            lock (ConsoleLock)
+            {
+                SetCursorPosition(CursorPos.TitleScreenMenuLeft2, connectResultCursorTop);
+                WriteLine($" Error: {error}");
+                CursorLeft = CursorPos.TitleScreenMenuLeft2;
+                CursorTop++;
+                WriteLine(" Press any key to continue...");
+            }
+            ReadKey(true);
+            TitleScreenBorders(false, true);
+            return;
+        }
+        else
+        {
+            lock (ConsoleLock)
+            {
+                SetCursorPosition(CursorPos.TitleScreenMenuLeft2, connectResultCursorTop);
+                WriteLine(" Connected successfully!");
+                updateDataCursorTop = CursorTop + 1;
+            }
+        }
+
+        lock (ConsoleLock)
+        {
+            SetCursorPosition(CursorPos.TitleScreenMenuLeft2, updateDataCursorTop);
+            WriteLine(" Updating game data...");
+            CursorLeft = CursorPos.TitleScreenMenuLeft2;
+            WriteLine(" Updated successfully!");
+            CursorLeft = CursorPos.TitleScreenMenuLeft2;
+            CursorTop++;
+            WriteLine(" Press any key to continue...");
+        }
+
+        ReadKey(true);
+        TitleScreenBorders(false, true);
+    }
+
+    // public static void OnlineScreen(List<string> options)
+    // {
+    //     Clear();
+    //     DrawHeader();
+    //     CursorTop = CursorPos.BottomBorderTop;
+    //     DrawLine('-');
+
+    //     CursorTop = CursorPos.StartScreenMainMenuTop;
+    //     foreach (var option in options)
+    //     {
+    //         WriteLine($" {option}                 ");
+    //     }
+    // }
+
+    // public static void StartRunMainMenuScreen(List<string> options)
+    // {
+    //     Clear();
+    //     DrawHeader();
+    //     CursorTop = CursorPos.BottomBorderTop;
+    //     DrawLine('-');
+
+    //     CursorTop = CursorPos.StartScreenMainMenuTop;
+    //     foreach (var option in options)
+    //     {
+    //         WriteLine($" {option}                 ");
+    //     }
+    // }
+
+    // public static void StartRunSubMenuScreen(List<string> options)
+    // {
+    //     SetCursorPosition(0, CursorPos.StartScreenSubMenuTop - 2);
+    //     DrawLine('-');
+
+    //     CursorTop = CursorPos.StartScreenSubMenuTop;
+    //     foreach (var option in options)
+    //     {
+    //         WriteLine($" {option}                 ");
+    //     }
+    // }
 
     public static void PausePopup(List<string> pauseOptions, TimeSpan? elapsedTime = null)
     {
-        CursorTop = CursorPos.PauseBorderTop;
-        UIMisc.WriteCenter($"╔{new string('═', UIConstants.PauseWidth)}╗");
-        for (int i = 0; i < UIConstants.PauseHeight - 2; i++)
-            UIMisc.WriteCenter($"║{new string(' ', UIConstants.PauseWidth)}║");
-        UIMisc.WriteCenter($"╚{new string('═', UIConstants.PauseWidth)}╝");
+        CursorTop = CursorPos.PausePopupTop;
+        WriteCenter($"╔{new string('═', UIConstants.PausePopupWidth)}╗");
+        for (int i = 0; i < UIConstants.PausePopupHeight - 2; i++)
+            WriteCenter($"║{new string(' ', UIConstants.PausePopupWidth)}║");
+        WriteCenter($"╚{new string('═', UIConstants.PausePopupWidth)}╝");
 
-        CursorTop = CursorPos.PauseOptionTop;
+        CursorTop = CursorPos.PauseMenuTop;
         foreach(var option in pauseOptions)
         {
-            CursorLeft = CursorPos.PauseOptionLeft;
+            CursorLeft = CursorPos.PauseMenuLeft;
             WriteLine(option);
         }
 
         if (elapsedTime != null)
         {
-            CursorTop = CursorPos.PauseTimeTop;
-            UIMisc.WriteCenter("Run Time:");
-            UIMisc.WriteCenter($"{elapsedTime:hh\\:mm\\:ss\\.fff}");
+            CursorTop = CursorPos.PauseElapsedTimeTop;
+            WriteCenter("Run Time:");
+            WriteCenter($"{elapsedTime:hh\\:mm\\:ss\\.fff}");
         }
     }
 
@@ -208,11 +319,11 @@ static class GameUI
         if (setCursor)
             SetCursorPosition(0, 0);
 
-        UIMisc.DrawLine('=');
+        DrawLine('=');
         ForegroundColor = ConsoleColor.Cyan;
-        UIMisc.WriteCenter(GameTitle);
+        WriteCenter(GameTitle);
         ResetColor();
-        UIMisc.DrawLine('=');
+        DrawLine('=');
     }
 
     public static void GenericGameScreen(GameData gameData)
@@ -220,69 +331,90 @@ static class GameUI
         Clear();
         DrawHeader();
         gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        Write(new string('\n', UIConstants.MainZoneHeight));
-        UIMisc.DrawLine('-');
-        Write(new string('\n', UIConstants.SubZoneHeight));
-        UIMisc.DrawLine('-');
+
+        DrawLine('-');
+        CursorTop += UIConstants.MainZoneHeight;
+    
+        DrawLine('-');
+        CursorTop += UIConstants.SubZoneHeight;
+
+        DrawLine('-');
         gameData.Player.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
     }
 
-    public static void RouteScreen(GameData gameData, List<Event> routes, List<string> invOptions)
+    public static void PrintMainZone(List<string> options, string? msg = null)
     {
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        PrintComponents(routes, UIConstants.MainZoneHeight, " -- Pick a Route:");
-        UIMisc.DrawLine('-');
-        PrintOptions(invOptions, UIConstants.SubZoneHeight, " -- Inventory:");
-        UIMisc.DrawLine('-');
-        gameData.Player.Print();
-        UIMisc.DrawLine('-');
+        CursorTop = CursorPos.MainZoneTop;
+        if (msg != null)
+            WriteLine($" -- {msg}");
+        options.ForEach(option => WriteLine($" {option}"));
     }
 
-    public static void InventoryScreen<T>(GameData gameData, List<T> inv, List<T> equipped) where T : Item
+    public static void PrintMainZone<T>(List<T> components, string? msg = null) where T : Component
     {
-        Clear();
-        DrawHeader(false);
-        gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        PrintComponents(inv, UIConstants.MainZoneHeight, " -- Inventory:");
-        UIMisc.DrawLine('-');
-        PrintComponents(equipped, UIConstants.SubZoneHeight, " -- Currently Equipped:");
-        UIMisc.DrawLine('-');
-        gameData.Player.Print();
-        UIMisc.DrawLine('-');
+        CursorTop = CursorPos.MainZoneTop;
+        if (msg != null)
+            WriteLine($" -- {msg}");
+        components.ForEach(components => components.Print());
     }
 
-    public static void FightScreen(GameData gameData, List<Monster> monsters, List<string> actions)
+    public static void PrintSubZone(List<string> options, string? msg = null)
     {
-        Clear();
-        DrawHeader();
-        gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        PrintComponents(monsters, UIConstants.MainZoneHeight);
-        UIMisc.DrawLine('-');
-        PrintOptions(actions, UIConstants.SubZoneHeight, " -- Actions:");
-        UIMisc.DrawLine('-');
-        gameData.Player.Print();
-        UIMisc.DrawLine('-');
+        CursorTop = CursorPos.SubZoneTop;
+        if (msg != null)
+            WriteLine($" -- {msg}");
+        options.ForEach(option => WriteLine($" {option}"));
     }
+
+    public static void PrintSubZone<T>(List<T> components, string? msg = null) where T : Component
+    {
+        CursorTop = CursorPos.SubZoneTop;
+        if (msg != null)
+            WriteLine($" -- {msg}");
+        components.ForEach(components => components.Print());
+    }
+
+    // public static void InventoryScreen<T>(GameData gameData, List<T> inv, List<T> equipped) where T : Item
+    // {
+    //     Clear();
+    //     DrawHeader(false);
+    //     gameData.Progress.Print();
+    //     DrawLine('-');
+    //     PrintComponents(inv, UIConstants.MainZoneHeight, " -- Inventory:");
+    //     DrawLine('-');
+    //     PrintComponents(equipped, UIConstants.SubZoneHeight, " -- Currently Equipped:");
+    //     DrawLine('-');
+    //     gameData.Player.Print();
+    //     DrawLine('-');
+    // }
+
+    // public static void FightScreen(GameData gameData, List<Monster> monsters, List<string> actions)
+    // {
+    //     Clear();
+    //     DrawHeader();
+    //     gameData.Progress.Print();
+    //     DrawLine('-');
+    //     PrintComponents(monsters, UIConstants.MainZoneHeight);
+    //     DrawLine('-');
+    //     PrintOptions(actions, UIConstants.SubZoneHeight, " -- Actions:");
+    //     DrawLine('-');
+    //     gameData.Player.Print();
+    //     DrawLine('-');
+    // }
 
     public static void FightSkillScreen(GameData gameData, List<Monster> monsters, List<Skill> skills)
     {
         Clear();
         DrawHeader();
         gameData.Progress.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         PrintComponents(monsters, UIConstants.MainZoneHeight);
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         PrintComponents(skills, UIConstants.SubZoneHeight);
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         gameData.Player.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
     }
 
     public static void RewardScreen(GameData gameData, List<Item> rewards)
@@ -290,61 +422,13 @@ static class GameUI
         Clear();
         DrawHeader();
         gameData.Progress.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         PrintComponents(rewards, UIConstants.MainZoneHeight, " -- Rewards:");
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         Write(new string('\n', UIConstants.SubZoneHeight));
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         gameData.Player.Print();
-        UIMisc.DrawLine('-');
-    }
-
-    public static void GameOverScreen(List<string> options)
-    {
-        Clear();
-        DrawHeader();
-        WriteLine();
-        UIMisc.WriteCenter(@" _______ _______ _______ _______      _______ ___ ___ _______ ______ ");
-        UIMisc.WriteCenter(@"|     __|   _   |   |   |    ___|    |       |   |   |    ___|   __ \");
-        UIMisc.WriteCenter(@"|    |  |       |       |    ___|    |   -   |   |   |    ___|      <");
-        UIMisc.WriteCenter(@"|_______|___|___|__|_|__|_______|    |_______|\_____/|_______|___|__|");
-        WriteLine();
-        WriteLine();
-        UIMisc.DrawLine('-');
-        CursorTop += 7;
-        UIMisc.DrawLine('-');
-
-        CursorTop = CursorPos.EndMenuTop;
-        foreach (var option in options)
-        {
-            CursorLeft = CursorPos.MainMenuLeft;
-            WriteLine($" {option}        ");
-        }
-    }
-
-    public static void VictoryScreen(TimeSpan elapsedTime, List<string> options)
-    {
-        Clear();
-        DrawHeader();
-        WriteLine();
-        UIMisc.WriteCenter(@" ___ ___ _______ ______ _______ _______ ______ ___ ___ __ ");
-        UIMisc.WriteCenter(@"|   |   |_     _|      |_     _|       |   __ \   |   |  |");
-        UIMisc.WriteCenter(@"|   |   |_|   |_|   ---| |   | |   -   |      <\     /|__|");
-        UIMisc.WriteCenter(@" \_____/|_______|______| |___| |_______|___|__| |___| |__|");
-        WriteLine();
-        WriteLine();
-        UIMisc.DrawLine('-');
-        CursorTop += 7;
-        UIMisc.DrawLine('-');
-
-        CursorTop = CursorPos.EndMenuTop;
-        UIMisc.WriteCenter($"Run duration: {elapsedTime:hh\\:mm\\:ss\\.fff}");
-        WriteLine();
-        foreach (var option in options)
-        {
-            CursorLeft = CursorPos.MainMenuLeft;
-            WriteLine($" {option}        ");
-        }
+        DrawLine('-');
     }
 
     public static void ShopMainScreen(GameData gameData, List<string> actions)
@@ -352,18 +436,18 @@ static class GameUI
         Clear();
         DrawHeader();
         gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        UIMisc.WriteCenter(@"   _____________________________                            ");
-        UIMisc.WriteCenter(@"  /    _____ _____ _____ _____  \            ┌─────────┐    ");
-        UIMisc.WriteCenter(@" /   |   __|  |  |     |  _  |   \           │   ♦$♦   │    ");
-        UIMisc.WriteCenter(@"|    |__   |     |  |  |   __|    |      ════╪═════════╪════");
-        UIMisc.WriteCenter(@" \   |_____|__|__|_____|__|      /           │ █     █ │    ");
-        UIMisc.WriteCenter(@"  \_____________________________/            ;  = ┴ =  ;    ");
-        UIMisc.DrawLine('-');
+        DrawLine('-');
+        WriteCenter(@"   _____________________________                            ");
+        WriteCenter(@"  /    _____ _____ _____ _____  \            ┌─────────┐    ");
+        WriteCenter(@" /   |   __|  |  |     |  _  |   \           │   ♦$♦   │    ");
+        WriteCenter(@"|    |__   |     |  |  |   __|    |      ════╪═════════╪════");
+        WriteCenter(@" \   |_____|__|__|_____|__|      /           │ █     █ │    ");
+        WriteCenter(@"  \_____________________________/            ;  = ┴ =  ;    ");
+        DrawLine('-');
         PrintOptions(actions, UIConstants.SubZoneHeight);
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         gameData.Player.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
     }
 
     public static void ShopTradingScreen<T>(GameData gameData, List<T> items, bool buying) where T : Item
@@ -371,13 +455,13 @@ static class GameUI
         Clear();
         DrawHeader();
         gameData.Progress.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         WriteLine($" -- {(buying ? "Buying:" : "Selling:")}");
         items.ForEach(item => item.PrintPrice(buying));
         CursorTop = CursorPos.PlayerZoneTop - 1;
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         gameData.Player.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
     }
 
     public static void CampfireScreen(GameData gameData)
@@ -385,11 +469,11 @@ static class GameUI
         Clear();
         DrawHeader();
         gameData.Progress.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         CursorTop += 11;
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         gameData.Player.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
 
         CancellationTokenSource animTokenSource = new();
         _ = Task.Run(() => DrawCampfire(animTokenSource.Token));
@@ -403,48 +487,96 @@ static class GameUI
         Clear();
         DrawHeader();
         gameData.Progress.Print();
-        UIMisc.DrawLine('-');
+        DrawLine('-');
         WriteLine();
-        UIMisc.WriteCenter(@"       _ _                                  ");
-        UIMisc.WriteCenter(@"    .' '.: '*:=. _                          ");
-        UIMisc.WriteCenter(@"  .' .'            '* :=. _                 ");
-        UIMisc.WriteCenter(@" /  /                      . *: -__         ");
-        UIMisc.WriteCenter(@":  :                     .'  .:     ' .     ");
-        UIMisc.WriteCenter(@":  '=._                 /  .'          \    ");
-        UIMisc.WriteCenter(@":._     '*:=._         '  /             :   ");
-        UIMisc.WriteCenter(@":  +'* =._     '* =._ :  :           _(#)   ");
-        UIMisc.WriteCenter(@":O +     : '*:=._     '  ::     _ .=*+  :   ");
-        UIMisc.WriteCenter(@":  +     | '@,-:   '* : -..=:*'      + O:   ");
-        UIMisc.WriteCenter(@":O +      ' # ,|      +''::' +       +  :   ");
-        UIMisc.WriteCenter(@":  +-._               + O::O +       + O:   ");
-        UIMisc.WriteCenter(@" *=:._  '+-._         +  ::  +       +  :   ");
-        UIMisc.WriteCenter(@"     ''*=:._  '+-._   + O::O +   _.=*'  :   ");
-        UIMisc.WriteCenter(@"           ''*=:._  ''+  ::  +*' _.;=*'     ");
-        UIMisc.DrawLine('-');
+        WriteCenter(@"       _ _                                  ");
+        WriteCenter(@"    .' '.: '*:=. _                          ");
+        WriteCenter(@"  .' .'            '* :=. _                 ");
+        WriteCenter(@" /  /                      . *: -__         ");
+        WriteCenter(@":  :                     .'  .:     ' .     ");
+        WriteCenter(@":  '=._                 /  .'          \    ");
+        WriteCenter(@":._     '*:=._         '  /             :   ");
+        WriteCenter(@":  +'* =._     '* =._ :  :           _(#)   ");
+        WriteCenter(@":O +     : '*:=._     '  ::     _ .=*+  :   ");
+        WriteCenter(@":  +     | '@,-:   '* : -..=:*'      + O:   ");
+        WriteCenter(@":O +      ' # ,|      +''::' +       +  :   ");
+        WriteCenter(@":  +-._               + O::O +       + O:   ");
+        WriteCenter(@" *=:._  '+-._         +  ::  +       +  :   ");
+        WriteCenter(@"     ''*=:._  '+-._   + O::O +   _.=*'  :   ");
+        WriteCenter(@"           ''*=:._  ''+  ::  +*' _.;=*'     ");
+        DrawLine('-');
         ReadKey(true);
         
         Clear();
         DrawHeader();
         gameData.Progress.Print();
-        UIMisc.DrawLine('-');
-        UIMisc.WriteCenter(@"  .* .'_       '*::=._                      ");
-        UIMisc.WriteCenter(@" /. _    '*:=-._      ''*::=._              ");
-        UIMisc.WriteCenter(@"' * _ '*=-._     '*:=._     :'*::=.__       ");
-        UIMisc.WriteCenter(@"     ' =_    '*=-._     '-:'  .*      `.    ");
-        UIMisc.WriteCenter(@"          *=_       '*=-._  /            \  ");
-        UIMisc.WriteCenter(@"           _(#)_           ' ._           . ");
-        UIMisc.WriteCenter(@"     _-+*'₀ ₁ ₀₀ '*=. _         *=_       : ");
-        UIMisc.WriteCenter(@".+*' ₁₀ ₁ ₁ ₀₀₁  ₀   ₁ ₁'*=-._      *=_  /  ");
-        UIMisc.WriteCenter(@": *+= _₁ ₁  ₀₁₁  ₁ ₀ ₁  ₀₁₁ ₁  ₀'*=-._(#)   ");
-        UIMisc.WriteCenter(@":O +    '*+= _ ₁₁ ₀  ₀₁₀ ₁   ₀₀ ₁  _.+' :   ");
-        UIMisc.WriteCenter(@":  +     | '@, '*+= _₀₁ ₀ ₀ ₁_.+:'   + O:   ");
-        UIMisc.WriteCenter(@":O +      ' # ,|      +''::' +       +  :   ");
-        UIMisc.WriteCenter(@":  +-._               + O::O +       + O:   ");
-        UIMisc.WriteCenter(@" *=:._  '+-._         +  ::  +       +  :   ");
-        UIMisc.WriteCenter(@"     ''*=:._  '+-._   + O::O +   _.=*'  :   ");
-        UIMisc.WriteCenter(@"           ''*=:._  ''+  ::  +*' _.;=*'     ");
-        UIMisc.DrawLine('-');
+        DrawLine('-');
+        WriteCenter(@"  .* .'_       '*::=._                      ");
+        WriteCenter(@" /. _    '*:=-._      ''*::=._              ");
+        WriteCenter(@"' * _ '*=-._     '*:=._     :'*::=.__       ");
+        WriteCenter(@"     ' =_    '*=-._     '-:'  .*      `.    ");
+        WriteCenter(@"          *=_       '*=-._  /            \  ");
+        WriteCenter(@"           _(#)_           ' ._           . ");
+        WriteCenter(@"     _-+*'₀ ₁ ₀₀ '*=. _         *=_       : ");
+        WriteCenter(@".+*' ₁₀ ₁ ₁ ₀₀₁  ₀   ₁ ₁'*=-._      *=_  /  ");
+        WriteCenter(@": *+= _₁ ₁  ₀₁₁  ₁ ₀ ₁  ₀₁₁ ₁  ₀'*=-._(#)   ");
+        WriteCenter(@":O +    '*+= _ ₁₁ ₀  ₀₁₀ ₁   ₀₀ ₁  _.+' :   ");
+        WriteCenter(@":  +     | '@, '*+= _₀₁ ₀ ₀ ₁_.+:'   + O:   ");
+        WriteCenter(@":O +      ' # ,|      +''::' +       +  :   ");
+        WriteCenter(@":  +-._               + O::O +       + O:   ");
+        WriteCenter(@" *=:._  '+-._         +  ::  +       +  :   ");
+        WriteCenter(@"     ''*=:._  '+-._   + O::O +   _.=*'  :   ");
+        WriteCenter(@"           ''*=:._  ''+  ::  +*' _.;=*'     ");
+        DrawLine('-');
         ReadKey(true);
+    }
+
+    public static void GameOverScreen(List<string> options)
+    {
+        Clear();
+        DrawHeader();
+        WriteLine();
+        WriteCenter(@" _______ _______ _______ _______      _______ ___ ___ _______ ______ ");
+        WriteCenter(@"|     __|   _   |   |   |    ___|    |       |   |   |    ___|   __ \");
+        WriteCenter(@"|    |  |       |       |    ___|    |   -   |   |   |    ___|      <");
+        WriteCenter(@"|_______|___|___|__|_|__|_______|    |_______|\_____/|_______|___|__|");
+        WriteLine();
+        WriteLine();
+        DrawLine('-');
+        CursorTop += 7;
+        DrawLine('-');
+
+        CursorTop = CursorPos.EndScreenMenuTop;
+        foreach (var option in options)
+        {
+            CursorLeft = CursorPos.EndScreenMenuLeft;
+            WriteLine($" {option}        ");
+        }
+    }
+
+    public static void VictoryScreen(TimeSpan elapsedTime, List<string> options)
+    {
+        Clear();
+        DrawHeader();
+        WriteLine();
+        WriteCenter(@" ___ ___ _______ ______ _______ _______ ______ ___ ___ __ ");
+        WriteCenter(@"|   |   |_     _|      |_     _|       |   __ \   |   |  |");
+        WriteCenter(@"|   |   |_|   |_|   ---| |   | |   -   |      <\     /|__|");
+        WriteCenter(@" \_____/|_______|______| |___| |_______|___|__| |___| |__|");
+        WriteLine();
+        WriteLine();
+        DrawLine('-');
+        CursorTop += 7;
+        DrawLine('-');
+
+        CursorTop = CursorPos.EndScreenMenuTop;
+        WriteCenter($"Run duration: {elapsedTime:hh\\:mm\\:ss\\.fff}");
+        WriteLine();
+        foreach (var option in options)
+        {
+            CursorLeft = CursorPos.EndScreenMenuLeft;
+            WriteLine($" {option}        ");
+        }
     }
 
     private static readonly string[][] campfireAnim =
@@ -666,7 +798,7 @@ static class GameUI
         {
             CursorTop = CursorPos.MainZoneTop;
             foreach(var line in campfireAnim[frameInd++])
-                UIMisc.WriteCenter(line);
+                WriteCenter(line);
             frameInd %= campfireAnim.Length;
 
             await Task.Delay(300, CancellationToken.None);

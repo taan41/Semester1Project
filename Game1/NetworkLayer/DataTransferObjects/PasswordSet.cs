@@ -1,14 +1,27 @@
 using System.Text.Json;
 
 [Serializable]
-class PasswordSet(byte[] pwdHash, byte[] pwdSalt)
+class PasswordSet
 {
-    public byte[] PwdHash { get; set; } = pwdHash;
-    public byte[] PwdSalt { get; set; } = pwdSalt;
+    public byte[] PwdHash { get; set; } = new byte[Utilities.DataConstants.pwdHashLen];
+    public byte[] PwdSalt { get; set; } = new byte[Utilities.DataConstants.pwdSaltLen];
 
-    public string Serialize()
+    public PasswordSet() {}
+
+    public PasswordSet(string password)
+    {
+        (PwdHash, PwdSalt) = Utilities.Security.HashPassword(password);
+    }
+
+    public PasswordSet(byte[] pwdHash, byte[] pwdSalt)
+    {
+        PwdHash = pwdHash;
+        PwdSalt = pwdSalt;
+    }
+
+    public string ToJson()
         => JsonSerializer.Serialize(this);
 
-    public static PasswordSet? Deserialize(string data) =>
+    public static PasswordSet? FromJson(string data) =>
         JsonSerializer.Deserialize<PasswordSet>(data);
 }

@@ -6,9 +6,9 @@ class PasswordSet(byte[] pwdHash, byte[] pwdSalt)
     public byte[] PwdHash { get; set; } = pwdHash;
     public byte[] PwdSalt { get; set; } = pwdSalt;
 
-    public string Serialize()
+    public string ToJson()
         => JsonSerializer.Serialize(this);
 
-    public static PasswordSet? Deserialize(string data) =>
+    public static PasswordSet? FromJson(string data) =>
         JsonSerializer.Deserialize<PasswordSet>(data);
 }

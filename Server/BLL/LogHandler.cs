@@ -17,7 +17,7 @@ static class LogHandler
 
     public static async void Initialize()
     {
-        var (oldLog, errorMessage) = await DBHandler.LogDB.GetAll();
+        var (oldLog, errorMessage) = await LogDB.GetAll();
 
         if(oldLog == null)
         {
@@ -37,7 +37,7 @@ static class LogHandler
         if(!initialized)
             return;
 
-        var (success, errorMessage) = await DBHandler.LogDB.Add(sourceMethod ?? "null", logContent);
+        var (success, errorMessage) = await LogDB.Add(sourceMethod ?? "null", logContent);
 
         if(success)
         {
@@ -61,7 +61,7 @@ static class LogHandler
         lock(logList)
             logList.Clear();
 
-        var (success, errorMessage) = await DBHandler.LogDB.Clear();
+        var (success, errorMessage) = await LogDB.Clear();
 
         if(!success)
         {

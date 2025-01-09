@@ -12,4 +12,7 @@ class GameData
 
     public string ToJson()
         => JsonSerializer.Serialize(this);
+
+    public static GameData? FromJson(string data)
+        => JsonSerializer.Deserialize<GameData>(data);
 }

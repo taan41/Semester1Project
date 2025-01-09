@@ -41,12 +41,12 @@ class ClientHandler
 
             while((bytesRead = await stream.ReadAsync(memory, token)) > 0)
             {
-                receivedCmd = Json.Deserialize<Command>(Encode.GetString(buffer, 0, bytesRead));
+                receivedCmd = Command.FromJson(Encode.GetString(buffer, 0, bytesRead));
 
                 switch (receivedCmd?.CommandType)
                 {
                     case CommandType.Ping:
-                        cmdToSend.Set(CommandType.Ping, null);
+                        cmdToSend = new(CommandType.Ping, null);
                         break;
 
                     case CommandType.CheckUsername:
@@ -56,7 +56,7 @@ class ClientHandler
                     case CommandType.Register:
                         cmdToSend = await Register(receivedCmd);
                         break;
-
+                    
                     case CommandType.GetUserPwd:
                         (cmdToSend, tempUser) = await GetUserPwd(receivedCmd);
                         break;
@@ -73,12 +73,17 @@ class ClientHandler
                         cmdToSend = await ChangeNickname(receivedCmd);
                         break;
 
+                    case CommandType.ChangeEmail:
+                        cmdToSend = await ChangeEmail(receivedCmd);
+                        break;
+
                     case CommandType.ChangePassword:
                         cmdToSend = await ChangePassword(receivedCmd);
                         break;
 
                     case CommandType.Disconnect:
-                        LogHandler.AddLog($"Client disconnected", this);
+                        cmdToSend = Disconnect(receivedCmd);
+                        await stream.WriteAsync(Encode.GetBytes(cmdToSend.ToJson()), token);
                         return;
 
                     default:
@@ -88,7 +93,7 @@ class ClientHandler
 
                 if (cmdToSend.CommandType != CommandType.Empty)
                 {
-                    await stream.WriteAsync(Encode.GetBytes(Json.Serialize(cmdToSend)), token);
+                    await stream.WriteAsync(Encode.GetBytes(cmdToSend.ToJson()), token);
                     cmdToSend.Set(CommandType.Empty, null);
                 }
             }
@@ -108,7 +113,7 @@ class ClientHandler
 
     private async Task<Command> CheckUsername(Command cmd)
     {
-        var (success, errorMessage) = await DBHandler.UserDB.CheckUsername(cmd.Payload);
+        var (success, errorMessage) = await UserDB.CheckUsername(cmd.Payload);
 
         if(!success)
             return Helper.ErrorCmd(this, cmd, errorMessage, false);
@@ -118,12 +123,12 @@ class ClientHandler
 
     private async Task<Command> Register(Command cmd)
     {
-        User? registeredUser = Json.Deserialize<User>(cmd.Payload);
+        User? registeredUser = User.FromJson(cmd.Payload);
 
         if(registeredUser == null)
             return Helper.ErrorCmd(this, cmd, "Invalid registering user");
 
-        var (success, errorMessage) = await DBHandler.UserDB.Add(registeredUser);
+        var (success, errorMessage) = await UserDB.Add(registeredUser);
 
         if(!success)
             return Helper.ErrorCmd(this, cmd, errorMessage);
@@ -134,7 +139,7 @@ class ClientHandler
 
     private async Task<(Command cmdToSend, User? requestedUser)> GetUserPwd(Command cmd)
     {
-        var (requestedUser, errorMessage) = await DBHandler.UserDB.Get(cmd.Payload);
+        var (requestedUser, errorMessage) = await UserDB.Get(cmd.Payload);
 
         if(requestedUser == null)
             return (Helper.ErrorCmd(this, cmd, errorMessage, false), null);
@@ -142,7 +147,7 @@ class ClientHandler
         if(requestedUser.PwdSet == null)
             return (Helper.ErrorCmd(this, cmd, "No password found"), null);
 
-        return (new(cmd.CommandType, Json.Serialize(requestedUser.PwdSet)), requestedUser);
+        return (new(cmd.CommandType, requestedUser.PwdSet.ToJson()), requestedUser);
     }
 
     private Command Login(Command cmd, User? tempUser)
@@ -152,7 +157,7 @@ class ClientHandler
 
         user = tempUser;
         LogHandler.AddLog($"Logged in as {user}", endPoint);
-        return new(cmd.CommandType, Json.Serialize(user));
+        return new(cmd.CommandType, user.ToJson());
     }
 
     private Command Logout(Command cmd)
@@ -172,7 +177,7 @@ class ClientHandler
 
         string newNickname = cmd.Payload;
 
-        var (success, errorMessage) = await DBHandler.UserDB.Update(user.UserID, newNickname, null, null);
+        var (success, errorMessage) = await UserDB.Update(user.UserID, newNickname, null, null);
 
         if(!success)
             return Helper.ErrorCmd(this, cmd, errorMessage);
@@ -189,7 +194,7 @@ class ClientHandler
 
         string newEmail = cmd.Payload;
 
-        var (success, errorMessage) = await DBHandler.UserDB.Update(user.UserID, newEmail, null, null);
+        var (success, errorMessage) = await UserDB.Update(user.UserID, newEmail, null, null);
 
         if(!success)
             return Helper.ErrorCmd(this, cmd, errorMessage);
@@ -204,15 +209,22 @@ class ClientHandler
         if(user == null || user.UserID < 1)
             return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-        var newPwd = Json.Deserialize<PasswordSet>(cmd.Payload);
+        var newPwd = PasswordSet.FromJson(cmd.Payload);
 
-        var (success, errorMessage) = await DBHandler.UserDB.Update(user.UserID, null, null, newPwd);
+        var (success, errorMessage) = await UserDB.Update(user.UserID, null, null, newPwd);
 
         if(!success)
             return Helper.ErrorCmd(this, cmd, errorMessage);
         
         LogHandler.AddLog($"Changed password of {user}", this);
         user.PwdSet = newPwd;
+        return new(cmd.CommandType);
+    }
+
+    private Command Disconnect(Command cmd)
+    {
+        LogHandler.AddLog($"Disconnected", this);
+        user = null;
         return new(cmd.CommandType);
     }
 

@@ -1,39 +1,39 @@
 using System.Text.Json;
 
-enum EquipType
+enum SkillType
 {
-    Weapon, Armor, Ring
+    Single, Random, All
 }
 
 [Serializable]
-class Equipment : Item
+class Skill : Item
 {
     public static readonly int[] IDTracker = [1, 101, 201, 301];
+    
+    public SkillType Type { get; set; }
+    public int Damage { get; set; } = 0;
+    public int Heal { get; set; } = 0;
+    public int MPCost { get; set; } = 0;
 
-    public EquipType Type { get; set; } = EquipType.Weapon;
-    public int BonusATK { get; set; } = 0;
-    public int BonusMaxHP { get; set; } = 0;
-    public int BonusMaxMP { get; set; } = 0;
+    public Skill() {}
 
-    public Equipment() {}
-
-    public Equipment(string name, int atk, int hp, int mp, ItemRarity rarity = ItemRarity.Common, EquipType type = EquipType.Weapon, int price = 0)
+    public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, SkillType type = SkillType.Single, int price = -1)
         : base(name, rarity, price)
     {
         Type = type;
-        BonusATK = atk;
-        BonusMaxHP = hp;
-        BonusMaxMP = mp;
+        Damage = dmg;
+        Heal = heal;
+        MPCost = mpcost;
 
         ID = IDTracker[(int) Rarity]++;
-        Price = Price * (100 + EquipMultiplier) / 100;
+        Price = Price * (100 + SkillMultiplier) / 100;
     }
 
-    public Equipment(Equipment other) : base(other.Name, other.Rarity, other.Price)
+    public Skill(Skill other) : base(other.Name, other.Rarity, other.Price)
     {
-        BonusATK = other.BonusATK;
-        BonusMaxHP = other.BonusMaxHP;
-        BonusMaxMP = other.BonusMaxMP;
+        Damage = other.Damage;
+        Heal = other.Heal;
+        MPCost = other.MPCost;
         Type = other.Type;
         ID = other.ID;
     }
@@ -41,9 +41,9 @@ class Equipment : Item
         => JsonSerializer.Serialize(this);
 }
 
-class EquipmentComparer : IComparer<Equipment>
+class SkillComparer : IComparer<Skill>
 {
-    public int Compare(Equipment? x, Equipment? y)
+    public int Compare(Skill? x, Skill? y)
     {
         if (x == null && y == null) return 0;
         if (x == null) return 1;

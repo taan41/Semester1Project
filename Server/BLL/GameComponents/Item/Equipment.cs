@@ -1,49 +1,50 @@
 using System.Text.Json;
 
-enum TargetType
+enum EquipType
 {
-    Single, Random, All
+    Weapon, Armor, Ring
 }
 
 [Serializable]
-class Skill : Item
+class Equipment : Item
 {
     public static readonly int[] IDTracker = [1, 101, 201, 301];
-    
-    public TargetType Type { get; set; }
-    public int Damage { get; set; } = 0;
-    public int Heal { get; set; } = 0;
-    public int MPCost { get; set; } = 0;
 
-    public Skill() {}
+    public EquipType Type { get; set; } = EquipType.Weapon;
+    public int BonusATK { get; set; } = 0;
+    public int BonusHP { get; set; } = 0;
+    public int BonusMP { get; set; } = 0;
 
-    public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, TargetType type = TargetType.Single, int price = -1)
+    public Equipment() {}
+
+    public Equipment(string name, int atk, int hp, int mp, ItemRarity rarity = ItemRarity.Common, EquipType type = EquipType.Weapon, int price = 0)
         : base(name, rarity, price)
     {
         Type = type;
-        Damage = dmg;
-        Heal = heal;
-        MPCost = mpcost;
+        BonusATK = atk;
+        BonusHP = hp;
+        BonusMP = mp;
 
         ID = IDTracker[(int) Rarity]++;
-        Price = Price * (100 + SkillMultiplier) / 100;
+        Price = Price * (100 + EquipMultiplier) / 100;
     }
 
-    public Skill(Skill other) : base(other.Name, other.Rarity, other.Price)
+    public Equipment(Equipment other) : base(other.Name, other.Rarity, other.Price)
     {
-        Damage = other.Damage;
-        Heal = other.Heal;
-        MPCost = other.MPCost;
+        BonusATK = other.BonusATK;
+        BonusHP = other.BonusHP;
+        BonusMP = other.BonusMP;
         Type = other.Type;
         ID = other.ID;
     }
+    
     public override string ToJson()
         => JsonSerializer.Serialize(this);
 }
 
-class SkillComparer : IComparer<Skill>
+class EquipmentComparer : IComparer<Equipment>
 {
-    public int Compare(Skill? x, Skill? y)
+    public int Compare(Equipment? x, Equipment? y)
     {
         if (x == null && y == null) return 0;
         if (x == null) return 1;

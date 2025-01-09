@@ -1,4 +1,4 @@
-enum TargetType
+enum SkillType
 {
     Single, Random, All
 }
@@ -8,14 +8,14 @@ class Skill : Item
 {
     public static readonly int[] IDTracker = [1, 101, 201, 301];
     
-    public TargetType Type { get; set; }
+    public SkillType Type { get; set; }
     public int Damage { get; set; } = 0;
     public int Heal { get; set; } = 0;
     public int MPCost { get; set; } = 0;
 
     public Skill() {}
 
-    public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, TargetType type = TargetType.Single, int price = -1)
+    public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, SkillType type = SkillType.Single, int price = -1)
         : base(name, rarity, price)
     {
         Type = type;
@@ -80,7 +80,7 @@ class Skill : Item
         }
 
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine($" ({MPCost} MP)  ");
+        Console.WriteLine($" ({MPCost} MP)    ");
         Console.ResetColor();
     }
 }

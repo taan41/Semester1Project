@@ -68,7 +68,7 @@ class Monster : Entity
         
         base.Print();
         Console.Write($"| ATK: {ATK,-3} ");
-        GameUIHelper.UIMisc.DrawBar(HP, MaxHP, true, barLen, ConsoleColor.Red);
+        GameUIHelper.DrawBar(HP, MaxHP, true, barLen, ConsoleColor.Red);
     }
 }
 

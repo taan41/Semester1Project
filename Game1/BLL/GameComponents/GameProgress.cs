@@ -65,4 +65,7 @@ class GameProgress
         }
         Console.WriteLine(sb);
     }
+
+    public override string ToString()
+        => $"Room {_room}/{MaxRoom} - Floor {_floor}";
 }

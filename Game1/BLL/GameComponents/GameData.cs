@@ -2,12 +2,19 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 
 [Serializable]
-class GameData(int? seed = null)
+class GameData
 {
-    public int Seed { get; set; } = seed.HasValue ? (int)seed & int.MaxValue : GenerateSeed();
+    public int Seed { get; set; }
     public Player Player { get; set; } = Player.DefaultPlayer();
     public GameProgress Progress { get; set; } = new();
     public TimeSpan SavedTime { get; set; } = new(0);
+
+    public GameData() {}
+
+    public GameData(int? seed)
+    {
+        Seed = seed.HasValue ? (int)seed & int.MaxValue : GenerateSeed();
+    }
 
     private readonly Stopwatch _stopwatch = new();
     private TimeSpan _lastSavedTime = new(0);
@@ -21,16 +28,11 @@ class GameData(int? seed = null)
     public TimeSpan GetElapsedTime()
         => SavedTime + _stopwatch.Elapsed - _lastSavedTime;
         
-    public void Save()
+    public void SaveTime()
     {
         SavedTime += _stopwatch.Elapsed - _lastSavedTime;
         _lastSavedTime = _stopwatch.Elapsed;
-        
-        FileManager.SaveData(this);
     }
-
-    public static bool Load(out GameData? loadedData)
-        => FileManager.LoadData(out loadedData);
 
     private static int GenerateSeed()
     {

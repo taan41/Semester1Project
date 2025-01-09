@@ -11,13 +11,21 @@ class User
 
     public User() {}
 
-    public User(User userTemplate)
+    public User(string username, string nickname, string password, string email)
     {
-        UserID = userTemplate.UserID;
-        Username = userTemplate.Username;
-        Nickname = userTemplate.Nickname;
-        Email = userTemplate.Email;
-        PwdSet = userTemplate.PwdSet;
+        Username = username;
+        Nickname = nickname;
+        Email = email;
+        PwdSet = new(password);
+    }
+
+    public User(User other)
+    {
+        UserID = other.UserID;
+        Username = other.Username;
+        Nickname = other.Nickname;
+        Email = other.Email;
+        PwdSet = other.PwdSet;
     }
     
     public override string ToString()
@@ -26,9 +34,9 @@ class User
     public string ToString(bool showFullInfo)
         => showFullInfo ? $"User(ID: {UserID}, Username: {Username}, Nickname: {Nickname})" : ToString();
 
-    public string Serialize()
+    public string ToJson()
         => JsonSerializer.Serialize(this);
 
-    public static User? Deserialize(string data) =>
+    public static User? FromJson(string data) =>
         JsonSerializer.Deserialize<User>(data);
 }

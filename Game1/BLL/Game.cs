@@ -1,24 +1,30 @@
 using System.Security.Cryptography;
 
 using static GameUIHelper;
+using static Utilities;
 
 class Game
 {
+    private static NetworkHandler? networkHandler;
+
     public static void Start()
     {
         List<string> welcomeOptions = ["PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
+        GameUI.TitleScreenBorders();
 
         while(true)
         {
-            GameUI.WelcomeScreen(welcomeOptions);
             GameUI.StartTitleAnim();
 
-            Console.ReadKey(true);
-            switch(InteractiveUI.PickString(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, welcomeOptions))
+            switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, welcomeOptions))
             {
                 case 0:
+                    if (OnlineGame())
+                        goto case 1;
+                    break;
+
                 case 1:
-                    StartGame();
+                    StartRun();
                     break;
                 
                 case 2: case null:
@@ -27,50 +33,270 @@ class Game
         }
     }
 
-    // Return false if return without starting a game
-    private static bool StartGame()
+    // Return false if failed to connect to server or login
+    private static bool OnlineGame()
     {
-        List<string> playOptions = ["NEW GAME", "LOAD GAME", "CUSTOM SEED", "RETURN"];
-        GameUI.StartScreen(playOptions);
+        GameUI.ConnectingScreen(ref networkHandler);
+
+        if (networkHandler == null)
+            return false;
+
+        List<string> onlineOptions = ["REGISTER", "LOGIN", "RESET PASSWORD", "RETURN"];
+
+        while (true)
+        {
+            GameUI.TitleScreenBorders(false, true);
+            switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, onlineOptions))
+            {
+                case 0:
+                    Register();
+                    break;
+
+                case 1:
+                    // Login();
+                    return true;
+
+                case 2:
+                    // ResetPassword();
+                    break;
+
+                default:
+                    networkHandler.Close();
+                    networkHandler = null;
+                    GameUI.TitleScreenBorders(false, true);
+                    return false;
+            }
+        }
+    }
+
+    private static void Register()
+    {
+        if (networkHandler == null)
+            return;
+
+        if (!networkHandler.IsConnected)
+        {
+            GameUI.WarningPopup("Can't connect to server!");
+            GameUI.TitleScreenBorders(true);
+            GameUI.StartTitleAnim();
+            return;
+        }
+
+        GameUI.TitleScreenBorders(false, true);
+        string?
+            username = null,
+            nickname = null,
+            password = null,
+            confirmPassword = null,
+            email = null,
+            errorMsg;
+        int tempCursorLeft, tempCursorTop;
+
+        while (true)
+        {
+            lock (ConsoleLock)
+            {
+                Console.CursorTop = CursorPos.TitleScreenMenuTop;
+                Console.WriteLine(" 'ESC' to return");
+                Console.Write($" Username ({DataConstants.usernameMin} ~ {DataConstants.usernameMax} characters): ");
+                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
+                if (username != null)
+                    Console.WriteLine(username);
+            }
+
+            if (username == null)
+            {
+                username = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.usernameMax);
+                
+                if (username == null)
+                    return;
+                else if (string.IsNullOrWhiteSpace(username) || username.Length < DataConstants.usernameMin)
+                {
+                    username = null;
+                    continue;
+                }
+
+                if (!networkHandler.CheckUsername(username, out errorMsg))
+                {
+                    username = null;
+                    GameUI.WarningPopup(errorMsg);
+                    GameUI.TitleScreenBorders(true);
+                    GameUI.StartTitleAnim();
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                Console.CursorTop = CursorPos.TitleScreenMenuTop + 2;
+                Console.Write($" Password ({DataConstants.passwordMin} ~ {DataConstants.passwordMax} characters): ");
+                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
+                if (password != null)
+                    Console.WriteLine(new string('*', password.Length));
+            }
+
+            if (password == null)
+            {
+                password = ReadInput(tempCursorLeft, tempCursorTop, true, DataConstants.passwordMax);
+                
+                if (password == null)
+                    return;
+                else if (string.IsNullOrWhiteSpace(password) || password.Length < DataConstants.passwordMin)
+                {
+                    password = null;
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                Console.CursorTop = CursorPos.TitleScreenMenuTop + 3;
+                Console.Write(" Confirm Password: ");
+                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
+                if (confirmPassword != null)
+                    Console.WriteLine(new string('*', confirmPassword.Length));
+            }
+
+            if (confirmPassword == null)
+            {
+                Console.CursorTop = tempCursorTop;
+                confirmPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DataConstants.passwordMax);
+                
+                if (confirmPassword == null)
+                    return;
+                else if (string.IsNullOrWhiteSpace(confirmPassword) || confirmPassword.Length < DataConstants.passwordMin)
+                {
+                    confirmPassword = null;
+                    continue;
+                }
+                else if (password != confirmPassword)
+                {
+                    confirmPassword = null;
+                    GameUI.WarningPopup("Passwords do not match!");
+                    GameUI.TitleScreenBorders(true);
+                    GameUI.StartTitleAnim();
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                Console.CursorTop = CursorPos.TitleScreenMenuTop + 4;
+                Console.Write($" Nickname ({DataConstants.nicknameMin} ~ {DataConstants.nicknameMax} characters): ");
+                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
+                if (nickname != null)
+                    Console.WriteLine(nickname);
+            }
+
+            if (nickname == null)
+            {
+                nickname = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.nicknameMax);
+                
+                if (nickname == null)
+                    return;
+                else if (string.IsNullOrWhiteSpace(nickname) || nickname.Length < DataConstants.nicknameMin)
+                {
+                    nickname = null;
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                Console.CursorTop = CursorPos.TitleScreenMenuTop + 5;
+                Console.Write(" Email: ");
+                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
+                if (email != null)
+                    Console.WriteLine(email);
+            }
+
+            if (email == null)
+            {
+                email = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.emailLen);
+                
+                if (email == null)
+                    return;
+                else if (string.IsNullOrWhiteSpace(email))
+                {
+                    email = null;
+                    continue;
+                }
+            }
+
+            User newUser = new(username, nickname, password, email);
+            if (!networkHandler.Register(newUser, out errorMsg))
+            {
+                GameUI.WarningPopup(errorMsg);
+                GameUI.TitleScreenBorders(true);
+                GameUI.StartTitleAnim();
+                return;
+            }
+            else
+            {
+                GameUI.SuccessPopup("Registration Successful!");
+                GameUI.TitleScreenBorders(true);
+                GameUI.StartTitleAnim();
+                return;
+            }
+        }
+    }
+
+    // Return false if return without starting a game
+    private static bool StartRun()
+    {
+        List<string> playOptions = ["NEW GAME", "LOAD GAME", "RETURN"];
+        int tempCursorTop;
 
         while (true)
         {
             GameUI.StartTitleAnim();
+            GameUI.TitleScreenBorders(false, true);
 
-            Console.ReadKey(true);
-            switch(InteractiveUI.PickString(CursorPos.MainMenuLeft, CursorPos.MainMenuTop, playOptions))
+            switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, playOptions))
             {
-                case 0:
-                    GameUI.StopTitleAnim();
-                    NewGame();
-                    return true;
+                case 0: new_game:// New Game
+                    List<string> newGameOptions = ["RANDOM SEED", "CUSTOM SEED", "RETURN"];
 
-                case 1:
-                    GameUI.StopTitleAnim();
+                    switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, newGameOptions))
+                    {
+                        case 0: // Random Seed
+                            NewGame();
+                            GameUI.TitleScreenBorders(true);
+                            return true;
+
+                        case 1: // Custom Seed
+                            lock (ConsoleLock)
+                            {
+                                Console.SetCursorPosition(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop + 4);
+                                Console.WriteLine(" ENTER SEED: ");
+                                tempCursorTop = Console.CursorTop;
+                            }
+
+                            string? input = ReadInput(15, tempCursorTop, false, 40);
+                            if (string.IsNullOrWhiteSpace(input))
+                            {
+                                GameUI.TitleScreenBorders(false, true);
+                                goto new_game;
+                            }
+                            
+                            NewGame(input);
+                            GameUI.TitleScreenBorders(true);
+                            return true;
+                        
+                        default:
+                            continue;
+                    }
+
+                case 1: // Load Game
                     if (!LoadGame())
                     {
-                        GameUI.StartScreen(playOptions);
                         continue;
                     }
-                    return true;
-
-                case 2:
-                    GameUI.StopTitleAnim();
-                    GameUI.StartScreen(["", "", "", ""], false);
-                    Console.CursorTop = CursorPos.MainMenuTop;
-                    Console.CursorLeft = CursorPos.MainMenuLeft * 70 / 100;
-                    Console.Write("ENTER SEED: ");
-                    string? input = Console.ReadLine();
-                    if (string.IsNullOrWhiteSpace(input))
-                    {
-                        GameUI.StartScreen(playOptions);
-                        continue;
-                    }
-                    
-                    NewGame(input);
+                    GameUI.TitleScreenBorders(true);
                     return true;
                 
-                case 3: case null:
+                default:
+                    GameUI.TitleScreenBorders(false, true);
                     return false;
             }
         }
@@ -78,6 +304,11 @@ class Game
 
     private static void NewGame(string? seed = null)
     {
+        GameUI.StopTitleAnim();
+
+        GameData gameData = new(seed?.GetHashCode());
+        GameSave gameSave = new(gameData);
+
         List<Equipment> startEquips =
         [
             AssetManager.Equipments[1],
@@ -91,8 +322,6 @@ class Game
             AssetManager.Skills[3]
         ];
 
-        GameData gameData = new(seed?.GetHashCode());
-
         GameUI.GenericGameScreen(gameData);
         GameUI.PrintComponents(startEquips, UIConstants.MainZoneHeight, " -- Choose Starting Item:", CursorPos.MainZoneTop);
         
@@ -100,8 +329,8 @@ class Game
         if (pickedEquipInd == null)
             return;
 
-        Equipment pickedEquip = startEquips[(int) pickedEquipInd];
-        gameData.Player.ChangeEquip(new(pickedEquip));
+        Equipment pickedEquip = new(startEquips[(int) pickedEquipInd]);
+        gameData.Player.AddItem(pickedEquip);
 
         GameUI.GenericGameScreen(gameData);
         GameUI.PrintComponents(startSkills, UIConstants.MainZoneHeight, " -- Choose Starting Skill:", CursorPos.MainZoneTop);
@@ -110,34 +339,57 @@ class Game
         if (pickedSkillInd == null)
             return;
 
-        Skill pickedSkill = startSkills[(int) pickedEquipInd];
-        gameData.Player.AddItem((Skill)new(pickedSkill));
+        Skill pickedSkill = new(startSkills[(int) pickedEquipInd]);
+        gameData.Player.AddItem(pickedSkill);
 
         gameData.Progress.Next();
-        GameLoop(gameData);
+        GameLoop(gameSave);
     }
 
     private static bool LoadGame()
     {
-        if (GameData.Load(out GameData? loadedData))
+        FileManager.LoadSaves(out List<GameSave> saves, out string? error);
+
+        if (error != null)
         {
-            if (loadedData != null)
+            GameUI.WarningPopup(error);
+            return false;
+        }
+
+        GameUI.TitleScreenBorders(false, true);
+
+        if (saves.Count > 0)
+        {
+            lock (ConsoleLock)
             {
-                GameLoop(loadedData);
+                Console.CursorTop = CursorPos.TitleScreenMenuTop;
+                Console.WriteLine(" -- Choose Save:");
+            }
+
+            int? pickedSaveInd = InteractiveUI.PickComponent(CursorPos.TitleScreenMenuTop + 1, saves);
+            if (pickedSaveInd == null)
+                return false;
+            else
+            {
+                GameUI.StopTitleAnim();
+                GameLoop(saves[(int) pickedSaveInd]);
                 return true;
             }
-            else
-                GameUI.WarningPopup("Corrupted Data");
         }
         else
-            GameUI.WarningPopup("No Save Found");
-        
-        Console.ReadKey(true);
-        return false;
+        {
+            lock (ConsoleLock)
+            {
+                Console.CursorTop = CursorPos.TitleScreenMenuTop;
+                WriteCenter("No Save Found!");
+            }
+            return false;
+        }
     }
 
-    private static void GameLoop(GameData gameData)
+    private static void GameLoop(GameSave gameSave)
     {
+        GameData gameData = gameSave.GameData;
         EventManager eventManager = new(gameData);
         List<string> invOptions = ["Change Equipment", "Change Skill"];
         List<string> loseOptions = ["RETRY", "RETURN TO TITLE"];
@@ -146,16 +398,24 @@ class Game
 
         while (true)
         {
+            gameSave.Save("AutoSave");
             List<Event> routes = eventManager.GetEvents();
             
-            GameUI.RouteScreen(gameData, routes, invOptions);
+            // GameUI.RouteScreen(gameData, routes, invOptions);
+            GameUI.GenericGameScreen(gameData);
+            GameUI.PrintMainZone(routes, "Routes:");
+            GameUI.PrintSubZone(invOptions, "Inventory:");
 
             int? pickedRouteInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, routes, false, true, pickFromEnd);
             pickFromEnd = false;
             if (pickedRouteInd == null)
             {
                 if (HanldePause(gameData)) continue;
-                else return;
+                else 
+                {
+                    gameSave.Save("LocalSave");
+                    return;
+                }
             }
 
             if (pickedRouteInd == routes.Count) // Move down to inventory options
@@ -165,7 +425,11 @@ class Game
                 {
                     case null:
                         if (HanldePause(gameData)) continue;
-                        else return;
+                        else 
+                        {
+                            gameSave.Save("LocalSave");
+                            return;
+                        }
 
                     case -1:
                         pickFromEnd = true;
@@ -202,7 +466,7 @@ class Game
                     {
                         GameUI.GameOverScreen(loseOptions);
 
-                        switch(InteractiveUI.PickString(CursorPos.MainMenuLeft, CursorPos.EndMenuTop, loseOptions))
+                        switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.EndScreenMenuTop, loseOptions))
                         {
                             case 0:
                                 gameData.Player.HP = hpPreFight;
@@ -242,7 +506,6 @@ class Game
                 HandleVictory(gameData);
                 return;
             }
-            gameData.Save();
         }
     }
 
@@ -254,8 +517,8 @@ class Game
         gameData.SetTime(false);
         GameUI.PausePopup(pauseOptions, gameData.GetElapsedTime());
 
-        int? optionInd = InteractiveUI.PickString(CursorPos.PauseOptionLeft, CursorPos.PauseOptionTop, pauseOptions);
-        switch(optionInd)
+        int? optionInd = InteractiveUI.PickString(CursorPos.PauseMenuLeft, CursorPos.PauseMenuTop, pauseOptions);
+        switch (optionInd)
         {
             case 1:
                 return false;
@@ -275,7 +538,9 @@ class Game
 
         while(true)
         {
-            GameUI.InventoryScreen(gameData, equipInv[startInd..endInd], gameData.Player.GetEquipped());
+            // GameUI.InventoryScreen(gameData, equipInv[startInd..endInd], gameData.Player.GetEquipped());
+            GameUI.GenericGameScreen(gameData);
+            GameUI.PrintSubZone(gameData.Player.GetEquipped(), "Currently Equipped:");
 
             int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, equipInv[startInd..endInd], startInd > 0, endInd < equipInv.Count, pickFromEnd);
 
@@ -313,7 +578,9 @@ class Game
 
         while(true)
         {
-            GameUI.InventoryScreen(gameData, skillInv[startInd..endInd], gameData.Player.Skills);
+            // GameUI.InventoryScreen(gameData, skillInv[startInd..endInd], gameData.Player.Skills);
+            GameUI.GenericGameScreen(gameData);
+            GameUI.PrintSubZone(gameData.Player.Skills, "Currently Equipped:");
 
             int? pickedEquipInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop + 1, skillInv[startInd..endInd], startInd > 0, endInd < skillInv.Count, pickFromEnd);
 
@@ -359,7 +626,9 @@ class Game
 
         while (fightEvent.Monsters.Count > 0)
         {
-            GameUI.FightScreen(gameData, fightEvent.Monsters, fightActions);
+            // GameUI.FightScreen(gameData, fightEvent.Monsters, fightActions);
+            GameUI.GenericGameScreen(gameData);
+            GameUI.PrintMainZone(fightEvent.Monsters);
 
             switch (InteractiveUI.PickString(CursorPos.SubZoneTop + 1, fightActions))
             {
@@ -393,7 +662,7 @@ class Game
                     {
                         switch (pickedSkill.Type)
                         {
-                            case TargetType.Single:
+                            case SkillType.Single:
                                 pickedMonsterInd = InteractiveUI.PickComponent(CursorPos.MainZoneTop, fightEvent.Monsters);
                                 if (pickedMonsterInd == null)
                                     continue;
@@ -402,12 +671,12 @@ class Game
                                 gameData.Player.UseSkill(pickedSkill, [pickedMonster]);
                                 break;
 
-                            case TargetType.Random:
+                            case SkillType.Random:
                                 pickedMonster = fightEvent.Monsters[RandomNumberGenerator.GetInt32(fightEvent.Monsters.Count - 1)];
                                 gameData.Player.UseSkill(pickedSkill, [pickedMonster]);
                                 break;
 
-                            case TargetType.All:
+                            case SkillType.All:
                                 gameData.Player.UseSkill(pickedSkill, fightEvent.Monsters);
                                 break;
                         }
@@ -506,7 +775,7 @@ class Game
         {
             GameUI.ShopTradingScreen(gameData, shopItems[startInd..endInd], true);
 
-            int? pickedEquipInd = InteractiveUI.TradeItem(CursorPos.MainZoneTop + 1, shopItems[startInd..endInd], true, startInd > 0, endInd < shopItems.Count, pickFromEnd);
+            int? pickedEquipInd = InteractiveUI.PickTradeItem(CursorPos.MainZoneTop + 1, shopItems[startInd..endInd], true, startInd > 0, endInd < shopItems.Count, pickFromEnd);
 
             if (pickedEquipInd == null)
                 return;
@@ -551,7 +820,7 @@ class Game
         {
             GameUI.ShopTradingScreen(gameData, playerItems[startInd..endInd], false);
 
-            int? pickedEquipInd = InteractiveUI.TradeItem(CursorPos.MainZoneTop + 1, playerItems[startInd..endInd], false, startInd > 0, endInd < playerItems.Count, pickFromEnd);
+            int? pickedEquipInd = InteractiveUI.PickTradeItem(CursorPos.MainZoneTop + 1, playerItems[startInd..endInd], false, startInd > 0, endInd < playerItems.Count, pickFromEnd);
 
             if (pickedEquipInd == null)
                 return;
@@ -587,7 +856,7 @@ class Game
 
         GameUI.VictoryScreen(gameData.GetElapsedTime(), winOptions);
 
-        switch(InteractiveUI.PickString(CursorPos.MainMenuLeft, CursorPos.EndMenuTop + 2, winOptions))
+        switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.EndScreenMenuTop + 2, winOptions))
         {
             case 0:
                 // Post score

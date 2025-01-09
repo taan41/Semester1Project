@@ -8,8 +8,7 @@ class FileManager
     {
         public const string DirPath = "Persistence";
 
-        public const string DataFolder = "GameSaves";
-        public const string DataFile = "GameData.json";
+        public const string SaveFolder = "GameSaves";
 
         public const string AssetFolder = "GameAssets";
         public const string VersionFile = "Version.json";
@@ -18,35 +17,48 @@ class FileManager
         public const string MonstersFile = "Monsters.json";
     }
 
-    
-    private static  readonly JsonSerializerOptions _jsonOption = new(){ WriteIndented = true };
-    
-    public static bool LoadData(out GameData? loadedData)
+    private static readonly JsonSerializerOptions _fromJsonOption = new()
     {
-        loadedData = null;
-        string dataDirPath = Path.Combine(DirPath, DataFolder);
+        IncludeFields = true
+    };
+    private static readonly JsonSerializerOptions _toJsonOption = new()
+    {
+        WriteIndented = true
+    };
+    
+    public static void LoadSaves(out List<GameSave> loadedSaves, out string? error)
+    {
+        loadedSaves = [];
+        error = null;
+        string dataDirPath = Path.Combine(DirPath, SaveFolder);
 
         try
         {
-            loadedData = JsonSerializer.Deserialize<GameData>(File.ReadAllText(Path.Combine(dataDirPath, DataFile)));
+            foreach (string file in Directory.EnumerateFiles(dataDirPath, "*.json"))
+            {
+                var loadedSave = JsonSerializer.Deserialize<GameSave>(File.ReadAllText(file), _fromJsonOption);
+
+                if (loadedSave != null)
+                    loadedSaves.Add(loadedSave);
+                else
+                    throw new JsonException();
+            }
         }
         catch (JsonException)
         {
-            return true;
+            error = "Corrupted saves";
         }
         catch (Exception ex) when (ex is DirectoryNotFoundException || ex is FileNotFoundException)
         {
-            return false;
+            error = "No save found";
         }
-
-        return true;
     }
 
-    public static void SaveData(GameData gameData)
+    public static void WriteSave(GameSave gameSave)
     {
-        string dataDirPath = Path.Combine(DirPath, DataFolder);
+        string dataDirPath = Path.Combine(DirPath, SaveFolder);
         Directory.CreateDirectory(dataDirPath);
-        File.WriteAllText(Path.Combine(dataDirPath, DataFile), JsonSerializer.Serialize(gameData, _jsonOption));
+        File.WriteAllText(Path.Combine(dataDirPath, gameSave.Name + ".json"), JsonSerializer.Serialize(gameSave, _toJsonOption));
     }
 
     public static void LoadAsset(out Dictionary<int, Equipment> equipments, out Dictionary<int, Skill> skills, out Dictionary<int, Monster> monsters)
@@ -71,8 +83,8 @@ class FileManager
         string assetDirPath = Path.Combine(DirPath, AssetFolder);
         Directory.CreateDirectory(assetDirPath);
 
-        File.WriteAllText(Path.Combine(assetDirPath, EquipmentsFile), JsonSerializer.Serialize(AssetManager.Equipments, _jsonOption));
-        File.WriteAllText(Path.Combine(assetDirPath, SkillsFile), JsonSerializer.Serialize(AssetManager.Skills, _jsonOption));
-        File.WriteAllText(Path.Combine(assetDirPath, MonstersFile), JsonSerializer.Serialize(AssetManager.Monsters, _jsonOption));
+        File.WriteAllText(Path.Combine(assetDirPath, EquipmentsFile), JsonSerializer.Serialize(AssetManager.Equipments, _toJsonOption));
+        File.WriteAllText(Path.Combine(assetDirPath, SkillsFile), JsonSerializer.Serialize(AssetManager.Skills, _toJsonOption));
+        File.WriteAllText(Path.Combine(assetDirPath, MonstersFile), JsonSerializer.Serialize(AssetManager.Monsters, _toJsonOption));
     }
 }
