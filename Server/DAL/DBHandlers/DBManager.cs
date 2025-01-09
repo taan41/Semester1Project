@@ -89,7 +89,7 @@ static class DBManager
                 SaveID INT AUTO_INCREMENT PRIMARY KEY,
                 UserID INT NOT NULL UNIQUE,
                 UploadedTime DATETIME DEFAULT CURRENT_TIMESTAMP,
-                Data TEXT,
+                SaveData TEXT,
                 FOREIGN KEY (UserID) REFERENCES Users(UserID) ON UPDATE CASCADE ON DELETE CASCADE,
                 INDEX idx_userID (UserID)
             )", conn))

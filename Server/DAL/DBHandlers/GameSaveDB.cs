@@ -1,14 +1,14 @@
 using System.Data;
 using MySql.Data.MySqlClient;
 
-static class GameDataDB
+static class GameSaveDB
 {
-    public static async Task<(bool success, string errorMessage)> Save(int userID, GameData data)
+    public static async Task<(bool success, string errorMessage)> Save(int userID, GameSave save)
     {
         string query = @"
             DELETE FROM GameSaves
             WHERE UserID = @userID;
-            INSERT INTO GameSaves (UserID, Data)
+            INSERT INTO GameSaves (UserID, SaveData)
             VALUES (@userID, @data);
         ";
 
@@ -19,7 +19,7 @@ static class GameDataDB
 
             using MySqlCommand cmd = new(query, conn);
             cmd.Parameters.AddWithValue("@userID", userID);
-            cmd.Parameters.AddWithValue("@data", data.ToJson());
+            cmd.Parameters.AddWithValue("@data", save.ToJson());
 
             await cmd.ExecuteNonQueryAsync();
             return (true, "");
@@ -30,10 +30,10 @@ static class GameDataDB
         }
     }
 
-    public static async Task<(GameData? data, string errorMessage)> Load(int userID)
+    public static async Task<(GameSave? data, string errorMessage)> Load(int userID)
     {
         string query = @"
-            SELECT Data
+            SELECT SaveData
             FROM GameSaves
             WHERE UserID = @userID;
         ";
@@ -47,11 +47,12 @@ static class GameDataDB
             cmd.Parameters.AddWithValue("@userID", userID);
 
             using var reader = await cmd.ExecuteReaderAsync();
+            
             if (!reader.HasRows)
                 return (null, "No data found");
 
             await reader.ReadAsync();
-            return (GameData.FromJson(reader.GetString("Data")), "");
+            return (GameSave.FromJson(reader.GetString("SaveData")), "");
         }
         catch (MySqlException ex)
         {

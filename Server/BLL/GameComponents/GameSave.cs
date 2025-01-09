@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 [Serializable]
 class GameSave : Component
 {
@@ -11,4 +13,10 @@ class GameSave : Component
         GameData = gameData;
         SaveTime = saveTime ?? DateTime.Now;
     }
+
+    public override string ToJson()
+        => JsonSerializer.Serialize(this);
+
+    public static GameSave? FromJson(string json)
+        => JsonSerializer.Deserialize<GameSave>(json);
 }

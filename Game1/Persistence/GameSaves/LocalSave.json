@@ -1,7 +1,7 @@
 {
-  "SaveTime": "2025-01-08T20:07:29.0191423+07:00",
+  "SaveTime": "2025-01-09T22:55:28.5257809+07:00",
   "GameData": {
-    "Seed": 801902890,
+    "Seed": 2064279660,
     "Player": {
       "EquippedWeapon": {
         "Type": 0,
@@ -43,7 +43,7 @@
       "Floor": 1,
       "Room": 1
     },
-    "SavedTime": "00:00:12.6348690"
+    "SavedTime": "00:00:00.5458802"
   },
   "Name": "LocalSave"
 }

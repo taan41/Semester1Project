@@ -80,6 +80,9 @@ class Game
         {
             if (networkHandler == null || !networkHandler.IsConnected || user == null)
                 return;
+                
+            GameSave? cloudSave = networkHandler.DownloadSave(out _);
+            cloudSave?.Save("CloudSave");
 
             GameUI.TitleScreenBorders(false, true);
             GameUI.StartTitleAnim();
@@ -283,6 +286,8 @@ class Game
                 else 
                 {
                     gameSave.Save("LocalSave");
+                    if (networkHandler != null && !networkHandler.UploadSave(gameSave, out _))
+                        networkHandler = null;
                     return;
                 }
             }
@@ -297,6 +302,8 @@ class Game
                         else 
                         {
                             gameSave.Save("LocalSave");
+                            if (networkHandler != null && !networkHandler.UploadSave(gameSave, out _))
+                                networkHandler = null;
                             return;
                         }
 

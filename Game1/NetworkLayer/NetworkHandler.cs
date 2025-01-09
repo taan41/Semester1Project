@@ -1,5 +1,5 @@
 using System.Net.Sockets;
-
+using System.Text.Json;
 using static Utilities;
 
 class NetworkHandler
@@ -82,6 +82,21 @@ class NetworkHandler
     public bool ResetPwd(User user, out string errorMessage)
     {
         Command cmdToSend = new(CommandType.ResetPwd, user.ToJson());
+        return HandleCommand(cmdToSend, out _, out errorMessage);
+    }
+
+    public GameSave? DownloadSave(out string errorMessage)
+    {
+        Command cmdToSend = new(CommandType.DownloadSave);
+        return HandleCommand(cmdToSend, out Command receivedCmd, out errorMessage)
+            ? JsonSerializer.Deserialize<GameSave>(receivedCmd.Payload)
+            : null;
+    }
+
+    public bool UploadSave(GameSave gameSave, out string errorMessage)
+    {
+        gameSave.Name = "CloudSave";
+        Command cmdToSend = new(CommandType.UploadSave, JsonSerializer.Serialize(gameSave));
         return HandleCommand(cmdToSend, out _, out errorMessage);
     }
 

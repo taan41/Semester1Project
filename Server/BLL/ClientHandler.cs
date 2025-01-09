@@ -89,6 +89,14 @@ class ClientHandler
                         cmdToSend = await ChangePassword(receivedCmd);
                         break;
 
+                    case CommandType.UploadSave:    
+                        cmdToSend = await UploadSave(receivedCmd);
+                        break;
+
+                    case CommandType.DownloadSave:
+                        cmdToSend = await DownloadSave(receivedCmd);
+                        break;
+
                     case CommandType.Disconnect:
                         cmdToSend = Disconnect(receivedCmd);
                         await stream.WriteAsync(Encode.GetBytes(cmdToSend.ToJson()), token);
@@ -261,6 +269,41 @@ class ClientHandler
         LogHandler.AddLog($"Changed password of {user}", this);
         user.PwdSet = newPwd;
         return new(cmd.CommandType);
+    }
+
+    private async Task<Command> UploadSave(Command cmd)
+    {
+        if (user == null || user.UserID < 1)
+            return Helper.ErrorCmd(this, cmd, "Invalid user");
+
+        GameSave? gameSave = GameSave.FromJson(cmd.Payload);
+
+        if (gameSave == null)
+            return Helper.ErrorCmd(this, cmd, "Invalid game save");
+
+        gameSave.Name = $"{user.Username}Save";
+
+        var (success, errorMessage) = await GameSaveDB.Save(user.UserID, gameSave);
+
+        if (!success)
+            return Helper.ErrorCmd(this, cmd, errorMessage);
+
+        LogHandler.AddLog($"Uploaded save", this);
+        return new(cmd.CommandType);
+    }
+
+    private async Task<Command> DownloadSave(Command cmd)
+    {
+        if (user == null || user.UserID < 1)
+            return Helper.ErrorCmd(this, cmd, "Invalid user");
+
+        var (gameSave, errorMessage) = await GameSaveDB.Load(user.UserID);
+
+        if (gameSave == null)
+            return Helper.ErrorCmd(this, cmd, errorMessage);
+
+        LogHandler.AddLog($"Downloaded save", this);
+        return new(cmd.CommandType, gameSave.ToJson());
     }
 
     private Command Disconnect(Command cmd)
