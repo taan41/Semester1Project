@@ -1,11 +1,11 @@
 using System.Security.Cryptography;
 
 using static GameUIHelper;
-using static Utilities;
 
 class Game
 {
     private static NetworkHandler? networkHandler;
+    private static User? user;
 
     public static void Start()
     {
@@ -14,47 +14,51 @@ class Game
 
         while(true)
         {
+            GameUI.TitleScreenBorders(false, true);
             GameUI.StartTitleAnim();
 
             switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, welcomeOptions))
             {
                 case 0:
-                    if (OnlineGame())
-                        goto case 1;
+                    OnlineMode();
                     break;
 
                 case 1:
-                    StartRun();
+                    OfflineMode();
                     break;
                 
-                case 2: case null:
+                default:
                     return;
             }
         }
     }
 
     // Return false if failed to connect to server or login
-    private static bool OnlineGame()
+    private static void OnlineMode()
     {
         GameUI.ConnectingScreen(ref networkHandler);
-
-        if (networkHandler == null)
-            return false;
 
         List<string> onlineOptions = ["REGISTER", "LOGIN", "RESET PASSWORD", "RETURN"];
 
         while (true)
         {
+            if (networkHandler == null || !networkHandler.IsConnected)
+                return;
+
             GameUI.TitleScreenBorders(false, true);
+            GameUI.StartTitleAnim();
+            
             switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, onlineOptions))
             {
                 case 0:
-                    Register();
+                    GameUI.RegisterScreen(networkHandler);
                     break;
 
                 case 1:
-                    // Login();
-                    return true;
+                    GameUI.LoginScreen(networkHandler, out user);
+                    if (user != null)
+                        OnlinePlay();
+                    break;
 
                 case 2:
                     // ResetPassword();
@@ -63,246 +67,139 @@ class Game
                 default:
                     networkHandler.Close();
                     networkHandler = null;
-                    GameUI.TitleScreenBorders(false, true);
-                    return false;
+                    return;
             }
         }
     }
 
-    private static void Register()
+    private static void OnlinePlay()
     {
-        if (networkHandler == null)
-            return;
-
-        if (!networkHandler.IsConnected)
-        {
-            GameUI.WarningPopup("Can't connect to server!");
-            GameUI.TitleScreenBorders(true);
-            GameUI.StartTitleAnim();
-            return;
-        }
-
-        GameUI.TitleScreenBorders(false, true);
-        string?
-            username = null,
-            nickname = null,
-            password = null,
-            confirmPassword = null,
-            email = null,
-            errorMsg;
-        int tempCursorLeft, tempCursorTop;
+        List<string> onlineOptions = ["NEW GAME", "LOAD GAME", "VIEW SCORE", "LOG OUT"];
 
         while (true)
         {
-            lock (ConsoleLock)
-            {
-                Console.CursorTop = CursorPos.TitleScreenMenuTop;
-                Console.WriteLine(" 'ESC' to return");
-                Console.Write($" Username ({DataConstants.usernameMin} ~ {DataConstants.usernameMax} characters): ");
-                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
-                if (username != null)
-                    Console.WriteLine(username);
-            }
-
-            if (username == null)
-            {
-                username = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.usernameMax);
-                
-                if (username == null)
-                    return;
-                else if (string.IsNullOrWhiteSpace(username) || username.Length < DataConstants.usernameMin)
-                {
-                    username = null;
-                    continue;
-                }
-
-                if (!networkHandler.CheckUsername(username, out errorMsg))
-                {
-                    username = null;
-                    GameUI.WarningPopup(errorMsg);
-                    GameUI.TitleScreenBorders(true);
-                    GameUI.StartTitleAnim();
-                    continue;
-                }
-            }
-
-            lock (ConsoleLock)
-            {
-                Console.CursorTop = CursorPos.TitleScreenMenuTop + 2;
-                Console.Write($" Password ({DataConstants.passwordMin} ~ {DataConstants.passwordMax} characters): ");
-                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
-                if (password != null)
-                    Console.WriteLine(new string('*', password.Length));
-            }
-
-            if (password == null)
-            {
-                password = ReadInput(tempCursorLeft, tempCursorTop, true, DataConstants.passwordMax);
-                
-                if (password == null)
-                    return;
-                else if (string.IsNullOrWhiteSpace(password) || password.Length < DataConstants.passwordMin)
-                {
-                    password = null;
-                    continue;
-                }
-            }
-
-            lock (ConsoleLock)
-            {
-                Console.CursorTop = CursorPos.TitleScreenMenuTop + 3;
-                Console.Write(" Confirm Password: ");
-                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
-                if (confirmPassword != null)
-                    Console.WriteLine(new string('*', confirmPassword.Length));
-            }
-
-            if (confirmPassword == null)
-            {
-                Console.CursorTop = tempCursorTop;
-                confirmPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DataConstants.passwordMax);
-                
-                if (confirmPassword == null)
-                    return;
-                else if (string.IsNullOrWhiteSpace(confirmPassword) || confirmPassword.Length < DataConstants.passwordMin)
-                {
-                    confirmPassword = null;
-                    continue;
-                }
-                else if (password != confirmPassword)
-                {
-                    confirmPassword = null;
-                    GameUI.WarningPopup("Passwords do not match!");
-                    GameUI.TitleScreenBorders(true);
-                    GameUI.StartTitleAnim();
-                    continue;
-                }
-            }
-
-            lock (ConsoleLock)
-            {
-                Console.CursorTop = CursorPos.TitleScreenMenuTop + 4;
-                Console.Write($" Nickname ({DataConstants.nicknameMin} ~ {DataConstants.nicknameMax} characters): ");
-                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
-                if (nickname != null)
-                    Console.WriteLine(nickname);
-            }
-
-            if (nickname == null)
-            {
-                nickname = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.nicknameMax);
-                
-                if (nickname == null)
-                    return;
-                else if (string.IsNullOrWhiteSpace(nickname) || nickname.Length < DataConstants.nicknameMin)
-                {
-                    nickname = null;
-                    continue;
-                }
-            }
-
-            lock (ConsoleLock)
-            {
-                Console.CursorTop = CursorPos.TitleScreenMenuTop + 5;
-                Console.Write(" Email: ");
-                (tempCursorLeft, tempCursorTop) = Console.GetCursorPosition();
-                if (email != null)
-                    Console.WriteLine(email);
-            }
-
-            if (email == null)
-            {
-                email = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.emailLen);
-                
-                if (email == null)
-                    return;
-                else if (string.IsNullOrWhiteSpace(email))
-                {
-                    email = null;
-                    continue;
-                }
-            }
-
-            User newUser = new(username, nickname, password, email);
-            if (!networkHandler.Register(newUser, out errorMsg))
-            {
-                GameUI.WarningPopup(errorMsg);
-                GameUI.TitleScreenBorders(true);
-                GameUI.StartTitleAnim();
+            if (networkHandler == null || !networkHandler.IsConnected || user == null)
                 return;
-            }
-            else
+
+            GameUI.TitleScreenBorders(false, true);
+            GameUI.StartTitleAnim();
+
+            switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, onlineOptions))
             {
-                GameUI.SuccessPopup("Registration Successful!");
-                GameUI.TitleScreenBorders(true);
-                GameUI.StartTitleAnim();
-                return;
+                case 0:
+                    NewGame();
+                    break;
+
+                case 1:
+                    LoadGame();
+                    break;
+
+                default:
+                    if (!networkHandler.Logout(out string? error))
+                        GameUI.WarningPopup(error);
+                    user = null;
+                    return;
             }
         }
     }
 
     // Return false if return without starting a game
-    private static bool StartRun()
+    private static void OfflineMode()
     {
         List<string> playOptions = ["NEW GAME", "LOAD GAME", "RETURN"];
-        int tempCursorTop;
 
         while (true)
         {
-            GameUI.StartTitleAnim();
             GameUI.TitleScreenBorders(false, true);
+            GameUI.StartTitleAnim();
 
             switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, playOptions))
             {
-                case 0: new_game:// New Game
-                    List<string> newGameOptions = ["RANDOM SEED", "CUSTOM SEED", "RETURN"];
-
-                    switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, newGameOptions))
-                    {
-                        case 0: // Random Seed
-                            NewGame();
-                            GameUI.TitleScreenBorders(true);
-                            return true;
-
-                        case 1: // Custom Seed
-                            lock (ConsoleLock)
-                            {
-                                Console.SetCursorPosition(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop + 4);
-                                Console.WriteLine(" ENTER SEED: ");
-                                tempCursorTop = Console.CursorTop;
-                            }
-
-                            string? input = ReadInput(15, tempCursorTop, false, 40);
-                            if (string.IsNullOrWhiteSpace(input))
-                            {
-                                GameUI.TitleScreenBorders(false, true);
-                                goto new_game;
-                            }
-                            
-                            NewGame(input);
-                            GameUI.TitleScreenBorders(true);
-                            return true;
-                        
-                        default:
-                            continue;
-                    }
+                case 0: // New Game
+                    NewGame();
+                    break;
 
                 case 1: // Load Game
-                    if (!LoadGame())
-                    {
-                        continue;
-                    }
-                    GameUI.TitleScreenBorders(true);
-                    return true;
+                    LoadGame();
+                    break;
                 
                 default:
                     GameUI.TitleScreenBorders(false, true);
-                    return false;
+                    return;
             }
         }
     }
 
-    private static void NewGame(string? seed = null)
+    private static void NewGame()
+    {
+        List<string> newGameOptions = ["RANDOM SEED", "CUSTOM SEED", "RETURN"];
+
+        while (true)
+        {
+            GameUI.TitleScreenBorders(false, true);
+            GameUI.StartTitleAnim();
+
+            switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, newGameOptions))
+            {
+                case 0: // Random Seed
+                    StartNewRun();
+                    GameUI.TitleScreenBorders();
+                    return;
+
+                case 1: // Custom Seed
+                    string? seed = GameUI.EnterSeed();
+                    if (seed == null)
+                        continue;
+
+                    StartNewRun(seed);
+                    GameUI.TitleScreenBorders();
+                    return;
+                
+                default:
+                    continue;
+            }
+        }
+    }
+
+    private static void LoadGame()
+    {
+        FileManager.LoadSaves(out List<GameSave> saves, out string? error);
+
+        if (error != null)
+        {
+            GameUI.WarningPopup(error);
+            return;
+        }
+
+        GameUI.TitleScreenBorders(false, true);
+
+        if (saves.Count > 0)
+        {
+            lock (ConsoleLock)
+            {
+                Console.CursorTop = CursorPos.TitleScreenMenuTop;
+                Console.WriteLine(" -- Choose Save:");
+            }
+
+            int? pickedSaveInd = InteractiveUI.PickComponent(CursorPos.TitleScreenMenuTop + 1, saves);
+            if (pickedSaveInd == null)
+                return;
+            else
+            {
+                GameUI.StopTitleAnim();
+                GameLoop(saves[(int) pickedSaveInd]);
+                GameUI.TitleScreenBorders();
+                return;
+            }
+        }
+        else
+        {
+            GameUI.WarningPopup("No saves found!");
+            return;
+        }
+    }
+
+    private static void StartNewRun(string? seed = null)
     {
         GameUI.StopTitleAnim();
 
@@ -344,47 +241,6 @@ class Game
 
         gameData.Progress.Next();
         GameLoop(gameSave);
-    }
-
-    private static bool LoadGame()
-    {
-        FileManager.LoadSaves(out List<GameSave> saves, out string? error);
-
-        if (error != null)
-        {
-            GameUI.WarningPopup(error);
-            return false;
-        }
-
-        GameUI.TitleScreenBorders(false, true);
-
-        if (saves.Count > 0)
-        {
-            lock (ConsoleLock)
-            {
-                Console.CursorTop = CursorPos.TitleScreenMenuTop;
-                Console.WriteLine(" -- Choose Save:");
-            }
-
-            int? pickedSaveInd = InteractiveUI.PickComponent(CursorPos.TitleScreenMenuTop + 1, saves);
-            if (pickedSaveInd == null)
-                return false;
-            else
-            {
-                GameUI.StopTitleAnim();
-                GameLoop(saves[(int) pickedSaveInd]);
-                return true;
-            }
-        }
-        else
-        {
-            lock (ConsoleLock)
-            {
-                Console.CursorTop = CursorPos.TitleScreenMenuTop;
-                WriteCenter("No Save Found!");
-            }
-            return false;
-        }
     }
 
     private static void GameLoop(GameSave gameSave)

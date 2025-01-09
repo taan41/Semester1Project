@@ -59,9 +59,17 @@ class NetworkHandler
             : null;
     }
 
-    public bool Login(out string errorMessage)
+    public User? Login(out string errorMessage)
     {
         Command cmdToSend = new(CommandType.Login);
+        return HandleCommand(cmdToSend, out Command receivedCmd, out errorMessage)
+            ? User.FromJson(receivedCmd.Payload)
+            : null;
+    }
+
+    public bool Logout(out string errorMessage)
+    {
+        Command cmdToSend = new(CommandType.Logout);
         return HandleCommand(cmdToSend, out _, out errorMessage);
     }
 

@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 
 using static System.Console;
 using static GameUIHelper;
+using static Utilities;
 
 static class GameUI
 {
@@ -102,10 +103,10 @@ static class GameUI
         WriteCenter($"╚{new string('═', UIConstants.PopupWidth)}╝");
 
         CursorTop = CursorPos.PopupTop + 2;
-        WriteCenter(@".");
-        WriteCenter(@"/ \");
-        WriteCenter(@"/ ┃ \");
-        WriteCenter(@"/  •  \");
+        WriteCenter(@"   .   ");
+        WriteCenter(@"  ╱ ╲  ");
+        WriteCenter(@" ╱ ┃ ╲ ");
+        WriteCenter(@"╱  •  ╲");
         WriteCenter(@"‾‾‾‾‾‾‾");
 
         CursorTop++;
@@ -123,15 +124,38 @@ static class GameUI
         WriteCenter($"╚{new string('═', UIConstants.PopupWidth)}╝");
 
         CursorTop = CursorPos.PopupTop + 2;
-        WriteCenter(@"┌           ┐");
-        WriteCenter(@"│       ╱   │");
-        WriteCenter(@"│   ╲  ╱    │");
-        WriteCenter(@"│    ╲╱     │");
-        WriteCenter(@"└           ┘");
+        WriteCenter(@"┌            ┐");
+        WriteCenter(@"│        ╱   │");
+        WriteCenter(@"│    ╲  ╱    │");
+        WriteCenter(@"│     ╲╱     │");
+        WriteCenter(@"└            ┘");
 
         CursorTop++;
         WriteCenter(msg);
         ReadKey(true);
+    }
+
+    public static void PausePopup(List<string> pauseOptions, TimeSpan? elapsedTime = null)
+    {
+        CursorTop = CursorPos.PausePopupTop;
+        WriteCenter($"╔{new string('═', UIConstants.PausePopupWidth)}╗");
+        for (int i = 0; i < UIConstants.PausePopupHeight - 2; i++)
+            WriteCenter($"║{new string(' ', UIConstants.PausePopupWidth)}║");
+        WriteCenter($"╚{new string('═', UIConstants.PausePopupWidth)}╝");
+
+        CursorTop = CursorPos.PauseMenuTop;
+        foreach(var option in pauseOptions)
+        {
+            CursorLeft = CursorPos.PauseMenuLeft;
+            WriteLine(option);
+        }
+
+        if (elapsedTime != null)
+        {
+            CursorTop = CursorPos.PauseElapsedTimeTop;
+            WriteCenter("Run Time:");
+            WriteCenter($"{elapsedTime:hh\\:mm\\:ss\\.fff}");
+        }
     }
 
     public static void TitleScreenBorders(bool clear = true, bool clearOptionsZone = false)
@@ -160,7 +184,7 @@ static class GameUI
         }
     }
 
-    public static void PrintTitleScreenOptions(List<string> options)
+    public static void TitleScreenOptions(List<string> options)
     {
         CursorTop = CursorPos.TitleScreenMenuTop;
         foreach (var option in options)
@@ -223,6 +247,262 @@ static class GameUI
         TitleScreenBorders(false, true);
     }
 
+    public static void RegisterScreen(NetworkHandler networkHandler)
+    {
+        if (networkHandler == null || !networkHandler.IsConnected)
+        {
+            WarningPopup("Can't connect to server!");
+            goto return_label;
+        }
+
+        string?
+            username = null,
+            nickname = null,
+            password = null,
+            confirmPassword = null,
+            email = null,
+            errorMsg;
+        int tempCursorLeft, tempCursorTop;
+
+        while (true)
+        {
+            if (!networkHandler.IsConnected)
+                goto return_label;
+
+            TitleScreenBorders(false, true);
+            StartTitleAnim();
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop;
+                WriteLine(" 'ESC' to return");
+                Write($" Username ({DataConstants.usernameMin} ~ {DataConstants.usernameMax} characters): ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                if (username != null)
+                    WriteLine(username);
+            }
+
+            if (username == null)
+            {
+                username = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.usernameMax);
+                
+                if (username == null)
+                    goto return_label;
+                else if (string.IsNullOrWhiteSpace(username) || username.Length < DataConstants.usernameMin)
+                {
+                    username = null;
+                    continue;
+                }
+
+                if (!networkHandler.CheckUsername(username, out errorMsg))
+                {
+                    username = null;
+                    WarningPopup(errorMsg);
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop + 2;
+                Write($" Password ({DataConstants.passwordMin} ~ {DataConstants.passwordMax} characters): ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                if (password != null)
+                    WriteLine(new string('*', password.Length));
+            }
+
+            if (password == null)
+            {
+                password = ReadInput(tempCursorLeft, tempCursorTop, true, DataConstants.passwordMax);
+                
+                if (password == null)
+                    goto return_label;
+                else if (string.IsNullOrWhiteSpace(password) || password.Length < DataConstants.passwordMin)
+                {
+                    password = null;
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop + 3;
+                Write(" Confirm Password: ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                if (confirmPassword != null)
+                    WriteLine(new string('*', confirmPassword.Length));
+            }
+
+            if (confirmPassword == null)
+            {
+                CursorTop = tempCursorTop;
+                confirmPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DataConstants.passwordMax);
+                
+                if (confirmPassword == null)
+                    goto return_label;
+                else if (string.IsNullOrWhiteSpace(confirmPassword) || confirmPassword.Length < DataConstants.passwordMin)
+                {
+                    confirmPassword = null;
+                    continue;
+                }
+                else if (password != confirmPassword)
+                {
+                    confirmPassword = null;
+                    WarningPopup("Passwords do not match!");
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop + 4;
+                Write($" Nickname ({DataConstants.nicknameMin} ~ {DataConstants.nicknameMax} characters): ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                if (nickname != null)
+                    WriteLine(nickname);
+            }
+
+            if (nickname == null)
+            {
+                nickname = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.nicknameMax);
+                
+                if (nickname == null)
+                    goto return_label;
+                else if (string.IsNullOrWhiteSpace(nickname) || nickname.Length < DataConstants.nicknameMin)
+                {
+                    nickname = null;
+                    continue;
+                }
+            }
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop + 5;
+                Write(" Email: ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                if (email != null)
+                    WriteLine(email);
+            }
+
+            if (email == null)
+            {
+                email = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.emailLen);
+                
+                if (email == null)
+                    goto return_label;
+                else if (string.IsNullOrWhiteSpace(email))
+                {
+                    email = null;
+                    continue;
+                }
+            }
+
+            User newUser = new(username, nickname, password, email);
+            if (!networkHandler.Register(newUser, out errorMsg))
+                WarningPopup(errorMsg);
+            else
+                SuccessPopup("Registration Successful!");
+            
+            break;
+        }
+
+        return_label:
+            TitleScreenBorders(false, true);
+            StartTitleAnim();
+            return;
+    }
+
+    public static void LoginScreen(NetworkHandler networkHandler, out User? loggedInUser)
+    {
+        loggedInUser = null;
+
+        if (networkHandler == null || !networkHandler.IsConnected)
+        {
+            WarningPopup("Can't connect to server!");
+            goto return_label;
+        }
+
+        PasswordSet? passwordSet;
+        int tempCursorLeft, tempCursorTop;
+
+        while (true)
+        {
+            if (!networkHandler.IsConnected)
+                goto return_label;
+
+            TitleScreenBorders(false, true);
+            StartTitleAnim();
+            
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop;
+                WriteLine(" 'ESC' to return");
+                Write(" Username: ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+            }
+
+            string? username = ReadInput(tempCursorLeft, tempCursorTop, false, DataConstants.usernameMax);
+            if (username == null)
+                goto return_label;
+            else if (string.IsNullOrWhiteSpace(username))
+                continue;
+
+            passwordSet = networkHandler.GetPassword(username, out string? errorMsg);
+            if (passwordSet == null)
+            {
+                WarningPopup(errorMsg);
+                continue;
+            }
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop + 2;
+                Write(" Password: ");
+                (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+            }
+
+            string? password = ReadInput(tempCursorLeft, tempCursorTop, true, DataConstants.passwordMax);
+            if (password == null)
+                goto return_label;
+            else if (string.IsNullOrWhiteSpace(password))
+                continue;
+
+            if (!Security.VerifyPassword(password, passwordSet))
+            {
+                WarningPopup("Incorrect password!");
+                continue;
+            }
+
+            loggedInUser = networkHandler.Login(out errorMsg);
+
+            if (loggedInUser == null)
+                WarningPopup(errorMsg);
+            else
+                SuccessPopup("Login Successful!");
+
+            break;
+        }
+
+        return_label:
+            TitleScreenBorders(false, true);
+            StartTitleAnim();
+            return;
+    }
+
+    public static string? EnterSeed()
+    {
+        int tempCursorTop;
+
+        lock (ConsoleLock)
+        {
+            SetCursorPosition(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop + 4);
+            WriteLine(" ENTER SEED: ");
+            tempCursorTop = CursorTop;
+        }
+
+        return ReadInput(15, tempCursorTop, false, 40);
+    }
+
     // public static void OnlineScreen(List<string> options)
     // {
     //     Clear();
@@ -262,29 +542,6 @@ static class GameUI
     //         WriteLine($" {option}                 ");
     //     }
     // }
-
-    public static void PausePopup(List<string> pauseOptions, TimeSpan? elapsedTime = null)
-    {
-        CursorTop = CursorPos.PausePopupTop;
-        WriteCenter($"╔{new string('═', UIConstants.PausePopupWidth)}╗");
-        for (int i = 0; i < UIConstants.PausePopupHeight - 2; i++)
-            WriteCenter($"║{new string(' ', UIConstants.PausePopupWidth)}║");
-        WriteCenter($"╚{new string('═', UIConstants.PausePopupWidth)}╝");
-
-        CursorTop = CursorPos.PauseMenuTop;
-        foreach(var option in pauseOptions)
-        {
-            CursorLeft = CursorPos.PauseMenuLeft;
-            WriteLine(option);
-        }
-
-        if (elapsedTime != null)
-        {
-            CursorTop = CursorPos.PauseElapsedTimeTop;
-            WriteCenter("Run Time:");
-            WriteCenter($"{elapsedTime:hh\\:mm\\:ss\\.fff}");
-        }
-    }
 
     public static void PrintComponents<T>(List<T> components, int zoneHeight, string? msg = null, int? cursorTop = null) where T: Component
     {
