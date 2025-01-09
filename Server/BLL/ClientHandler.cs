@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
-
+using System.Text.Json;
 using static Utilities;
 
 class ClientHandler
@@ -95,6 +95,22 @@ class ClientHandler
 
                     case CommandType.DownloadSave:
                         cmdToSend = await DownloadSave(receivedCmd);
+                        break;
+
+                    case CommandType.UploadScore:
+                        cmdToSend = await UploadScore(receivedCmd);
+                        break;
+
+                    case CommandType.GetUserScores:
+                        cmdToSend = await GetUserScores(receivedCmd);
+                        break;
+
+                    case CommandType.GetMonthlyScores:
+                        cmdToSend = await GetMonthlyScores(receivedCmd);
+                        break;
+
+                    case CommandType.GetAllTimeScores:
+                        cmdToSend = await GetAllTimeScores(receivedCmd);
                         break;
 
                     case CommandType.Disconnect:
@@ -304,6 +320,67 @@ class ClientHandler
 
         LogHandler.AddLog($"Downloaded save", this);
         return new(cmd.CommandType, gameSave.ToJson());
+    }
+
+    private async Task<Command> UploadScore(Command cmd)
+    {
+        if (user == null || user.UserID < 1)
+            return Helper.ErrorCmd(this, cmd, "Invalid user");
+
+        Score? score = Score.FromJson(cmd.Payload);
+
+        if (score == null)
+            return Helper.ErrorCmd(this, cmd, "Invalid score");
+
+        var (success, errorMessage) = await ScoreDB.Add(score);
+
+        if (!success)
+            return Helper.ErrorCmd(this, cmd, errorMessage);
+
+        LogHandler.AddLog($"Uploaded score", this);
+        return new(cmd.CommandType);
+    }
+
+    private async Task<Command> GetUserScores(Command cmd)
+    {
+        if (user == null || user.UserID < 1)
+            return Helper.ErrorCmd(this, cmd, "Invalid user");
+
+        var (personal, errorMessage) = await ScoreDB.GetUser(user.UserID);
+
+        if (personal == null)
+            return Helper.ErrorCmd(this, cmd, errorMessage);
+
+        LogHandler.AddLog($"Got scores", this);
+        return new(cmd.CommandType, JsonSerializer.Serialize(personal));
+    }
+
+    private async Task<Command> GetMonthlyScores(Command cmd)
+    {
+        if (user == null || user.UserID < 1)
+            return Helper.ErrorCmd(this, cmd, "Invalid user");
+
+        var (monthly, errorMessage) = await ScoreDB.GetMonthly();
+
+        if (monthly == null)
+            return Helper.ErrorCmd(this, cmd, errorMessage);
+
+        LogHandler.AddLog($"Got monthly scores", this);
+        return new(cmd.CommandType, JsonSerializer.Serialize(monthly));
+    }
+
+    private async Task<Command> GetAllTimeScores(Command cmd)
+    {
+        if (user == null || user.UserID < 1)
+            return Helper.ErrorCmd(this, cmd, "Invalid user");
+
+        var (alltime, errorMessage) = await ScoreDB.GetAllTime();
+
+        if (alltime == null)
+            return Helper.ErrorCmd(this, cmd, errorMessage);
+
+        LogHandler.AddLog($"Got all time scores", this);
+        return new(cmd.CommandType, JsonSerializer.Serialize(alltime));
     }
 
     private Command Disconnect(Command cmd)

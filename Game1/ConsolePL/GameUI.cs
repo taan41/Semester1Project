@@ -658,6 +658,69 @@ static class GameUI
         return ReadInput(15, tempCursorTop, false, 40);
     }
 
+    public static void ViewPersonalScoreScreen(List<Score> personal)
+    {
+        StopTitleAnim();
+        Clear();
+        DrawHeader();
+        CursorTop++;
+
+        WriteLine(" -- Your Scores:");
+        for (int i = 1; i < 16; i++)
+        {
+            if (i <= personal.Count)
+                WriteLine($" {i}. {personal[i - 1]}");
+            else
+                WriteLine($" {i}.");
+        }
+
+        CursorTop = CursorPos.BottomBorderTop;
+        DrawLine('-');
+        ReadKey(true);
+    }
+
+    public static void ViewMonthlyScoreScreen(List<Score> monthly)
+    {
+        StopTitleAnim();
+        Clear();
+        DrawHeader();
+        CursorTop++;
+
+        WriteLine(" -- Monthly Scores:");
+        for (int i = 1; i < 16; i++)
+        {
+            if (i <= monthly.Count)
+                WriteLine($" {i}. {monthly[i - 1]}");
+            else
+                WriteLine($" {i}.");
+        }
+
+        CursorTop = CursorPos.BottomBorderTop;
+        DrawLine('-');
+        ReadKey(true);
+    }
+
+    public static void ViewAllTimeScoreScreen(List<Score> alltime)
+    {
+        StopTitleAnim();
+        Clear();
+        DrawHeader();
+        CursorTop++;
+
+        WriteLine(" -- All Time Scores:");
+        for (int i = 1; i < 16; i++)
+        {
+            if (i <= alltime.Count)
+                WriteLine($" {i}. {alltime[i - 1]}");
+            else
+                WriteLine($" {i}.");
+        }
+
+        CursorTop = CursorPos.BottomBorderTop;
+        DrawLine('-');
+        ReadKey(true);
+    }
+
     public static void PrintComponents<T>(List<T> components, int zoneHeight, string? msg = null, int? cursorTop = null) where T: Component
     {
         if (cursorTop != null)

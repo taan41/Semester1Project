@@ -32,16 +32,16 @@
       "PlayerGold": {
         "Quantity": 100
       },
-      "ATK": 7,
-      "MaxHP": 25,
-      "HP": 25,
+      "ATK": 700,
+      "MaxHP": 2500,
+      "HP": 2500,
       "MaxMP": 10,
       "MP": 10,
       "Name": "Player"
     },
     "Progress": {
-      "Floor": 1,
-      "Room": 1
+      "Floor": 3,
+      "Room": 15
     },
     "SavedTime": "00:00:00.5458802"
   },

@@ -4,7 +4,7 @@ static class ScoreDB
 {
     public static async Task<(bool success, string errorMessage)> Add(Score score)
     {
-        string query = "INSERT INTO Scores (UserID, Nickname, ClearTime) VALUES (@userID, @nickname, @clearTime)";
+        string query = "INSERT INTO Scores (UserID, ClearTime) VALUES (@userID, @clearTime)";
 
         try
         {
@@ -13,7 +13,6 @@ static class ScoreDB
 
             using MySqlCommand cmd = new(query, conn);
             cmd.Parameters.AddWithValue("@userID", score.UserID);
-            cmd.Parameters.AddWithValue("@nickname", score.Nickname);
             cmd.Parameters.AddWithValue("@clearTime", score.ClearTime);
 
             await cmd.ExecuteNonQueryAsync();

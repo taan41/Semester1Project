@@ -39,75 +39,112 @@ class NetworkHandler
         client?.Close();
     }
 
-    public bool CheckUsername(string username, out string errorMessage)
+    public bool CheckUsername(string username, out string errorMsg)
     {
         Command cmdToSend = new(CommandType.CheckUsername, username);
-        return HandleCommand(cmdToSend, out _, out errorMessage);
+        return HandleCommand(cmdToSend, out _, out errorMsg);
     }
 
-    public bool Register(User user, out string errorMessage)
+    public bool Register(User user, out string errorMsg)
     {
         Command cmdToSend = new(CommandType.Register, user.ToJson());
-        return HandleCommand(cmdToSend, out _, out errorMessage);
+        return HandleCommand(cmdToSend, out _, out errorMsg);
     }
 
-    public PasswordSet? GetPassword(string username, out string errorMessage)
+    public PasswordSet? GetPassword(string username, out string errorMsg)
     {
         Command cmdToSend = new(CommandType.GetUserPwd, username);
-        return HandleCommand(cmdToSend, out Command receivedCmd, out errorMessage)
+        return HandleCommand(cmdToSend, out Command receivedCmd, out errorMsg)
             ? PasswordSet.FromJson(receivedCmd.Payload)
             : null;
     }
 
-    public User? Login(out string errorMessage)
+    public User? Login(out string errorMsg)
     {
         Command cmdToSend = new(CommandType.Login);
-        return HandleCommand(cmdToSend, out Command receivedCmd, out errorMessage)
+        return HandleCommand(cmdToSend, out Command receivedCmd, out errorMsg)
             ? User.FromJson(receivedCmd.Payload)
             : null;
     }
 
-    public bool Logout(out string errorMessage)
+    public bool Logout(out string errorMsg)
     {
         Command cmdToSend = new(CommandType.Logout);
-        return HandleCommand(cmdToSend, out _, out errorMessage);
+        return HandleCommand(cmdToSend, out _, out errorMsg);
     }
 
-    public bool ValidateEmail(User user, out string errorMessage)
+    public bool ValidateEmail(User user, out string errorMsg)
     {
         Command cmdToSend = new(CommandType.ValidateEmail, user.ToJson());
-        return HandleCommand(cmdToSend, out _, out errorMessage);
+        return HandleCommand(cmdToSend, out _, out errorMsg);
     }
 
-    public bool ResetPwd(User user, out string errorMessage)
+    public bool ResetPwd(User user, out string errorMsg)
     {
         Command cmdToSend = new(CommandType.ResetPwd, user.ToJson());
-        return HandleCommand(cmdToSend, out _, out errorMessage);
+        return HandleCommand(cmdToSend, out _, out errorMsg);
     }
 
-    public GameSave? DownloadSave(out string errorMessage)
+    public GameSave? DownloadSave(out string errorMsg)
     {
         Command cmdToSend = new(CommandType.DownloadSave);
-        return HandleCommand(cmdToSend, out Command receivedCmd, out errorMessage)
+        return HandleCommand(cmdToSend, out Command receivedCmd, out errorMsg)
             ? JsonSerializer.Deserialize<GameSave>(receivedCmd.Payload)
             : null;
     }
 
-    public bool UploadSave(GameSave gameSave, out string errorMessage)
+    public bool UploadSave(GameSave gameSave, out string errorMsg)
     {
         gameSave.Name = "CloudSave";
         Command cmdToSend = new(CommandType.UploadSave, JsonSerializer.Serialize(gameSave));
-        return HandleCommand(cmdToSend, out _, out errorMessage);
+        return HandleCommand(cmdToSend, out _, out errorMsg);
     }
 
-    private bool HandleCommand(Command cmdToSend, out Command receivedCmd, out string errorMessage)
+    public bool UploadScore(Score score, out string errorMsg)
+    {
+        Command cmdToSend = new(CommandType.UploadScore, score.ToJson());
+        return HandleCommand(cmdToSend, out _, out errorMsg);
+    }
+
+    public bool GetScores(out List<Score>? personal, out List<Score>? monthly, out List<Score>? alltime, out string errorMsg)
+    {
+        personal = monthly = alltime = null;
+        
+        Command cmdToSend = new(CommandType.GetUserScores);
+        if(!HandleCommand(cmdToSend, out Command receivedCmd, out errorMsg))
+            return false;
+        else
+            personal = JsonSerializer.Deserialize<List<Score>>(receivedCmd.Payload);
+
+        cmdToSend.Set(CommandType.GetMonthlyScores);
+        if(!HandleCommand(cmdToSend, out receivedCmd, out errorMsg))
+            return false;
+        else
+            monthly = JsonSerializer.Deserialize<List<Score>>(receivedCmd.Payload);
+
+        cmdToSend.Set(CommandType.GetAllTimeScores);
+        if(!HandleCommand(cmdToSend, out receivedCmd, out errorMsg))
+            return false;
+        else
+            alltime = JsonSerializer.Deserialize<List<Score>>(receivedCmd.Payload);
+
+        if (personal == null || monthly == null || alltime == null)
+        {
+            errorMsg = "Null scores";
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool HandleCommand(Command cmdToSend, out Command receivedCmd, out string errorMsg)
     {
         receivedCmd = new();
-        errorMessage = "";
+        errorMsg = "";
 
         if (!IsConnected)
         {
-            errorMessage = "Can't connect to server";
+            errorMsg = "Can't connect to server";
             return false;
         }
 
@@ -129,7 +166,7 @@ class NetworkHandler
         }
         catch (Exception ex) when (ex is IOException or SocketException)
         {
-            errorMessage = $"Can't connect to server";
+            errorMsg = $"Can't connect to server";
             return false;
         }
         
@@ -138,7 +175,7 @@ class NetworkHandler
 
         if(tempCmd == null)
         {
-            errorMessage = "Null command";
+            errorMsg = "Null command";
             return false;
         }
 
@@ -149,11 +186,11 @@ class NetworkHandler
                 return true;
 
             case CommandType.Error:
-                errorMessage = tempCmd.Payload;
+                errorMsg = tempCmd.Payload;
                 return false;
 
             default:
-                errorMessage = $"Received invalid command: {tempCmd.CommandType}";
+                errorMsg = $"Received invalid command: {tempCmd.CommandType}";
                 return false;
         }
     }

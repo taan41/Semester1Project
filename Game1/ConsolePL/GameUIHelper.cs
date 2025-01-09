@@ -62,7 +62,7 @@ static class GameUIHelper
         sb.Append(']');
         if (includeValue)
             sb.Append($" {currentValue}/{maxValue}");
-        sb.Append(new string(' ', UIWidth - CursorLeft - sb.Length - 1));
+        sb.Append(new string(' ', Math.Max(0, UIWidth - CursorLeft - sb.Length - 1)));
 
         ForegroundColor = color;
         WriteLine(sb.ToString());

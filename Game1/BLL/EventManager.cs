@@ -32,7 +32,7 @@ class EventManager
 
     // Get events of current room
     public List<Event> GetEvents()
-        => _allEvents.ElementAt(_gameData.Progress.Room + (_gameData.Progress.Floor - 1) * GameProgress.MaxRoom);
+        => _allEvents.ElementAt(_gameData.Progress.Room - 1 + (_gameData.Progress.Floor - 1) * GameProgress.MaxRoom);
 
     private List<List<Event>> GenerateAllEvents()
     {

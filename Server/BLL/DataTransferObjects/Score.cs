@@ -6,6 +6,7 @@ class Score
     public int UserID { get; set; } = -1;
     public string Nickname { get; set; } = "Temp Name";
     public TimeSpan ClearTime { get; set; } = TimeSpan.Zero;
+    public DateTime UploadedTime { get; set; } = DateTime.Now;
 
     public Score() {}
 
@@ -17,7 +18,7 @@ class Score
     }
 
     public override string ToString()
-        => $"{Nickname, -Utilities.DataConstants.nicknameMax} - {ClearTime:hh:mm:ss.fff}";
+        => $"{Nickname, -Utilities.DataConstants.nicknameMax} - {ClearTime:hh:mm:ss.fff} - {UploadedTime:yyyy-MM-dd HH:mm:ss}";
 
     public string ToJson()
         => JsonSerializer.Serialize(this);

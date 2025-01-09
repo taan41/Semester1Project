@@ -74,7 +74,8 @@ class Game
 
     private static void OnlinePlay()
     {
-        List<string> onlineOptions = ["NEW GAME", "LOAD GAME", "VIEW SCORE", "UPDATE USER INFO", "LOG OUT"];
+        List<string> onlineOptions = ["NEW GAME", "LOAD GAME", "VIEW SCORE", "LOG OUT"];
+        // , "UPDATE USER INFO"
 
         while (true)
         {
@@ -103,17 +104,61 @@ class Game
                     break;
 
                 case 2:
-                    // view score
+                    ViewScore();
                     break;
 
-                case 3:
+                // case 3:
                     // update user info
-                    break;
+                    // break;
 
                 default:
                     if (!networkHandler.Logout(out string? error))
                         GameUI.WarningPopup(error);
                     user = null;
+                    return;
+            }
+        }
+    }
+
+    private static void ViewScore()
+    {
+        List<string> scoreOptions = ["PERSONAL", "TOP MONTHLY", "TOP ALL TIME", "RETURN"];
+
+        while (true)
+        {
+            if (networkHandler == null || !networkHandler.IsConnected || user == null)
+                return;
+
+            if (!networkHandler.GetScores(out List<Score>? personal, out List<Score>? monthly, out List<Score>? alltime, out string errorMsg))
+            {
+                GameUI.WarningPopup(errorMsg);
+                return;
+            }
+
+            if (personal == null || monthly == null || alltime == null)
+            {
+                GameUI.WarningPopup("Null scores");
+                return;
+            }
+            
+            GameUI.TitleScreenBorders(false, true);
+            GameUI.StartTitleAnim();
+
+            switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop, scoreOptions))
+            {
+                case 0:
+                    GameUI.ViewPersonalScoreScreen(personal);
+                    break;
+
+                case 1:
+                    GameUI.ViewMonthlyScoreScreen(monthly);
+                    break;
+
+                case 2:
+                    GameUI.ViewAllTimeScoreScreen(alltime);
+                    break;
+
+                default:
                     return;
             }
         }
@@ -338,19 +383,19 @@ class Game
 
                     if (fightResult == null)
                         return;
-                    else if (fightResult == false)
+                    else if (fightResult == false) // lose
                     {
                         GameUI.GameOverScreen(loseOptions);
 
                         switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.EndScreenMenuTop, loseOptions))
                         {
-                            case 0:
+                            case 0: // retry
                                 gameData.Player.HP = hpPreFight;
                                 gameData.Player.MP = mpPreFight;
                                 fightEvent.Monsters = monstersPreFight;
                                 continue;
                             
-                            case 1: case null: default: return;
+                            default: return;
                         }
                     }
                     break;
@@ -376,7 +421,7 @@ class Game
                         break;
             };
             
-            // No room left
+            // No room left - victory
             if (!gameData.Progress.Next())
             {
                 HandleVictory(gameData);
@@ -728,17 +773,21 @@ class Game
     {
         gameData.SetTime(false);
 
-        List<string> winOptions = ["POST SCORE", "RETURN TO TITLE"];
+        if (networkHandler != null && networkHandler.IsConnected && user != null)
+        {
+            Score score = new(user.UserID, user.Nickname, gameData.GetElapsedTime());
+            if (!networkHandler.UploadScore(score, out _))
+                networkHandler = null;
+        }
+
+        List<string> winOptions = ["RETURN TO TITLE"];
 
         GameUI.VictoryScreen(gameData.GetElapsedTime(), winOptions);
 
         switch (InteractiveUI.PickString(CursorPos.TitleScreenMenuLeft, CursorPos.EndScreenMenuTop + 2, winOptions))
         {
-            case 0:
-                // Post score
-                break;
-            
-            case 1: case null: default: return;
+            default:
+                return;
         }
     }
 }
