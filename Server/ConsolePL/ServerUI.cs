@@ -5,7 +5,7 @@ static class ServerUI
 {
     public static string Header { get; } = "Server Control Center";
 
-    public static void FillDBInfo()
+    public static bool FillDBInfo()
     {
         string? server, db, uid, password;
 
@@ -18,25 +18,25 @@ static class ServerUI
 
         Write(" Server (default 'localhost'): ");
         if ((server = ReadInput()) == null)
-            throw new("Cancelled initializing MySql connection");
+            return false;
         if (string.IsNullOrWhiteSpace(server))
             server = "localhost";
 
         Write(" Database (default 'consoleconquer'): ");
         if ((db = ReadInput()) == null)
-            throw new("Cancelled initializing MySql connection");
+            return false;
         if (string.IsNullOrWhiteSpace(db))
             db = "consoleconquer";
 
         Write(" UID (default 'root'): ");
         if ((uid = ReadInput()) == null)
-            throw new("Cancelled initializing MySql connection");
+            return false;
         if (string.IsNullOrWhiteSpace(uid))
             uid = "root";
 
         Write(" Password (default empty): ");
         if ((password = ReadInput(true)) == null)
-            throw new("Cancelled initializing MySql connection");
+            return false;
 
         DrawLine('-');
 
@@ -48,7 +48,7 @@ static class ServerUI
         LogHandler.Initialize();
 
         ReadKey(true);
-        return;
+        return true;
     }
     
     public static void MainMenu(string? serverIP, int port, bool serverOnline)
@@ -60,19 +60,20 @@ static class ServerUI
         WriteLine($" Server's status: {(serverOnline ? "Online" : "Offline")}");
         DrawLine('-');
 
-        if (serverOnline)
-        {
-            WriteLine(" 1. View connected clients");
-            WriteLine(" 4. View activity log");
-            WriteLine(" 0. Shut down server");
-        }
-        else
+        if (!serverOnline)
         {
             WriteLine(" 1. Start server");
             WriteLine(" 2. Change IP");
             WriteLine(" 3. Change port");
             WriteLine(" 4. View activity log");
             WriteLine(" 0. Exit program");
+        }
+        else
+        {
+            WriteLine(" 1. View connected clients");
+            WriteLine(" 2. Manage assets");
+            WriteLine(" 4. View activity log");
+            WriteLine(" 0. Shut down server");
         }
 
         DrawLine('-');

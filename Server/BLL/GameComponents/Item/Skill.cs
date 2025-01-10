@@ -26,7 +26,7 @@ class Skill : Item
         MPCost = mpcost;
 
         ID = IDTracker[(int) Rarity]++;
-        Price = Price * (100 + SkillMultiplier) / 100;
+        Price = Price * (100 + SkillPriceMultiplier) / 100;
     }
 
     public Skill(Skill other) : base(other.Name, other.Rarity, other.Price)
@@ -39,6 +39,9 @@ class Skill : Item
     }
     public override string ToJson()
         => JsonSerializer.Serialize(this);
+
+    public static int CalcPrice(ItemRarity rarity)
+        => BasePrice * (100 + (int) rarity * RarityPriceMultiplier + SkillPriceMultiplier) / 100;
 }
 
 class SkillComparer : IComparer<Skill>

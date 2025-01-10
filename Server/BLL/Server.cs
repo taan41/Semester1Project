@@ -9,12 +9,13 @@ class Server
     static readonly List<ClientHandler> clientHandlers = [];
     static TcpListener? listener;
 
-    public static void Start()
+    public static async Task Start()
     {
         string? serverIP = null;
         int port = defaultPort;
 
-        ServerUI.FillDBInfo();
+        if (!ServerUI.FillDBInfo())
+            return;
 
         while (true)
         {
@@ -32,7 +33,7 @@ class Server
             CancellationTokenSource serverStopToken = new();
             _ = Task.Run(() => AcceptClientsAsync(listener, serverStopToken.Token));
 
-            ServerOverview(serverIP, port);
+            await ServerOverview(serverIP, port);
 
             serverStopToken.Cancel();
             listener.Stop();
@@ -42,11 +43,11 @@ class Server
 
     static bool StartServer(ref string? serverIP, ref int port)
     {
-        while(true)
+        while (true)
         {
             ServerUI.MainMenu(serverIP, port, false);
 
-            switch(ReadLine())
+            switch (ServerUIHelper.ReadInput())
             {
                 case "1":
                     return true;
@@ -55,7 +56,7 @@ class Server
                     Write(" Enter IP: ");
                     serverIP = ReadLine();
 
-                    if(serverIP == null || !CheckIPv4(serverIP))
+                    if (serverIP == null || !CheckIPv4(serverIP))
                     {
                         serverIP = null;
                         WriteLine(" Invalid IP.");
@@ -69,10 +70,10 @@ class Server
                     {
                         port = Convert.ToInt32(ReadLine());
                         
-                        if(port < 0 || port > 65535)
+                        if (port < 0 || port > 65535)
                             throw new FormatException();
                     }
-                    catch(FormatException)
+                    catch (FormatException)
                     {
                         port = defaultPort;
                         WriteLine(" Invalid port");
@@ -93,19 +94,21 @@ class Server
         }
     }
 
-    static void ServerOverview(string? serverIP, int port)
+    static async Task ServerOverview(string? serverIP, int port)
     {
         while (true)
         {
             ServerUI.MainMenu(serverIP, port, true);
 
-            switch (ReadLine())
+            switch (ServerUIHelper.ReadInput())
             {
                 case "1":
                     ServerUI.ViewConnectedClients(clientHandlers);
                     continue;
 
                 case "2":
+                    await AssetManagerPL.Intance.Start();
+                    continue;
 
                 case "3":
                     break;
@@ -114,8 +117,7 @@ class Server
                     ServerUI.ViewLog();
                     continue;
 
-                case "0":
-                case null:
+                case "0": case null:
                     WriteLine(" Shutting down server...");
                     ReadKey(true);
                     return;
@@ -129,11 +131,11 @@ class Server
     {
         try
         {
-            while(true)
+            while (true)
             {
                 TcpClient client = await listener.AcceptTcpClientAsync(token);
 
-                if(token.IsCancellationRequested)
+                if (token.IsCancellationRequested)
                     return;
 
                 ClientHandler clientHandler = new(client);
@@ -144,8 +146,8 @@ class Server
                 _ = Task.Run(() => clientHandler.HandlingClientAsync(token), token);
             }
         }
-        catch(OperationCanceledException) {}
-        catch(Exception ex)
+        catch (OperationCanceledException) {}
+        catch (Exception ex)
         {
             LogHandler.AddLog($"Error: {ex.Message}");
         }
@@ -165,11 +167,11 @@ class Server
 
     private static bool CheckIPv4(string? ipAddress)
     {
-        if(!IPAddress.TryParse(ipAddress, out _))
+        if (!IPAddress.TryParse(ipAddress, out _))
             return false;
 
         string[] parts = ipAddress.Split('.');
-        if(parts.Length != 4) return false;
+        if (parts.Length != 4) return false;
 
         foreach(string part in parts)
         {

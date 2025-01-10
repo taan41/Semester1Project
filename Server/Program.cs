@@ -1,10 +1,10 @@
 class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         try
         {
-            Server.Start();
+            await Server.Start();
             // AssetCreator.Start();
         }
         catch (Exception ex)

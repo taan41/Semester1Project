@@ -77,7 +77,7 @@ static class MonsterDB
         }
     }
 
-    public static async Task<(List<Monster>? monsters, string errorMessage)> GetAll()
+    public static async Task<(Dictionary<int, Monster>? monsters, string errorMessage)> GetAll()
     {
         string query = @"
             SELECT 
@@ -99,10 +99,10 @@ static class MonsterDB
             using MySqlCommand cmd = new(query, conn);
             using var reader = await cmd.ExecuteReaderAsync();
 
-            List<Monster> monsters = [];
+            Dictionary<int, Monster> monsters = [];
             while (await reader.ReadAsync())
             {
-                monsters.Add(new Monster
+                monsters[reader.GetInt32("MonsterID")] = new Monster
                 {
                     ID = reader.GetInt32("MonsterID"),
                     Name = reader.GetString("Name"),
@@ -110,7 +110,7 @@ static class MonsterDB
                     Floor = reader.GetInt32("Floor"),
                     ATK = reader.GetInt32("ATK"),
                     HP = reader.GetInt32("HP")
-                });
+                };
             }
 
             return (monsters, "");

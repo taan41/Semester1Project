@@ -7,8 +7,8 @@ enum ItemRarity
 abstract class Item : Component
 {
     public const int
-        BasePrice = 100, RarityMultiplier = 75,
-        EquipMultiplier = 30, SkillMultiplier = 10,
+        BasePrice = 100, RarityPriceMultiplier = 75,
+        EquipPriceMultiplier = 30, SkillPriceMultiplier = 10,
         SellPricePercentage = 60;
 
     public virtual int ID { get; set; }
@@ -20,6 +20,6 @@ abstract class Item : Component
     public Item(string name, ItemRarity rarity = ItemRarity.Common, int price = -1) : base(name)
     {
         Rarity = rarity;
-        Price = price != -1 ? price : BasePrice * (100 + (int) Rarity * RarityMultiplier) / 100;
+        Price = price != -1 ? price : BasePrice * (100 + (int) Rarity * RarityPriceMultiplier) / 100;
     }
 }

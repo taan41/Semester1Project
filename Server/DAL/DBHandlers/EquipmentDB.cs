@@ -6,7 +6,7 @@ static class EquipmentDB
     public static async Task<(bool success, string errorMessage)> Add(Equipment equipment)
     {
         string query = @"
-            INSERT INTO Equipment (EquipID, Name, Rarity, Price, Type, BonusATK, BonusHP, BonusMP)
+            INSERT INTO Equipments (EquipID, Name, Rarity, Price, Type, BonusATK, BonusHP, BonusMP)
             VALUES (@id, @name, @rarity, @price, @type, @bonusATK, @bonusHP, @bonusMP);
         ";
 
@@ -47,7 +47,7 @@ static class EquipmentDB
                 BonusHP,
                 BonusMP
             FROM 
-                Equipment
+                Equipments
             WHERE 
                 EquipID = @equipID
         ";
@@ -83,7 +83,71 @@ static class EquipmentDB
         }
     }
 
-    public static async Task<(List<Equipment>? equipments, string errorMessage)> GetAll()
+    public static async Task<(bool success, string errorMessage)> Update(Equipment equipment)
+    {
+        string query = @"
+            UPDATE Equipments
+            SET 
+                Name = @name,
+                Rarity = @rarity,
+                Price = @price,
+                Type = @type,
+                BonusATK = @bonusATK,
+                BonusHP = @bonusHP,
+                BonusMP = @bonusMP
+            WHERE 
+                EquipID = @id
+        ";
+
+        try
+        {
+            using MySqlConnection conn = new(DBManager.ConnectionString);
+            await conn.OpenAsync();
+
+            using MySqlCommand cmd = new(query, conn);
+            cmd.Parameters.AddWithValue("@id", equipment.ID);
+            cmd.Parameters.AddWithValue("@name", equipment.Name);
+            cmd.Parameters.AddWithValue("@rarity", (int) equipment.Rarity);
+            cmd.Parameters.AddWithValue("@price", equipment.Price);
+            cmd.Parameters.AddWithValue("@type", (int) equipment.Type);
+            cmd.Parameters.AddWithValue("@bonusATK", equipment.BonusATK);
+            cmd.Parameters.AddWithValue("@bonusHP", equipment.BonusHP);
+            cmd.Parameters.AddWithValue("@bonusMP", equipment.BonusMP);
+
+            await cmd.ExecuteNonQueryAsync();
+            return (true, "");
+        }
+        catch (MySqlException ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public static async Task<(bool success, string errorMessage)> Delete(int equipID)
+    {
+        string query = @"
+            DELETE FROM Equipments
+            WHERE EquipID = @equipID
+        ";
+
+        try
+        {
+            using MySqlConnection conn = new(DBManager.ConnectionString);
+            await conn.OpenAsync();
+
+            using MySqlCommand cmd = new(query, conn);
+            cmd.Parameters.AddWithValue("@equipID", equipID);
+
+            await cmd.ExecuteNonQueryAsync();
+            return (true, "");
+        }
+        catch (MySqlException ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public static async Task<(Dictionary<int, Equipment>? equipments, string errorMessage)> GetAll()
     {
         string query = @"
             SELECT 
@@ -96,7 +160,7 @@ static class EquipmentDB
                 BonusHP,
                 BonusMP
             FROM 
-                Equipment
+                Equipments
         ";
 
         try
@@ -108,10 +172,10 @@ static class EquipmentDB
 
             using var reader = await cmd.ExecuteReaderAsync();
 
-            List<Equipment> equipments = [];
+            Dictionary<int, Equipment> equipments = [];
             while (await reader.ReadAsync())
             {
-                equipments.Add(new()
+                equipments[reader.GetInt32("EquipID")] = new()
                 {
                     ID = reader.GetInt32("EquipID"),
                     Name = reader.GetString("Name"),
@@ -121,7 +185,7 @@ static class EquipmentDB
                     BonusATK = reader.GetInt32("BonusATK"),
                     BonusHP = reader.GetInt32("BonusHP"),
                     BonusMP = reader.GetInt32("BonusMP")
-                });
+                };
             }
 
             return (equipments, "");

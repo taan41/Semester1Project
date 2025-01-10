@@ -1,0 +1,55 @@
+{
+  "EquipIDTracker": [
+    1,
+    101,
+    201
+  ],
+  "SkillIDTracker": [
+    1,
+    101,
+    201
+  ],
+  "MonsterIDTracker": [
+    [
+      1,
+      101,
+      201
+    ],
+    [
+      1001,
+      1101,
+      1201
+    ],
+    [
+      2001,
+      2101,
+      2201
+    ]
+  ],
+  "EquipRarityPoint": [
+    3,
+    6,
+    9,
+    15
+  ],
+  "EquipPointMultiplier": [
+    2,
+    10,
+    4
+  ],
+  "SkillRarityMultiplier": [
+    100,
+    200,
+    300,
+    500
+  ],
+  "SkillMPMultiplier": [
+    1.5,
+    1
+  ],
+  "SkillTypeDmgMultiplier": [
+    1,
+    1.2,
+    0.6
+  ]
+}

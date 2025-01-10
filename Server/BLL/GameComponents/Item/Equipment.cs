@@ -17,7 +17,7 @@ class Equipment : Item
 
     public Equipment() {}
 
-    public Equipment(string name, int atk, int hp, int mp, ItemRarity rarity = ItemRarity.Common, EquipType type = EquipType.Weapon, int price = 0)
+    public Equipment(string name, int atk, int hp, int mp, ItemRarity rarity = ItemRarity.Common, EquipType type = EquipType.Weapon, int price = -1)
         : base(name, rarity, price)
     {
         Type = type;
@@ -26,7 +26,7 @@ class Equipment : Item
         BonusMP = mp;
 
         ID = IDTracker[(int) Rarity]++;
-        Price = Price * (100 + EquipMultiplier) / 100;
+        Price = Price * (100 + EquipPriceMultiplier) / 100;
     }
 
     public Equipment(Equipment other) : base(other.Name, other.Rarity, other.Price)
@@ -40,6 +40,9 @@ class Equipment : Item
     
     public override string ToJson()
         => JsonSerializer.Serialize(this);
+
+    public static int CalcPrice(ItemRarity rarity)
+        => BasePrice * (100 + (int) rarity * RarityPriceMultiplier + EquipPriceMultiplier) / 100;
 }
 
 class EquipmentComparer : IComparer<Equipment>

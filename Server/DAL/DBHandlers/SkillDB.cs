@@ -83,7 +83,7 @@ static class SkillDB
         }
     }
 
-    public static async Task<(List<Skill>? skills, string errorMessage)> GetAll()
+    public static async Task<(Dictionary<int, Skill>? skills, string errorMessage)> GetAll()
     {
         string query = @"
             SELECT 
@@ -110,10 +110,10 @@ static class SkillDB
             if (!reader.HasRows)
                 return (null, "No skills found");
 
-            List<Skill> skills = [];
+            Dictionary<int, Skill> skills = [];
             while (await reader.ReadAsync())
             {
-                skills.Add(new Skill
+                skills[reader.GetInt32("SkillID")] = new Skill
                 {
                     ID = reader.GetInt32("SkillID"),
                     Name = reader.GetString("Name"),
@@ -123,7 +123,7 @@ static class SkillDB
                     Damage = reader.GetInt32("Damage"),
                     Heal = reader.GetInt32("Heal"),
                     MPCost = reader.GetInt32("MPCost")
-                });
+                };
             }
 
             return (skills, "");
