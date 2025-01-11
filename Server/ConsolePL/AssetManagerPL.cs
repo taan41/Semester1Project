@@ -1,59 +1,5 @@
-using System.Text.Json;
 using static System.Console;
 using static ServerUIHelper;
-
-[Serializable]
-class AssetMetadata
-{
-    private const string FileName = "AssetMetadata.json";
-    private const string DirPath = "Persistence";
-
-    private static JsonSerializerOptions _toJsonOption = new()
-    {
-        WriteIndented = true
-    };
-    
-    public int[] EquipIDTracker { get; set; } = new int[Enum.GetValues(typeof(ItemRarity)).Length];
-    public int[] SkillIDTracker { get; set; } = new int[Enum.GetValues(typeof(ItemRarity)).Length];
-    public int[][] MonsterIDTracker { get; set; } = new int[GameProgress.MaxFloor][];
-
-    public int[] EquipRarityPoint { get; set; } = new int[Enum.GetValues(typeof(ItemRarity)).Length];
-    public int[] EquipPointMultiplier { get; set; } = new int[3];
-
-    public int[] SkillRarityMultiplier { get; set; } = new int[Enum.GetValues(typeof(ItemRarity)).Length];
-    public double[] SkillMPMultiplier { get; set; } = new double[2];
-    public double[] SkillTypeDmgMultiplier { get; set; } = new double[Enum.GetValues(typeof(SkillType)).Length];
-
-    public AssetMetadata()
-    {
-        for (int i = 0; i < MonsterIDTracker.Length; i++)
-        {
-            MonsterIDTracker[i] = new int[Enum.GetValues(typeof(MonsterType)).Length];
-        }
-    }
-
-    public void Save()
-    {
-        Directory.CreateDirectory(DirPath);
-        File.WriteAllText(Path.Combine(DirPath, FileName), JsonSerializer.Serialize(this, _toJsonOption));
-    }
-
-    public static AssetMetadata Load()
-    {
-        AssetMetadata metadata = new();
-
-        string path = Path.Combine(DirPath, FileName);
-        if (!File.Exists(path)) return new AssetMetadata();
-
-        try
-        {
-            metadata = JsonSerializer.Deserialize<AssetMetadata>(File.ReadAllText(path)) ?? new AssetMetadata();
-        }
-        catch (JsonException) { }
-
-        return metadata;
-    }
-}
 
 class AssetManagerPL
 {
@@ -61,7 +7,7 @@ class AssetManagerPL
 
     public static AssetManagerPL Intance { get; } = new();
 
-    private readonly AssetMetadata _metadata = AssetMetadata.Load();
+    private readonly AssetMetadata _metadata = AssetMetadata.Instance;
 
     private Dictionary<int, Equipment> Equipments = [];
     private Dictionary<int, Skill> Skills  = [];
@@ -91,14 +37,15 @@ class AssetManagerPL
                     break;
 
                 case "2":
-                    ManageSkill();
+                    await ManageSkill();
                     break;
 
                 case "3":
-                    ManageMonster();
+                    await ManageMonster();
                     break;
 
                 case "0": case null:
+                    _metadata.Save();
                     return;
 
                 default: continue;
@@ -108,48 +55,50 @@ class AssetManagerPL
 
     private async Task Initialize()
     {
-        for (int i = 0; i < _metadata.EquipIDTracker.Length; i++)
-        {
-            _metadata.EquipIDTracker[i] = i * 100 + 1;
-            _metadata.SkillIDTracker[i] = i * 100 + 1;
-        }
-        for (int i = 0; i < _metadata.MonsterIDTracker.Length; i++)
-        {
-            for (int j = 0; j < _metadata.MonsterIDTracker[i].Length; j++)
-            {
-                _metadata.MonsterIDTracker[i][j] = i * 1000 + j * 100 + 1;
-            }
-        }
+        await LoadEquipments();
+        await LoadSkills();
+        await LoadMonsters();
+    }
 
+    private async Task LoadEquipments()
+    {
         var (equipDB, _) = await EquipmentDB.GetAll();
-        var (skillDB, _) = await SkillDB.GetAll();
-        var (monsterDB, _) = await MonsterDB.GetAll();
 
         if (equipDB != null)
         {
             Equipments = equipDB;
 
-            foreach (int id in Equipments.Keys)
-                if (id >= _metadata.EquipIDTracker[id / 100])
-                    _metadata.EquipIDTracker[id / 100] = id + 1;
+            foreach (var equip in Equipments.Values)
+                if (equip.ID >= _metadata.EquipIDTracker[(int) equip.Rarity])
+                    _metadata.EquipIDTracker[(int) equip.Rarity] = equip.ID + 1;
         }
+    }
+
+    private async Task LoadSkills()
+    {
+        var (skillDB, _) = await SkillDB.GetAll();
 
         if (skillDB != null)
         {
             Skills = skillDB;
 
-            foreach (int id in Skills.Keys)
-                if (id >= _metadata.SkillIDTracker[id / 100])
-                    _metadata.SkillIDTracker[id / 100] = id + 1;
+            foreach (var skill in Skills.Values)
+                if (skill.ID >= _metadata.SkillIDTracker[(int) skill.Rarity])
+                    _metadata.SkillIDTracker[(int) skill.Rarity] = skill.ID + 1;
         }
+    }
+
+    private async Task LoadMonsters()
+    {
+        var (monsterDB, _) = await MonsterDB.GetAll();
 
         if (monsterDB != null)
         {
             Monsters = monsterDB;
 
-            foreach (int id in Monsters.Keys)
-                if (id >= _metadata.MonsterIDTracker[id / 1000][id % 1000 / 100])
-                    _metadata.MonsterIDTracker[id / 1000][id % 1000 / 100] = id + 1;
+            foreach (var monster in Monsters.Values)
+                if (monster.ID >= _metadata.MonsterIDTracker[monster.Floor - 1][(int) monster.Type])
+                    _metadata.MonsterIDTracker[monster.Floor - 1][(int) monster.Type] = monster.ID + 1;
         }
     }
 
@@ -166,7 +115,7 @@ class AssetManagerPL
                 Write($" {(ItemRarity) i}: {_metadata.EquipRarityPoint[i]} |");
             }
             WriteLine();
-            WriteLine($" 1 Stat Point = {_metadata.EquipPointMultiplier[0]} ATK = {_metadata.EquipPointMultiplier[1]} HP = {_metadata.EquipPointMultiplier[2]} MP");
+            WriteLine($" 1 Stat Point = {_metadata.EquipPointMultiplier[0]} ATK = {_metadata.EquipPointMultiplier[1]} DEF = {_metadata.EquipPointMultiplier[2]} HP = {_metadata.EquipPointMultiplier[3]} MP");
             DrawLine('-');
             WriteLine(" 1. Create");
             WriteLine(" 2. Update");
@@ -181,7 +130,7 @@ class AssetManagerPL
             {
                 switch(ReadInput())
                 {
-                    case "1":
+                    case "1": // create
                         Clear();
                         DrawHeader(Header);
                         WriteLine(" -- Create Equipment");
@@ -210,11 +159,19 @@ class AssetManagerPL
                             int? id = EnterInt();
                             if (id == null) break;
 
-                            equipToUpdate = Equipments[(int) id];
+                            if (!Equipments.ContainsKey((int) id))
+                            {
+                                WriteLine(" Equipment not found");
+                                ReadKey(true);
+                                break;
+                            }
+                            else
+                                equipToUpdate = Equipments[(int) id];
 
                             DrawLine('-');
                             WriteLine(" Equipment Info:");
-                            WriteLine($" {equipToUpdate.ID, -3} | {equipToUpdate.Name, -25} | {equipToUpdate.Rarity, -10} | {equipToUpdate.Type, -6} | {equipToUpdate.BonusATK, -3} | {equipToUpdate.BonusHP, -2} | {equipToUpdate.BonusMP, -2} | {equipToUpdate.Price} G");
+                            WriteLine(" ID  | Name                      | Rarity     | Type   | ATK | DEF | HP | MP | Price");
+                            WriteLine($" {equipToUpdate.ID, -3} | {equipToUpdate.Name, -25} | {equipToUpdate.Rarity, -10} | {equipToUpdate.Type, -6} | {equipToUpdate.BonusATK, -3} | {equipToUpdate.BonusDEF, -3} | {equipToUpdate.BonusHP, -2} | {equipToUpdate.BonusMP, -2} | {equipToUpdate.Price} G");
                             DrawLine('-');
 
                             Equipment? equipToReplace = EnterEquipInfo();
@@ -231,7 +188,7 @@ class AssetManagerPL
                         }
                         break;
 
-                    case "3":
+                    case "3": // delete
                         Equipment? equipToDelete = null;
                         while (true)
                         {
@@ -243,11 +200,19 @@ class AssetManagerPL
                             int? id = EnterInt();
                             if (id == null) break;
 
-                            equipToDelete = Equipments[(int) id];
+                            if (!Equipments.ContainsKey((int) id))
+                            {
+                                WriteLine(" Equipment not found");
+                                ReadKey(true);
+                                break;
+                            }
+                            else
+                                equipToDelete = Equipments[(int) id];
 
                             DrawLine('-');
                             WriteLine(" Equipment Info:");
-                            WriteLine($" {equipToDelete.ID, -3} | {equipToDelete.Name, -25} | {equipToDelete.Rarity, -10} | {equipToDelete.Type, -6} | {equipToDelete.BonusATK, -3} | {equipToDelete.BonusHP, -2} | {equipToDelete.BonusMP, -2} | {equipToDelete.Price} G");
+                            WriteLine(" ID  | Name                      | Rarity     | Type   | ATK | DEF | HP | MP | Price");
+                            WriteLine($" {equipToDelete.ID, -3} | {equipToDelete.Name, -25} | {equipToDelete.Rarity, -10} | {equipToDelete.Type, -6} | {equipToDelete.BonusATK, -3} | {equipToDelete.BonusDEF, -3} | {equipToDelete.BonusHP, -2} | {equipToDelete.BonusMP, -2} | {equipToDelete.Price} G");
                             DrawLine('-');
 
                             Write(" Are you sure you want to delete this equipment? (Y/N): ");
@@ -258,6 +223,19 @@ class AssetManagerPL
                             {
                                 Equipments.Remove(equipToDelete.ID);
                                 await EquipmentDB.Delete(equipToDelete.ID);
+
+                                int deletedID = equipToDelete.ID;
+                                for (int i = deletedID; i < _metadata.EquipIDTracker[deletedID / 100]; i++)
+                                {
+                                    if (Equipments.ContainsKey(i + 1))
+                                    {
+                                        Equipments[i] = Equipments[i + 1];
+                                        Equipments[i].ID = i;
+                                        Equipments.Remove(i + 1);
+                                        await EquipmentDB.UpdateID(i + 1, i);
+                                    }
+                                }
+                                _metadata.EquipIDTracker[deletedID / 100]--;
 
                                 DrawLine('-');
                                 WriteLine(" Deleted Successfully");
@@ -274,7 +252,7 @@ class AssetManagerPL
                         break;
 
 
-                    case "4":
+                    case "4": // view list
                         List<Equipment> equipmentList = [.. Equipments.Values];
                         int maxPage = equipmentList.Count / 15;
                         int page = 0;
@@ -287,11 +265,11 @@ class AssetManagerPL
                             WriteLine($" -- Equipment List ({page + 1}/{maxPage + 1})");
                             WriteLine(" Arrow Keys To Turn Page, 'ESC' To Exit");
                             DrawLine('-');
-                            WriteLine(" ID  | Name                      | Rarity     | Type   | ATK | HP | MP | Price");
+                            WriteLine(" ID  | Name                      | Rarity     | Type   | ATK | DEF | HP | MP | Price");
                             DrawLine('-');
                             foreach (Equipment equip in equipmentList.Skip(page * 15).Take(15))
                             {
-                                WriteLine($" {equip.ID, -3} | {equip.Name, -25} | {equip.Rarity, -10} | {equip.Type, -6} | {equip.BonusATK, -3} | {equip.BonusHP, -2} | {equip.BonusMP, -2} | {equip.Price} G");
+                                WriteLine($" {equip.ID, -3} | {equip.Name, -25} | {equip.Rarity, -10} | {equip.Type, -6} | {equip.BonusATK, -3} | {equip.BonusDEF, -3} | {equip.BonusHP, -2} | {equip.BonusMP, -2} | {equip.Price} G");
                             }
                             DrawLine('=');
 
@@ -314,108 +292,55 @@ class AssetManagerPL
                         }
                         break;
 
-                    case "5":
+                    case "5": // update metadata
+                        int? intInput = null;
+
+                        Clear();
+                        DrawHeader(Header);
+                        WriteLine(" -- Update Metadata");
                         DrawLine('-');
-                        WriteLine(" Stat points per rarity:");
+
+                        int[] newEquipRarityPoint = new int[Enum.GetValues(typeof(ItemRarity)).Length];
+                        WriteLine(" - Stat points per rarity:");
+
                         for (int i = 0; i < Enum.GetValues(typeof(ItemRarity)).Length; i++)
                         {
-                            Write($"   {(ItemRarity) i}: ");
-                            try
-                            {
-                                _metadata.EquipRarityPoint[i] = Convert.ToInt32(ReadLine());
-                            }
-                            catch (FormatException)
-                            {
-                                WriteLine("Invalid input");
-                                ReadKey(true);
-                                continue;
-                            }
+                            Write($" {(ItemRarity) i}: ");
+                            intInput = EnterInt();
+                            if (intInput == null) break;
+                            newEquipRarityPoint[i] = intInput.Value;
                         }
-                        WriteLine(" Stat point multiplier:");
-                        Write("   ATK: ");
-                        try
-                        {
-                            _metadata.EquipPointMultiplier[0] = Convert.ToInt32(ReadLine());
-                        }
-                        catch (FormatException)
-                        {
-                            WriteLine("Invalid input");
-                            ReadKey(true);
-                            continue;
-                        }
-                        Write("   HP: ");
-                        try
-                        {
-                            _metadata.EquipPointMultiplier[1] = Convert.ToInt32(ReadLine());
-                        }
-                        catch (FormatException)
-                        {
-                            WriteLine("Invalid input");
-                            ReadKey(true);
-                            continue;
-                        }
-                        Write("   MP: ");
-                        try
-                        {
-                            _metadata.EquipPointMultiplier[2] = Convert.ToInt32(ReadLine());
-                        }
-                        catch (FormatException)
-                        {
-                            WriteLine("Invalid input");
-                            ReadKey(true);
-                            continue;
-                        }
+                        if (intInput == null) continue;
+
+                        int[] newEquipPointMultiplier = new int[3];
+                        WriteLine(" - Stat point multiplier:");
+
+                        Write(" ATK: ");
+                        intInput = EnterInt();
+                        if (intInput == null) continue;
+                        newEquipPointMultiplier[0] = intInput.Value;
+
+                        Write(" DEF: ");
+                        intInput = EnterInt();
+                        if (intInput == null) continue;
+                        newEquipPointMultiplier[1] = intInput.Value;
+
+                        Write(" HP: ");
+                        intInput = EnterInt();
+                        if (intInput == null) continue;
+                        newEquipPointMultiplier[2] = intInput.Value;
+
+                        Write(" MP: ");
+                        intInput = EnterInt();
+                        if (intInput == null) continue;
+                        newEquipPointMultiplier[3] = intInput.Value;
+
+                        _metadata.EquipRarityPoint = newEquipRarityPoint;
+                        _metadata.EquipPointMultiplier = newEquipPointMultiplier;
+
                         _metadata.Save();
+                        await LoadEquipments();
                         break;
-
-                //     case "1":
-                //         Write("name (25 max): ");
-                //         string? name = ReadLine();
-                //         if (string.IsNullOrWhiteSpace(name) || name.Length > GameUIHelper.UIConstants.NameLen) continue;
-
-                //         Write("type (0 = weapon, 1 = armor, 2 = ring): ");
-                //         EquipType type = (EquipType) Convert.ToInt32(ReadLine());
-
-                //         Write("rarity (0, 3: Common, Rare, Epic, Legendary): ");
-                //         ItemRarity rarity = (ItemRarity) Convert.ToInt32(ReadLine());
-                //         int point = rarity switch
-                //         {
-                //             ItemRarity.Rare => 6,
-                //             ItemRarity.Epic => 10,
-                //             ItemRarity.Legendary => 15,
-                //             _ => 3
-                //         };
-                //         WriteLine($"Recommend stat points : {point} (1 point = 2 atk = 10 hp = 5 mp)");
-
-                //         WriteLine($"Point left: {point}");
-                //         Write("atk point (1 pt = 2 atk): ");
-                //         int atk = Convert.ToInt32(ReadLine());
-                //         point -= atk;
-
-                //         WriteLine($"Point left: {point}");
-                //         Write("hp point (1 pt = 10 hp): ");
-                //         int hpPt = Convert.ToInt32(ReadLine());
-                //         point -= hpPt;
-
-                //         WriteLine($"Point left: {point}");
-                //         Write("mp point (1 pt = 5 mp): ");
-                //         int mpPt = Convert.ToInt32(ReadLine());
-                //         point -= mpPt;
-
-                //         Equipment equipment = new(name, atk * 2, hpPt * 10, mpPt * 5, rarity, type);
-                //         AssetManagerPL.Equipments[equipment.ID] = equipment;
-                //         WriteLine("Added");
-                //         ReadKey(true);
-                //         continue;
-
-                //     case "2":
-                //         AssetManagerPL.Equipments.Values.ToList().ForEach(equip => WriteLine($"{equip.ID:d3} {equip.Name, -25} {equip.Rarity, -10} {equip.Type, -6} {equip.BonusATK} atk, {equip.BonusHP} hp, {equip.BonusMP} mp, {equip.Price} g"));
-                //         ReadKey(true);
-                //         continue;
-
-                //     case "3":
-                //         AssetManagerPL.Equipments.Clear();
-                //         continue;
 
                     case "0": case null:
                         return;
@@ -433,13 +358,13 @@ class AssetManagerPL
 
     private Equipment? EnterEquipInfo()
     {
-        Write(" Type:");
+        Write(" All Type:");
         foreach (EquipType equipType in Enum.GetValues(typeof(EquipType)))
         {
             Write($" {(int) equipType} = {equipType} |");
         }
         WriteLine();
-        Write(" Rarity:");
+        Write(" All Rarity:");
         foreach (ItemRarity itemRarity in Enum.GetValues(typeof(ItemRarity)))
         {
             Write($" {(int) itemRarity} = {itemRarity} |");
@@ -472,21 +397,30 @@ class AssetManagerPL
         point -= atk.Value;
 
         WriteLine($" - Stat Point Left: {point}");
-        Write($" HP Point (1 Pt = {_metadata.EquipPointMultiplier[1]} HP): ");
+        Write($" DEF Point (1 Pt = {_metadata.EquipPointMultiplier[1]} DEF): ");
+        int? def = EnterInt();
+        if (def == null)
+            return null;
+        point -= def.Value;
+
+        WriteLine($" - Stat Point Left: {point}");
+        Write($" HP Point (1 Pt = {_metadata.EquipPointMultiplier[2]} HP): ");
         int? hpPt = EnterInt();
         if (hpPt == null)
             return null;
         point -= hpPt.Value;
 
         WriteLine($" - Stat Point Left: {point}");
-        Write($" MP Point (1 Pt = {_metadata.EquipPointMultiplier[2]} MP): ");
+        Write($" MP Point (1 Pt = {_metadata.EquipPointMultiplier[3]} MP): ");
         int? mpPt = EnterInt();
         if (mpPt == null)
             return null;
         point -= mpPt.Value;
 
-        Write(" Price (-1 for auto-calc): ");
-        int price = EnterInt() ?? -1;
+        Write(" Price (0 for auto-calc): ");
+        int? price = EnterInt();
+        if (price == null)
+            return null;
 
         return new Equipment()
         {
@@ -494,32 +428,33 @@ class AssetManagerPL
             Type = type.Value,
             Rarity = rarity.Value,
             BonusATK = atk.Value * _metadata.EquipPointMultiplier[0],
-            BonusHP = hpPt.Value * _metadata.EquipPointMultiplier[1],
-            BonusMP = mpPt.Value * _metadata.EquipPointMultiplier[2],
-            Price = price == -1 ? (atk.Value + hpPt.Value + mpPt.Value) * 10 : price
+            BonusDEF = def.Value * _metadata.EquipPointMultiplier[1],
+            BonusHP = hpPt.Value * _metadata.EquipPointMultiplier[2],
+            BonusMP = mpPt.Value * _metadata.EquipPointMultiplier[3],
+            Price = price != 0 ? price.Value : Equipment.CalcPrice((ItemRarity) rarity)
         };
     }
 
-    private void ManageSkill()
+    private async Task ManageSkill()
     {
         while (true)
         {
             Clear();
             DrawHeader(Header);
             WriteLine(" -- Skills");
-            Write(" Rarity Multiplier:\n  ");
+            Write(" Rarity Stat Multiplier:\n  ");
             for (int i = 0; i < Enum.GetValues(typeof(ItemRarity)).Length; i++)
             {
                 Write($" {(ItemRarity) i}: {_metadata.SkillRarityMultiplier[i]}% |");
             }
             WriteLine();
-            WriteLine($" 1 MP = {_metadata.SkillMPMultiplier[0]:F1} Damage = {_metadata.SkillMPMultiplier[1]:F1} Heal");
             Write(" Type Damage Multiplier:\n  ");
             for (int i = 0; i < Enum.GetValues(typeof(SkillType)).Length; i++)
             {
                 Write($" {(SkillType) i}: {_metadata.SkillTypeDmgMultiplier[i]:F1} |");
             }
             WriteLine();
+            WriteLine($" 1 MP = {_metadata.SkillMPMultiplier[0]:F1} Damage = {_metadata.SkillMPMultiplier[1]:F1} Heal");
             DrawLine('-');
             WriteLine(" 1. Create");
             WriteLine(" 2. Update");
@@ -534,108 +469,220 @@ class AssetManagerPL
             {
                 switch(ReadInput())
                 {
-                    case "5":
+                    case "1":
+                        Clear();
+                        DrawHeader(Header);
+                        WriteLine(" -- Create Skill");
+
+                        Skill? skillToAdd = EnterSkillInfo(out int dmgPt, out int healPt);
+                        if (skillToAdd == null) continue;
+
+                        skillToAdd.ID = _metadata.SkillIDTracker[(int) skillToAdd.Rarity]++;
+                        Skills[skillToAdd.ID] = skillToAdd;
+                        await SkillDB.Add(skillToAdd, dmgPt, healPt);
+
                         DrawLine('-');
-                        WriteLine(" Rarity multiplier (%):");
+                        WriteLine(" Added Successfully");
+                        ReadKey(true);
+                        continue;
+
+                    case "2":
+                        Skill? skillToUpdate = null;
+                        while (true)
+                        {
+                            Clear();
+                            DrawHeader(Header);
+                            WriteLine(" -- Update Skill");
+                            Write(" Enter Skill ID: ");
+
+                            int? id = EnterInt();
+                            if (id == null) break;
+
+                            if (!Skills.ContainsKey((int) id))
+                            {
+                                WriteLine(" Skill not found");
+                                ReadKey(true);
+                                break;
+                            }
+                            else
+                                skillToUpdate = Skills[(int) id];
+
+                            DrawLine('-');
+                            WriteLine(" Skill Info:");
+                            WriteLine(" ID  | Name                      | Rarity     | Type   | MP | Dmg | Heal | Price");
+                            WriteLine($" {skillToUpdate.ID, -3} | {skillToUpdate.Name, -25} | {skillToUpdate.Rarity, -10} | {skillToUpdate.Type, -6} | {skillToUpdate.MPCost, -2} | {skillToUpdate.Damage, -3} | {skillToUpdate.Heal, -4} | {skillToUpdate.Price} G");
+                            DrawLine('-');
+
+                            Skill? skillToReplace = EnterSkillInfo(out dmgPt, out healPt);
+                            if (skillToReplace == null) continue;
+
+                            skillToReplace.ID = skillToUpdate.ID;
+                            Skills[skillToReplace.ID] = skillToReplace;
+                            await SkillDB.Update(skillToReplace, dmgPt, healPt);
+
+                            DrawLine('-');
+                            WriteLine(" Updated Successfully");
+                            ReadKey(true);
+                            break;
+                        }
+                        continue;
+
+                    case "3":
+                        Skill? skillToDelete = null;
+                        while (true)
+                        {
+                            Clear();
+                            DrawHeader(Header);
+                            WriteLine(" -- Delete Skill");
+                            Write(" Enter Skill ID: ");
+
+                            int? id = EnterInt();
+                            if (id == null) break;
+
+                            if (!Skills.ContainsKey((int) id))
+                            {
+                                WriteLine(" Skill not found");
+                                ReadKey(true);
+                                break;
+                            }
+                            else
+                                skillToDelete = Skills[(int) id];
+
+                            DrawLine('-');
+                            WriteLine(" Skill Info:");
+                            WriteLine(" ID  | Name                      | Rarity     | Type   | MP | Dmg | Heal | Price");
+                            WriteLine($" {skillToDelete.ID, -3} | {skillToDelete.Name, -25} | {skillToDelete.Rarity, -10} | {skillToDelete.Type, -6} | {skillToDelete.MPCost, -2} | {skillToDelete.Damage, -3} | {skillToDelete.Heal, -4} | {skillToDelete.Price} G");
+                            DrawLine('-');
+
+                            Write(" Are you sure you want to delete this skill? (Y/N): ");
+
+                            var keyPressed = ReadKey(true).Key;
+                            WriteLine();
+                            if (keyPressed == ConsoleKey.Y || keyPressed == ConsoleKey.Enter)
+                            {
+                                Skills.Remove(skillToDelete.ID);
+                                await SkillDB.Delete(skillToDelete.ID);
+
+                                int deletedID = skillToDelete.ID;
+                                for (int i = deletedID; i < _metadata.SkillIDTracker[deletedID / 100]; i++)
+                                {
+                                    if (Skills.ContainsKey(i + 1))
+                                    {
+                                        Skills[i] = Skills[i + 1];
+                                        Skills[i].ID = i;
+                                        Skills.Remove(i + 1);
+                                        await SkillDB.UpdateID(i + 1, i);
+                                    }
+                                }
+                                _metadata.SkillIDTracker[deletedID / 100]--;
+
+                                DrawLine('-');
+                                WriteLine(" Deleted Successfully");
+                                ReadKey(true);
+                            }
+                            else
+                            {
+                                DrawLine('-');
+                                WriteLine(" Deletion Cancelled");
+                                ReadKey(true);
+                            }
+                            break;
+                        }
+                        continue;
+
+                    case "4":
+                        List<Skill> skillList = [.. Skills.Values];
+                        int maxPage = skillList.Count / 15;
+                        int page = 0;
+                        bool exit = false;
+
+                        while (!exit)
+                        {
+                            Clear();
+                            DrawHeader(Header);
+                            WriteLine($" -- Skill List ({page + 1}/{maxPage + 1})");
+                            WriteLine(" Arrow Keys To Turn Page, 'ESC' To Exit");
+                            DrawLine('-');
+                            WriteLine(" ID  | Name                      | Rarity     | Type   | MP | Dmg | Heal | Price");
+                            DrawLine('-');
+                            foreach (Skill skill in skillList.Skip(page * 15).Take(15))
+                            {
+                                WriteLine($" {skill.ID, -3} | {skill.Name, -25} | {skill.Rarity, -10} | {skill.Type, -6} | {skill.MPCost, -2} | {skill.Damage, -3} | {skill.Heal, -4} | {skill.Price} G");
+                            }
+                            DrawLine('=');
+
+                            switch (ReadKey(true).Key)
+                            {
+                                case ConsoleKey.Escape:
+                                    exit = true;
+                                    break;
+
+                                case ConsoleKey.LeftArrow:
+                                    if (page > 0) page--;
+                                    continue;
+
+                                case ConsoleKey.RightArrow:
+                                    if (page < maxPage) page++;
+                                    continue;
+
+                                default: continue;
+                            }
+                        }
+                        continue;
+
+                    case "5":
+                        int? intInput = null;
+                        double? doubleInput = null;
+
+                        Clear();
+                        DrawHeader(Header);
+                        WriteLine(" -- Update Metadata");
+                        DrawLine('-');
+
+                        int[] newSkillRarityMultiplier = new int[Enum.GetValues(typeof(ItemRarity)).Length];
+                        WriteLine(" - Rarity multiplier (%):");
+
                         for (int i = 0; i < Enum.GetValues(typeof(ItemRarity)).Length; i++)
                         {
-                            Write($"   {(ItemRarity) i}: ");
-                            try
-                            {
-                                _metadata.SkillRarityMultiplier[i] = Convert.ToInt32(ReadLine());
-                            }
-                            catch (FormatException)
-                            {
-                                WriteLine("Invalid input");
-                                ReadKey(true);
-                                continue;
-                            }
+                            Write($" {(ItemRarity) i}: ");
+                            intInput = EnterInt();
+                            if (intInput == null) break;
+                            newSkillRarityMultiplier[i] = intInput.Value;
                         }
-                        WriteLine(" MP multiplier:");
-                        Write("   Damage: ");
-                        try
-                        {
-                            _metadata.SkillMPMultiplier[0] = Convert.ToDouble(ReadLine());
-                        }
-                        catch (FormatException)
-                        {
-                            WriteLine("Invalid input");
-                            ReadKey(true);
-                            continue;
-                        }
-                        Write("   Heal: ");
-                        try
-                        {
-                            _metadata.SkillMPMultiplier[1] = Convert.ToDouble(ReadLine());
-                        }
-                        catch (FormatException)
-                        {
-                            WriteLine("Invalid input");
-                            ReadKey(true);
-                            continue;
-                        }
-                        WriteLine(" Type damage multiplier:");
+                        if (intInput == null) continue;
+
+                        double[] newSkillMPMultiplier = new double[2];
+                        WriteLine(" - MP point multiplier:");
+
+                        Write(" Damage: ");
+                        doubleInput = EnterDouble();
+                        if (doubleInput == null) continue;
+                        newSkillMPMultiplier[0] = doubleInput.Value;
+
+                        Write(" Heal: ");
+                        doubleInput = EnterDouble();
+                        if (doubleInput == null) continue;
+                        newSkillMPMultiplier[1] = doubleInput.Value;
+
+                        double[] newSkillTypeDmgMultiplier = new double[Enum.GetValues(typeof(SkillType)).Length];
+                        WriteLine(" - Type damage multiplier:");
+
                         for (int i = 0; i < Enum.GetValues(typeof(SkillType)).Length; i++)
                         {
-                            Write($"   {(SkillType) i}: ");
-                            try
-                            {
-                                _metadata.SkillTypeDmgMultiplier[i] = Convert.ToDouble(ReadLine());
-                            }
-                            catch (FormatException)
-                            {
-                                WriteLine("Invalid input");
-                                ReadKey(true);
-                                continue;
-                            }
+                            Write($" {(SkillType) i}: ");
+                            doubleInput = EnterDouble();
+                            if (doubleInput == null) break;
+                            newSkillTypeDmgMultiplier[i] = doubleInput.Value;
                         }
+                        if (doubleInput == null) continue;
+
+                        _metadata.SkillRarityMultiplier = newSkillRarityMultiplier;
+                        _metadata.SkillMPMultiplier = newSkillMPMultiplier;
+                        _metadata.SkillTypeDmgMultiplier = newSkillTypeDmgMultiplier;
+
                         _metadata.Save();
+                        await LoadSkills();
                         continue;
-                    // case "1":
-                    //     Write("name (25 max): ");
-                    //     string? name = ReadLine();
-                    //     if (string.IsNullOrWhiteSpace(name) || name.Length > GameUIHelper.UIConstants.NameLen) continue;
-
-                    //     Write("type (0, 2: Single, Random, All): ");
-                    //     SkillType type = (SkillType) Convert.ToInt32(ReadLine());
-
-                    //     Write("rarity (0, 3: Common, Rare, Epic, Legendary): ");
-                    //     ItemRarity rarity = (ItemRarity) Convert.ToInt32(ReadLine());
-                    //     int multiplier = rarity switch
-                    //     {
-                    //         ItemRarity.Rare => 200,
-                    //         ItemRarity.Epic => 300,
-                    //         ItemRarity.Legendary => 450,
-                    //         _ => 100
-                    //     };
-                    //     WriteLine($"Multiplier based on rairty : {multiplier}%");
-                    //     WriteLine("1 mp = 1 heal = 2 damage");
-
-                    //     Write("mp cost: ");
-                    //     int mp = Convert.ToInt32(ReadLine());
-
-                    //     WriteLine($"MP left: {mp}");
-                    //     Write("dmg point (1 pt = 1 mp = 2 dmg): ");
-                    //     int dmgPt = Convert.ToInt32(ReadLine());
-
-                    //     WriteLine($"MP left: {mp - dmgPt}");
-                    //     Write("heal point (1 pt = 1 mp = 1 heal): ");
-                    //     int healPt = Convert.ToInt32(ReadLine());
-
-                    //     Skill skill = new(name, dmgPt * 2 * multiplier / 100, healPt * multiplier / 100, mp, rarity, type);
-                    //     AssetManagerPL.Skills[skill.ID] = skill;
-                    //     WriteLine("Added");
-                    //     ReadKey(true);
-                    //     continue;
-
-                    // case "2":
-                    //     AssetManagerPL.Skills.Values.ToList().ForEach(skill => WriteLine($"{skill.ID:d3} {skill.Name, -25} {skill.Rarity, -10} {skill.Type, -6} {skill.Damage} dmg, {skill.Heal} heal, {skill.MPCost} mp, {skill.Price} g"));
-                    //     ReadKey(true);
-                    //     continue;
-
-                    // case "3":
-                    //     AssetManagerPL.Skills.Clear();
-                    //     continue;
 
                     case "0": case null:
                         return;
@@ -650,7 +697,77 @@ class AssetManagerPL
         }
     }
 
-    private static void ManageMonster()
+    private Skill? EnterSkillInfo(out int dmgPt, out int healPt)
+    {
+        dmgPt = healPt = 0;
+
+        Write(" All Type:");
+        foreach (SkillType skillType in Enum.GetValues(typeof(SkillType)))
+        {
+            Write($" {(int) skillType} = {skillType} |");
+        }
+        WriteLine();
+        Write(" All Rarity:");
+        foreach (ItemRarity itemRarity in Enum.GetValues(typeof(ItemRarity)))
+        {
+            Write($" {(int) itemRarity} = {itemRarity} |");
+        }
+        WriteLine();
+        DrawLine('-');
+
+        Write(" Name (25 max): ");
+        string? name = ReadInput(false, 25);
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        Write(" Type: ");
+        SkillType? type = (SkillType?) EnterInt();
+        if (type == null)
+            return null;
+
+        Write(" Rarity: ");
+        ItemRarity? rarity = (ItemRarity?) EnterInt();
+        if (rarity == null)
+            return null;
+
+        Write(" MP Cost: ");
+        int? mpCost = EnterInt();
+        if (mpCost == null)
+            return null;
+
+        WriteLine($" MP Point Left: {mpCost}");
+        Write($" Damage Point (1 Pt = {_metadata.SkillMPMultiplier[0]} Dmg): ");
+        int? dmg = EnterInt();
+        if (dmg == null)
+            return null;
+
+        WriteLine($" MP Point Left: {mpCost - dmg.Value}");
+        Write($" Heal Point (1 Pt = {_metadata.SkillMPMultiplier[1]} Heal): ");
+        int? heal = EnterInt();
+        if (heal == null)
+            return null;
+
+        Write(" Price (0 for auto-calc): ");
+        int? price = EnterInt();
+        if (price == null)
+            return null;
+
+        dmgPt = dmg.Value;
+        healPt = heal.Value;
+
+        return new Skill()
+        {
+            Name = name,
+            Type = type.Value,
+            Rarity = rarity.Value,
+            MPCost = mpCost.Value,
+            Damage = (int) (dmg.Value * _metadata.SkillMPMultiplier[0] * _metadata.SkillTypeDmgMultiplier[(int) type.Value]) * _metadata.SkillRarityMultiplier[(int) rarity.Value] / 100,
+            Heal = (int) (heal.Value * _metadata.SkillMPMultiplier[1]) * _metadata.SkillRarityMultiplier[(int) rarity.Value] / 100,
+            Price = price != 0 ? price.Value : Skill.CalcPrice((ItemRarity) rarity)
+        };
+    }
+
+    private async Task ManageMonster()
     {
         while (true)
         {
@@ -669,37 +786,166 @@ class AssetManagerPL
             {
                 switch(ReadInput())
                 {
-                    // case "1":
-                    //     Write("name (25 max): ");
-                    //     string? name = ReadLine();
-                    //     if (string.IsNullOrWhiteSpace(name) || name.Length > GameUIHelper.UIConstants.NameLen) continue;
+                    case "1":
+                        Clear();
+                        DrawHeader(Header);
+                        WriteLine(" -- Create Monster");
 
-                    //     Write("type (0 = normal, 1 = elite, 2 = boss): ");
-                    //     MonsterType type = (MonsterType) Convert.ToInt32(ReadLine());
+                        Monster? monsterToAdd = EnterMonsterInfo();
+                        if (monsterToAdd == null) continue;
 
-                    //     Write("floor: ");
-                    //     int floor = Convert.ToInt32(ReadLine());
+                        monsterToAdd.ID = _metadata.MonsterIDTracker[monsterToAdd.Floor - 1][(int) monsterToAdd.Type]++;
+                        Monsters[monsterToAdd.ID] = monsterToAdd;
+                        await MonsterDB.Add(monsterToAdd);
 
-                    //     Write("atk: ");
-                    //     int atk = Convert.ToInt32(ReadLine());
+                        DrawLine('-');
+                        WriteLine(" Added Successfully");
+                        ReadKey(true);
+                        break;
 
-                    //     Write("hp: ");
-                    //     int hp = Convert.ToInt32(ReadLine());
+                    case "2":
+                        Monster? monsterToUpdate = null;
+                        while (true)
+                        {
+                            Clear();
+                            DrawHeader(Header);
+                            WriteLine(" -- Update Monster");
+                            Write(" Enter Monster ID: ");
 
-                    //     Monster monster = new(name, atk, hp, floor, type);
-                    //     AssetManagerPL.Monsters[monster.ID] = monster;
-                    //     WriteLine("Added");
-                    //     ReadKey(true);
-                    //     continue;
+                            int? id = EnterInt();
+                            if (id == null) break;
 
-                    // case "2":
-                    //     AssetManagerPL.Monsters.Values.ToList().ForEach(monster => WriteLine($"{monster.ID:d4} {monster.Name, -25} {monster.Type, -6} floor: {monster.Floor}, atk: {monster.ATK}, hp: {monster.HP}"));
-                    //     ReadKey(true);
-                    //     continue;
+                            if (!Monsters.ContainsKey((int) id))
+                            {
+                                WriteLine(" Monster not found");
+                                ReadKey(true);
+                                break;
+                            }
+                            else
+                                monsterToUpdate = Monsters[(int) id];
 
-                    // case "3":
-                    //     AssetManagerPL.Monsters.Clear();
-                    //     continue;
+                            DrawLine('-');
+                            WriteLine(" Monster Info:");
+                            WriteLine(" ID   | Name                      | Floor | Type   | ATK | DEF | HP");
+                            WriteLine($" {monsterToUpdate.ID, -4} | {monsterToUpdate.Name, -25} | {monsterToUpdate.Floor, -5} | {monsterToUpdate.Type, -6} | {monsterToUpdate.ATK, -3} | {monsterToUpdate.DEF, -3} | {monsterToUpdate.HP, -2}");
+                            DrawLine('-');
+
+                            Monster? monsterToReplace = EnterMonsterInfo();
+                            if (monsterToReplace == null) continue;
+
+                            monsterToReplace.ID = monsterToUpdate.ID;
+                            Monsters[monsterToReplace.ID] = monsterToReplace;
+                            await MonsterDB.Update(monsterToReplace);
+
+                            DrawLine('-');
+                            WriteLine(" Updated Successfully");
+                            ReadKey(true);
+                            break;
+                        }
+                        break;
+
+                    case "3":
+                        Monster? monsterToDelete = null;
+                        while (true)
+                        {
+                            Clear();
+                            DrawHeader(Header);
+                            WriteLine(" -- Delete Monster");
+                            Write(" Enter Monster ID: ");
+
+                            int? id = EnterInt();
+                            if (id == null) break;
+
+                            if (!Monsters.ContainsKey((int) id))
+                            {
+                                WriteLine(" Monster not found");
+                                ReadKey(true);
+                                break;
+                            }
+                            else
+                                monsterToDelete = Monsters[(int) id];
+
+                            DrawLine('-');
+                            WriteLine(" Monster Info:");
+                            WriteLine(" ID   | Name                      | Floor | Type   | ATK | DEF | HP");
+                            WriteLine($" {monsterToDelete.ID, -4} | {monsterToDelete.Name, -25} | {monsterToDelete.Floor, -5} | {monsterToDelete.Type, -6} | {monsterToDelete.ATK, -3} | {monsterToDelete.DEF, -3} | {monsterToDelete.HP, -2}");
+                            DrawLine('-');
+
+                            Write(" Are you sure you want to delete this monster? (Y/N): ");
+
+                            var keyPressed = ReadKey(true).Key;
+                            WriteLine();
+                            if (keyPressed == ConsoleKey.Y || keyPressed == ConsoleKey.Enter)
+                            {
+                                Monsters.Remove(monsterToDelete.ID);
+                                await MonsterDB.Delete(monsterToDelete.ID);
+
+                                int deletedID = monsterToDelete.ID;
+                                for (int i = deletedID; i < _metadata.MonsterIDTracker[monsterToDelete.Floor - 1][(int) monsterToDelete.Type]; i++)
+                                {
+                                    if (Monsters.ContainsKey(i + 1))
+                                    {
+                                        Monsters[i] = Monsters[i + 1];
+                                        Monsters[i].ID = i;
+                                        Monsters.Remove(i + 1);
+                                        await MonsterDB.UpdateID(i + 1, i);
+                                    }
+                                }
+                                _metadata.MonsterIDTracker[monsterToDelete.Floor - 1][(int) monsterToDelete.Type]--;
+
+                                DrawLine('-');
+                                WriteLine(" Deleted Successfully");
+                                ReadKey(true);
+                            }
+                            else
+                            {
+                                DrawLine('-');
+                                WriteLine(" Deletion Cancelled");
+                                ReadKey(true);
+                            }
+                            break;
+                        }
+                        break;
+
+                    case "4":
+                        List<Monster> monsterList = [.. Monsters.Values];
+                        int maxPage = monsterList.Count / 15;
+                        int page = 0;
+                        bool exit = false;
+
+                        while (!exit)
+                        {
+                            Clear();
+                            DrawHeader(Header);
+                            WriteLine($" -- Monster List ({page + 1}/{maxPage + 1})");
+                            WriteLine(" Arrow Keys To Turn Page, 'ESC' To Exit");
+                            DrawLine('-');
+                            WriteLine(" ID   | Name                      | Floor | Type   | ATK | DEF | HP");
+                            DrawLine('-');
+                            foreach (Monster monster in monsterList.Skip(page * 15).Take(15))
+                            {
+                                WriteLine($" {monster.ID, -4} | {monster.Name, -25} | {monster.Floor, -5} | {monster.Type, -6} | {monster.ATK, -3} | {monster.DEF, -3} | {monster.HP, -2}");
+                            }
+                            DrawLine('=');
+
+                            switch (ReadKey(true).Key)
+                            {
+                                case ConsoleKey.Escape:
+                                    exit = true;
+                                    break;
+
+                                case ConsoleKey.LeftArrow:
+                                    if (page > 0) page--;
+                                    continue;
+
+                                case ConsoleKey.RightArrow:
+                                    if (page < maxPage) page++;
+                                    continue;
+
+                                default: continue;
+                            }
+                        }
+                        break;
 
                     case "0": case null:
                         return;
@@ -714,6 +960,65 @@ class AssetManagerPL
         }
     }
 
+    private static Monster? EnterMonsterInfo()
+    {
+        Write(" All Type:");
+        foreach (MonsterType monsterType in Enum.GetValues(typeof(MonsterType)))
+        {
+            Write($" {(int) monsterType} = {monsterType} |");
+        }
+        WriteLine();
+        WriteLine($" Max Floor: {GameProgress.MaxFloor}");
+        DrawLine('-');
+
+        Write(" Name (25 max): ");
+        string? name = ReadInput(false, 25);
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        Write(" Type: ");
+        MonsterType? type = (MonsterType?) EnterInt();
+        if (type == null)
+            return null;
+
+        Write(" Floor: ");
+        int? floor = EnterInt();
+        if (floor == null)
+            return null;
+        if (floor < 1 || floor > GameProgress.MaxFloor)
+        {
+            WriteLine("Invalid floor");
+            ReadKey(true);
+            return null;
+        }
+
+        Write(" ATK: ");
+        int? atk = EnterInt();
+        if (atk == null)
+            return null;
+
+        Write(" DEF: ");
+        int? def = EnterInt();
+        if (def == null)
+            return null;
+
+        Write(" HP: ");
+        int? hp = EnterInt();
+        if (hp == null)
+            return null;
+
+        return new Monster()
+        {
+            Name = name,
+            Type = type.Value,
+            Floor = floor.Value,
+            ATK = atk.Value,
+            DEF = def.Value,
+            MaxHP = hp.Value,
+            HP = hp.Value,
+        };
+    }
+
     private static int? EnterInt()
     {
         string? numInput = ReadInput();
@@ -723,19 +1028,24 @@ class AssetManagerPL
             return 0;
         if (int.TryParse(numInput, out int result))
             return result;
+        else
+        {
+            WriteLine("Invalid input");
+            ReadKey(true);
+        }
         return null;
     }
 
     private static double? EnterDouble()
     {
-        try
-        {
-            string? numInput = ReadInput();
-            if (numInput == null) return null;
-            if (!string.IsNullOrWhiteSpace(numInput) && double.TryParse(numInput, out double result))
-                return result;
-        }
-        catch (FormatException)
+        string? numInput = ReadInput();
+        if (numInput == null)
+            return null;
+        if (string.IsNullOrWhiteSpace(numInput))
+            return 0;
+        if (double.TryParse(numInput, out double result))
+            return result;
+        else
         {
             WriteLine("Invalid input");
             ReadKey(true);

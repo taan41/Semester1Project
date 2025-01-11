@@ -89,6 +89,18 @@ class ClientHandler
                         cmdToSend = await ChangePassword(receivedCmd);
                         break;
 
+                    case CommandType.UpdateEquip:
+                        cmdToSend = await UpdateEquip(receivedCmd);
+                        break;
+
+                    case CommandType.UpdateSkill:
+                        cmdToSend = await UpdateSkill(receivedCmd);
+                        break;
+
+                    case CommandType.UpdateMonster:
+                        cmdToSend = await UpdateMonster(receivedCmd);
+                        break;
+
                     case CommandType.UploadSave:    
                         cmdToSend = await UploadSave(receivedCmd);
                         break;
@@ -287,6 +299,36 @@ class ClientHandler
         return new(cmd.CommandType);
     }
 
+    private async Task<Command> UpdateEquip(Command cmd)
+    {
+        var (equipments, errorMessage) = await EquipmentDB.GetAll();
+
+        if (equipments == null)
+            return Helper.ErrorCmd(this, cmd, errorMessage);
+
+        return new(cmd.CommandType, JsonSerializer.Serialize(equipments));
+    }
+
+    private async Task<Command> UpdateSkill(Command cmd)
+    {
+        var (skills, errorMessage) = await SkillDB.GetAll();
+
+        if (skills == null)
+            return Helper.ErrorCmd(this, cmd, errorMessage);
+
+        return new(cmd.CommandType, JsonSerializer.Serialize(skills));
+    }
+
+    private async Task<Command> UpdateMonster(Command cmd)
+    {
+        var (monsters, errorMessage) = await MonsterDB.GetAll();
+
+        if (monsters == null)
+            return Helper.ErrorCmd(this, cmd, errorMessage);
+
+        return new(cmd.CommandType, JsonSerializer.Serialize(monsters));
+    }
+
     private async Task<Command> UploadSave(Command cmd)
     {
         if (user == null || user.UserID < 1)
@@ -316,7 +358,7 @@ class ClientHandler
         var (gameSave, errorMessage) = await GameSaveDB.Load(user.UserID);
 
         if (gameSave == null)
-            return Helper.ErrorCmd(this, cmd, errorMessage);
+            return Helper.ErrorCmd(this, cmd, errorMessage, false);
 
         return new(cmd.CommandType, gameSave.ToJson());
     }

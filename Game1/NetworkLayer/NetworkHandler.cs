@@ -85,6 +85,72 @@ class NetworkHandler
         return HandleCommand(cmdToSend, out _, out errorMsg);
     }
 
+    public bool UpdateEquip(out Dictionary<int, Equipment>? equipments, out string errorMsg)
+    {
+        Command cmdToSend = new(CommandType.UpdateEquip);
+        if (!HandleCommand(cmdToSend, out Command receivedCmd, out errorMsg))
+        {
+            equipments = null;
+            return false;
+        }
+        else
+        {
+            equipments = JsonSerializer.Deserialize<Dictionary<int, Equipment>>(receivedCmd.Payload);
+
+            if (equipments == null)
+            {
+                errorMsg = "Null equipments";
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    public bool UpdateSkill(out Dictionary<int, Skill>? skills, out string errorMsg)
+    {
+        Command cmdToSend = new(CommandType.UpdateSkill);
+        if (!HandleCommand(cmdToSend, out Command receivedCmd, out errorMsg))
+        {
+            skills = null;
+            return false;
+        }
+        else
+        {
+            skills = JsonSerializer.Deserialize<Dictionary<int, Skill>>(receivedCmd.Payload);
+
+            if (skills == null)
+            {
+                errorMsg = "Null skills";
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    public bool UpdateMonster(out Dictionary<int, Monster>? monsters, out string errorMsg)
+    {
+        Command cmdToSend = new(CommandType.UpdateMonster);
+        if (!HandleCommand(cmdToSend, out Command receivedCmd, out errorMsg))
+        {
+            monsters = null;
+            return false;
+        }
+        else
+        {
+            monsters = JsonSerializer.Deserialize<Dictionary<int, Monster>>(receivedCmd.Payload);
+
+            if (monsters == null)
+            {
+                errorMsg = "Null monsters";
+                return false;
+            }
+            
+            return true;
+        }
+    }
+
     public GameSave? DownloadSave(out string errorMsg)
     {
         Command cmdToSend = new(CommandType.DownloadSave);

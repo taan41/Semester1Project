@@ -15,25 +15,25 @@ class Skill : Item
 
     public Skill() {}
 
-    public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, SkillType type = SkillType.Single, int price = -1)
-        : base(name, rarity, price)
-    {
-        Type = type;
-        Damage = dmg;
-        Heal = heal;
-        MPCost = mpcost;
+    // public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, SkillType type = SkillType.Single, int price = 0)
+    //     : base(name, rarity, price)
+    // {
+    //     Type = type;
+    //     Damage = dmg;
+    //     Heal = heal;
+    //     MPCost = mpcost;
 
-        ID = IDTracker[(int) Rarity]++;
-        Price = Price * (100 + SkillMultiplier) / 100;
-    }
+    //     ID = IDTracker[(int) Rarity]++;
+    //     Price = Price * (100 + SkillMultiplier) / 100;
+    // }
 
     public Skill(Skill other) : base(other.Name, other.Rarity, other.Price)
     {
+        ID = other.ID;
+        Type = other.Type;
         Damage = other.Damage;
         Heal = other.Heal;
         MPCost = other.MPCost;
-        Type = other.Type;
-        ID = other.ID;
     }
 
     public override void Print()

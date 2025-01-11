@@ -9,8 +9,6 @@ enum MonsterType
 [Serializable]
 class Monster : Entity
 {
-    public readonly static int[][] IDTracker;
-
     public int ID { get; set; }
     public MonsterType Type { get; set; }
     public int Floor { get; set; } = 1;
@@ -18,29 +16,19 @@ class Monster : Entity
     [JsonIgnore]
     public int Power { get => ATK * 5 + MaxHP; }
 
-    static Monster()
-    {
-        IDTracker = new int[GameProgress.MaxFloor][];
-        for (int i = 0; i < GameProgress.MaxFloor; i++)
-        {
-            IDTracker[i] = [i * 1000 + 1, i * 1000 + 101, i * 1000 + 201];
-        }
-    }
-
     public Monster() {}
 
-    public Monster(string name, int atk, int hp, int floor = 1, MonsterType type = MonsterType.Normal) : base(name, atk, hp, 0)
-    {
-        Type = type;
-        Floor = floor;
-        ID = IDTracker[floor - 1][(int) Type]++;
-    }
+    // public Monster(string name, int atk, int def, int hp, int floor = 1, MonsterType type = MonsterType.Normal) : base(name, atk, def, hp, 0)
+    // {
+    //     Type = type;
+    //     Floor = floor;
+    // }
 
-    public Monster(Monster other) : base(other.Name, other.ATK, other.HP, 0)
+    public Monster(Monster other) : base(other.Name, other.ATK, other.DEF, other.HP, 0)
     {
+        ID = other.ID;
         Type = other.Type;
         Floor = other.Floor;
-        ID = other.ID;
     }
 
     public override string ToJson()

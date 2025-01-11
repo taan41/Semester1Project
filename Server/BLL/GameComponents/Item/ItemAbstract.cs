@@ -17,9 +17,9 @@ abstract class Item : Component
 
     public Item() {}
 
-    public Item(string name, ItemRarity rarity = ItemRarity.Common, int price = -1) : base(name)
+    public Item(string name, ItemRarity rarity = ItemRarity.Common, int price = 0) : base(name)
     {
         Rarity = rarity;
-        Price = price != -1 ? price : BasePrice * (100 + (int) Rarity * RarityPriceMultiplier) / 100;
+        Price = price != 0 ? price : BasePrice * (100 + (int) Rarity * RarityPriceMultiplier) / 100;
     }
 }

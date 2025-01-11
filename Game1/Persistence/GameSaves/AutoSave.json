@@ -1,49 +1,117 @@
 {
-  "SaveTime": "2025-01-10T04:31:27.9824241+07:00",
+  "SaveTime": "2025-01-11T09:08:51.4003342+07:00",
   "GameData": {
-    "Seed": 1751935619,
+    "Seed": 1699425083,
     "Player": {
       "EquippedWeapon": {
         "Type": 0,
-        "BonusATK": 2,
+        "BonusATK": 4,
+        "BonusDEF": 0,
         "BonusHP": 0,
-        "BonusMP": 0,
-        "ID": 3,
-        "Rarity": 0,
-        "Price": 130,
-        "Name": "Starter Staff"
+        "BonusMP": 16,
+        "ID": 101,
+        "Rarity": 1,
+        "Price": 205,
+        "Name": "Rare Staff"
       },
       "EquippedArmor": null,
       "EquippedRing": null,
-      "EquipInventory": [],
+      "EquipInventory": [
+        {
+          "Type": 0,
+          "BonusATK": 2,
+          "BonusDEF": 1,
+          "BonusHP": 10,
+          "BonusMP": 0,
+          "ID": 1,
+          "Rarity": 0,
+          "Price": 130,
+          "Name": "Starter Sword"
+        },
+        {
+          "Type": 0,
+          "BonusATK": 6,
+          "BonusDEF": 0,
+          "BonusHP": 0,
+          "BonusMP": 0,
+          "ID": 2,
+          "Rarity": 0,
+          "Price": 130,
+          "Name": "Starter Bow"
+        },
+        {
+          "Type": 0,
+          "BonusATK": 6,
+          "BonusDEF": 0,
+          "BonusHP": 0,
+          "BonusMP": 0,
+          "ID": 2,
+          "Rarity": 0,
+          "Price": 130,
+          "Name": "Starter Bow"
+        },
+        {
+          "Type": 0,
+          "BonusATK": 2,
+          "BonusDEF": 0,
+          "BonusHP": 0,
+          "BonusMP": 8,
+          "ID": 3,
+          "Rarity": 0,
+          "Price": 130,
+          "Name": "Starter Staff"
+        },
+        {
+          "Type": 0,
+          "BonusATK": 2,
+          "BonusDEF": 0,
+          "BonusHP": 0,
+          "BonusMP": 8,
+          "ID": 3,
+          "Rarity": 0,
+          "Price": 130,
+          "Name": "Starter Staff"
+        }
+      ],
       "Skills": [
         {
           "Type": 2,
-          "Damage": 6,
+          "Damage": 4,
           "Heal": 0,
           "MPCost": 5,
           "ID": 3,
           "Rarity": 0,
           "Price": 110,
-          "Name": "Quick Slash"
+          "Name": "Careless Slash"
+        },
+        {
+          "Type": 2,
+          "Damage": 4,
+          "Heal": 0,
+          "MPCost": 5,
+          "ID": 3,
+          "Rarity": 0,
+          "Price": 110,
+          "Name": "Careless Slash"
         }
       ],
       "SkillInventory": [],
       "PlayerGold": {
-        "Quantity": 100
+        "Quantity": 658
       },
-      "ATK": 5,
+      "ATK": 7,
+      "DEF": 0,
       "MaxHP": 25,
-      "HP": 25,
-      "MaxMP": 10,
-      "MP": 10,
+      "HP": 5,
+      "MaxMP": 26,
+      "MP": 6,
       "Name": "Player"
     },
     "Progress": {
       "Floor": 1,
-      "Room": 1
+      "Room": 8
     },
-    "SavedTime": "00:00:04.7052046"
+    "SavedTime": "00:01:13.4561708"
   },
   "Name": "AutoSave"
 }

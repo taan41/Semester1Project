@@ -7,8 +7,9 @@ enum CommandType
     CheckUsername, Register,
     GetUserPwd, Login, Logout, ValidateEmail, ResetPwd,
     ChangeNickname, ChangeEmail, ChangePassword,
-    UploadScore, GetUserScores, GetMonthlyScores, GetAllTimeScores,
+    UpdateEquip, UpdateSkill, UpdateMonster,
     UploadSave, DownloadSave,
+    UploadScore, GetUserScores, GetMonthlyScores, GetAllTimeScores,
     Disconnect
 }
 

@@ -66,6 +66,7 @@ class FileManager
         equipments = [];
         skills = [];
         monsters = [];
+        
         string assetDirPath = Path.Combine(DirPath, AssetFolder);
 
         try

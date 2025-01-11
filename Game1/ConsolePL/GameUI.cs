@@ -226,7 +226,9 @@ static class GameUI
         int updateDataCursorTop;
         if (error != null)
         {
+            networkHandler.Close();
             networkHandler = null;
+
             lock (ConsoleLock)
             {
                 SetCursorPosition(CursorPos.TitleScreenMenuLeft2, connectResultCursorTop);
@@ -235,6 +237,7 @@ static class GameUI
                 CursorTop++;
                 WriteLine(" Press any key to continue...");
             }
+
             ReadKey(true);
             TitleScreenBorders(false, true);
             return;
@@ -249,11 +252,88 @@ static class GameUI
             }
         }
 
+        int updateDataResultCursorTop;
         lock (ConsoleLock)
         {
             SetCursorPosition(CursorPos.TitleScreenMenuLeft2, updateDataCursorTop);
             WriteLine(" Updating game data...");
-            CursorLeft = CursorPos.TitleScreenMenuLeft2;
+            updateDataResultCursorTop = CursorTop;
+        }
+
+        if (!networkHandler.UpdateEquip(out var equipments, out string? errorMsg))
+        {
+            networkHandler.Close();
+            networkHandler = null;
+
+            lock (ConsoleLock)
+            {
+                SetCursorPosition(CursorPos.TitleScreenMenuLeft2, updateDataResultCursorTop);
+                WriteLine($" Error: {errorMsg}");
+                CursorLeft = CursorPos.TitleScreenMenuLeft2;
+                CursorTop++;
+                WriteLine(" Press any key to continue...");
+            }
+
+            ReadKey(true);
+            TitleScreenBorders(false, true);
+            return;
+        }
+        else
+        {
+            AssetManager.Equipments = equipments!;
+        }
+
+        if (!networkHandler.UpdateSkill(out var skills, out errorMsg))
+        {
+            networkHandler.Close();
+            networkHandler = null;
+
+            lock (ConsoleLock)
+            {
+                SetCursorPosition(CursorPos.TitleScreenMenuLeft2, updateDataResultCursorTop);
+                WriteLine($" Error: {errorMsg}");
+                CursorLeft = CursorPos.TitleScreenMenuLeft2;
+                CursorTop++;
+                WriteLine(" Press any key to continue...");
+            }
+
+            ReadKey(true);
+            TitleScreenBorders(false, true);
+            return;
+        }
+        else
+        {
+            AssetManager.Skills = skills!;
+        }
+
+        if (!networkHandler.UpdateMonster(out var monsters, out errorMsg))
+        {
+            networkHandler.Close();
+            networkHandler = null;
+
+            lock (ConsoleLock)
+            {
+                SetCursorPosition(CursorPos.TitleScreenMenuLeft2, updateDataResultCursorTop);
+                WriteLine($" Error: {errorMsg}");
+                CursorLeft = CursorPos.TitleScreenMenuLeft2;
+                CursorTop++;
+                WriteLine(" Press any key to continue...");
+            }
+
+            ReadKey(true);
+            TitleScreenBorders(false, true);
+            return;
+        }
+        else
+        {
+            AssetManager.Monsters = monsters!;
+        }
+
+        AssetManager.SaveAsset();
+
+        lock (ConsoleLock)
+        {
+            SetCursorPosition(CursorPos.TitleScreenMenuLeft2, updateDataResultCursorTop);
             WriteLine(" Updated successfully!");
             CursorLeft = CursorPos.TitleScreenMenuLeft2;
             CursorTop++;

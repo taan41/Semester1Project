@@ -1,7 +1,8 @@
 {
   "1": {
     "Type": 0,
-    "BonusATK": 4,
+    "BonusATK": 2,
+    "BonusDEF": 1,
     "BonusHP": 10,
     "BonusMP": 0,
     "ID": 1,
@@ -12,6 +13,7 @@
   "2": {
     "Type": 0,
     "BonusATK": 6,
+    "BonusDEF": 0,
     "BonusHP": 0,
     "BonusMP": 0,
     "ID": 2,
@@ -22,8 +24,9 @@
   "3": {
     "Type": 0,
     "BonusATK": 2,
+    "BonusDEF": 0,
     "BonusHP": 0,
-    "BonusMP": 10,
+    "BonusMP": 8,
     "ID": 3,
     "Rarity": 0,
     "Price": 130,
@@ -31,32 +34,35 @@
   },
   "101": {
     "Type": 0,
-    "BonusATK": 6,
-    "BonusHP": 30,
-    "BonusMP": 0,
+    "BonusATK": 4,
+    "BonusDEF": 0,
+    "BonusHP": 0,
+    "BonusMP": 16,
     "ID": 101,
     "Rarity": 1,
-    "Price": 227,
-    "Name": "Rare Sword"
+    "Price": 205,
+    "Name": "Rare Staff"
   },
   "201": {
     "Type": 0,
-    "BonusATK": 10,
-    "BonusHP": 40,
-    "BonusMP": 5,
+    "BonusATK": 6,
+    "BonusDEF": 0,
+    "BonusHP": 0,
+    "BonusMP": 24,
     "ID": 201,
     "Rarity": 2,
-    "Price": 325,
-    "Name": "Epic Sword"
+    "Price": 280,
+    "Name": "Epic Staff"
   },
   "301": {
     "Type": 0,
-    "BonusATK": 14,
-    "BonusHP": 60,
-    "BonusMP": 10,
+    "BonusATK": 8,
+    "BonusDEF": 0,
+    "BonusHP": 10,
+    "BonusMP": 40,
     "ID": 301,
     "Rarity": 3,
-    "Price": 422,
-    "Name": "Legendary Sword"
+    "Price": 355,
+    "Name": "Legendary Staff"
   }
 }

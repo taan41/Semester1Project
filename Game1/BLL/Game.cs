@@ -333,7 +333,10 @@ class Game
                 {
                     gameSave.Save("LocalSave");
                     if (networkHandler != null && !networkHandler.UploadSave(gameSave, out _))
+                    {
+                        networkHandler.Close();
                         networkHandler = null;
+                    }
                     return;
                 }
             }
@@ -349,7 +352,10 @@ class Game
                         {
                             gameSave.Save("LocalSave");
                             if (networkHandler != null && !networkHandler.UploadSave(gameSave, out _))
+                            {
+                                networkHandler.Close();
                                 networkHandler = null;
+                            }
                             return;
                         }
 
@@ -783,7 +789,10 @@ class Game
         {
             Score score = new(user.UserID, user.Nickname, gameData.GetElapsedTime());
             if (!networkHandler.UploadScore(score, out _))
+            {
+                networkHandler.Close();
                 networkHandler = null;
+            }
         }
 
         List<string> winOptions = ["RETURN TO TITLE"];

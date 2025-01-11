@@ -6,8 +6,8 @@ static class EquipmentDB
     public static async Task<(bool success, string errorMessage)> Add(Equipment equipment)
     {
         string query = @"
-            INSERT INTO Equipments (EquipID, Name, Rarity, Price, Type, BonusATK, BonusHP, BonusMP)
-            VALUES (@id, @name, @rarity, @price, @type, @bonusATK, @bonusHP, @bonusMP);
+            INSERT INTO Equipments (EquipID, Name, Rarity, Price, Type, ATKPoint, DEFPoint, HPPoint, MPPoint)
+            VALUES (@id, @name, @rarity, @price, @type, @atk, @def, @hp, @mp);
         ";
 
         try
@@ -21,9 +21,10 @@ static class EquipmentDB
             cmd.Parameters.AddWithValue("@rarity", (int) equipment.Rarity);
             cmd.Parameters.AddWithValue("@price", equipment.Price);
             cmd.Parameters.AddWithValue("@type", (int) equipment.Type);
-            cmd.Parameters.AddWithValue("@bonusATK", equipment.BonusATK);
-            cmd.Parameters.AddWithValue("@bonusHP", equipment.BonusHP);
-            cmd.Parameters.AddWithValue("@bonusMP", equipment.BonusMP);
+            cmd.Parameters.AddWithValue("@atk", equipment.BonusATK / AssetMetadata.Instance.EquipPointMultiplier[0]);
+            cmd.Parameters.AddWithValue("@def", equipment.BonusDEF / AssetMetadata.Instance.EquipPointMultiplier[1]);
+            cmd.Parameters.AddWithValue("@hp", equipment.BonusHP / AssetMetadata.Instance.EquipPointMultiplier[2]);
+            cmd.Parameters.AddWithValue("@mp", equipment.BonusMP / AssetMetadata.Instance.EquipPointMultiplier[3]);
 
             await cmd.ExecuteNonQueryAsync();
             return (true, "");
@@ -43,9 +44,10 @@ static class EquipmentDB
                 Rarity,
                 Price,
                 Type,
-                BonusATK,
-                BonusHP,
-                BonusMP
+                ATKPoint,
+                DEFPoint,
+                HPPoint,
+                MPPoint
             FROM 
                 Equipments
             WHERE 
@@ -72,9 +74,10 @@ static class EquipmentDB
                 Rarity = (ItemRarity) reader.GetInt32("Rarity"),
                 Price = reader.GetInt32("Price"),
                 Type = (EquipType) reader.GetInt32("Type"),
-                BonusATK = reader.GetInt32("BonusATK"),
-                BonusHP = reader.GetInt32("BonusHP"),
-                BonusMP = reader.GetInt32("BonusMP")
+                BonusATK = reader.GetInt32("ATKPoint") * AssetMetadata.Instance.EquipPointMultiplier[0],
+                BonusDEF = reader.GetInt32("DEFPoint") * AssetMetadata.Instance.EquipPointMultiplier[1],
+                BonusHP = reader.GetInt32("HPPoint") * AssetMetadata.Instance.EquipPointMultiplier[2],
+                BonusMP = reader.GetInt32("MPPoint") * AssetMetadata.Instance.EquipPointMultiplier[3]
             }, "");
         }
         catch (MySqlException ex)
@@ -92,9 +95,10 @@ static class EquipmentDB
                 Rarity = @rarity,
                 Price = @price,
                 Type = @type,
-                BonusATK = @bonusATK,
-                BonusHP = @bonusHP,
-                BonusMP = @bonusMP
+                ATKPoint = @atk,
+                DEFPoint = @def,
+                HPPoint = @hp,
+                MPPoint = @mp
             WHERE 
                 EquipID = @id
         ";
@@ -110,9 +114,38 @@ static class EquipmentDB
             cmd.Parameters.AddWithValue("@rarity", (int) equipment.Rarity);
             cmd.Parameters.AddWithValue("@price", equipment.Price);
             cmd.Parameters.AddWithValue("@type", (int) equipment.Type);
-            cmd.Parameters.AddWithValue("@bonusATK", equipment.BonusATK);
-            cmd.Parameters.AddWithValue("@bonusHP", equipment.BonusHP);
-            cmd.Parameters.AddWithValue("@bonusMP", equipment.BonusMP);
+            cmd.Parameters.AddWithValue("@atk", equipment.BonusATK / AssetMetadata.Instance.EquipPointMultiplier[0]);
+            cmd.Parameters.AddWithValue("@def", equipment.BonusDEF / AssetMetadata.Instance.EquipPointMultiplier[1]);
+            cmd.Parameters.AddWithValue("@hp", equipment.BonusHP / AssetMetadata.Instance.EquipPointMultiplier[2]);
+            cmd.Parameters.AddWithValue("@mp", equipment.BonusMP / AssetMetadata.Instance.EquipPointMultiplier[3]);
+
+            await cmd.ExecuteNonQueryAsync();
+            return (true, "");
+        }
+        catch (MySqlException ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public static async Task<(bool success, string errorMessage)> UpdateID(int oldID, int newID)
+    {
+        string query = @"
+            UPDATE Equipments
+            SET 
+                EquipID = @newID
+            WHERE 
+                EquipID = @oldID
+        ";
+
+        try
+        {
+            using MySqlConnection conn = new(DBManager.ConnectionString);
+            await conn.OpenAsync();
+
+            using MySqlCommand cmd = new(query, conn);
+            cmd.Parameters.AddWithValue("@oldID", oldID);
+            cmd.Parameters.AddWithValue("@newID", newID);
 
             await cmd.ExecuteNonQueryAsync();
             return (true, "");
@@ -156,9 +189,10 @@ static class EquipmentDB
                 Rarity,
                 Price,
                 Type,
-                BonusATK,
-                BonusHP,
-                BonusMP
+                ATKPoint,
+                DEFPoint,
+                HPPoint,
+                MPPoint
             FROM 
                 Equipments
         ";
@@ -182,9 +216,10 @@ static class EquipmentDB
                     Rarity = (ItemRarity) reader.GetInt32("Rarity"),
                     Price = reader.GetInt32("Price"),
                     Type = (EquipType) reader.GetInt32("Type"),
-                    BonusATK = reader.GetInt32("BonusATK"),
-                    BonusHP = reader.GetInt32("BonusHP"),
-                    BonusMP = reader.GetInt32("BonusMP")
+                    BonusATK = reader.GetInt32("ATKPoint") * AssetMetadata.Instance.EquipPointMultiplier[0],
+                    BonusDEF = reader.GetInt32("DEFPoint") * AssetMetadata.Instance.EquipPointMultiplier[1],
+                    BonusHP = reader.GetInt32("HPPoint") * AssetMetadata.Instance.EquipPointMultiplier[2],
+                    BonusMP = reader.GetInt32("MPPoint") * AssetMetadata.Instance.EquipPointMultiplier[3]
                 };
             }
 

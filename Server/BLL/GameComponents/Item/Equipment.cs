@@ -8,34 +8,35 @@ enum EquipType
 [Serializable]
 class Equipment : Item
 {
-    public static readonly int[] IDTracker = [1, 101, 201, 301];
+    // public static readonly int[] IDTracker = [1, 101, 201, 301];
 
     public EquipType Type { get; set; } = EquipType.Weapon;
     public int BonusATK { get; set; } = 0;
+    public int BonusDEF { get; set; } = 0;
     public int BonusHP { get; set; } = 0;
     public int BonusMP { get; set; } = 0;
 
     public Equipment() {}
 
-    public Equipment(string name, int atk, int hp, int mp, ItemRarity rarity = ItemRarity.Common, EquipType type = EquipType.Weapon, int price = -1)
-        : base(name, rarity, price)
-    {
-        Type = type;
-        BonusATK = atk;
-        BonusHP = hp;
-        BonusMP = mp;
+    // public Equipment(string name, int atk, int hp, int mp, ItemRarity rarity = ItemRarity.Common, EquipType type = EquipType.Weapon, int price = 0)
+    //     : base(name, rarity, price)
+    // {
+    //     Type = type;
+    //     BonusATK = atk;
+    //     BonusHP = hp;
+    //     BonusMP = mp;
 
-        ID = IDTracker[(int) Rarity]++;
-        Price = Price * (100 + EquipPriceMultiplier) / 100;
-    }
+    //     ID = IDTracker[(int) Rarity]++;
+    //     Price = Price * (100 + EquipPriceMultiplier) / 100;
+    // }
 
     public Equipment(Equipment other) : base(other.Name, other.Rarity, other.Price)
     {
+        ID = other.ID;
+        Type = other.Type;
         BonusATK = other.BonusATK;
         BonusHP = other.BonusHP;
         BonusMP = other.BonusMP;
-        Type = other.Type;
-        ID = other.ID;
     }
     
     public override string ToJson()

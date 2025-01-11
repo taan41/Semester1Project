@@ -13,13 +13,13 @@ class Player : Entity
 
     public Player() {}
 
-    public Player(string name, int atk, int hp, int mp, int goldQuantity) : base(name, atk, hp, mp)
+    public Player(string name, int atk, int def, int hp, int mp, int goldQuantity) : base(name, atk, def, hp, mp)
     {
         PlayerGold = new(goldQuantity);
     }
 
     public static Player DefaultPlayer() 
-        => new("Player", 3, 25, 10, 100);
+        => new("Player", 3, 0, 25, 10, 100);
 
     public override string ToJson()
         => JsonSerializer.Serialize(this);

@@ -3,6 +3,7 @@ abstract class Entity : Component
 {
     private int
         _atk,
+        _def,
         _maxHP, _HP,
         _maxMP, _MP;
 
@@ -13,6 +14,16 @@ abstract class Entity : Component
         {
             if (value < 1) value = 1;
             _atk = value;
+        }
+    }
+
+    public int DEF
+    {
+        get => _def;
+        set
+        {
+            if (value < 0) value = 0;
+            _def = value;
         }
     }
 
@@ -60,9 +71,10 @@ abstract class Entity : Component
 
     public Entity() {}
 
-    public Entity(string name, int atk, int hp, int mp) : base(name)
+    public Entity(string name, int atk, int def, int hp, int mp) : base(name)
     {
         ATK = atk;
+        DEF = def;
         MaxHP = hp;
         HP = hp;
         MaxMP = mp;
@@ -71,15 +83,15 @@ abstract class Entity : Component
 
     public void Attack(Entity target)
     {
-        target.HP -= ATK;
-        HP -= target.ATK;
+        target.HP -= ATK - target.DEF;
+        HP -= target.ATK - DEF;
         MP += MaxMP * 10 / 100;
     }
 
     public void UseSkill(Skill skill, List<Monster> targets)
     {
         foreach (var target in targets)
-            target.HP -= skill.Damage;
+            target.HP -= skill.Damage - target.DEF;
 
         HP += skill.Heal;
         MP -= skill.MPCost;

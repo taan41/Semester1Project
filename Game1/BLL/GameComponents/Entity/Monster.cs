@@ -32,18 +32,18 @@ class Monster : Entity
 
     public Monster() {}
 
-    public Monster(string name, int atk, int hp, int floor = 1, MonsterType type = MonsterType.Normal) : base(name, atk, hp, 0)
-    {
-        Type = type;
-        Floor = floor;
-        ID = IDTracker[floor - 1][(int) Type]++;
-    }
+    // public Monster(string name, int atk, int def, int hp, int floor = 1, MonsterType type = MonsterType.Normal) : base(name, atk, def, hp, 0)
+    // {
+    //     Type = type;
+    //     Floor = floor;
+    //     ID = IDTracker[floor - 1][(int) Type]++;
+    // }
 
-    public Monster(Monster other, int targetPower = 0) : base(other.Name, other.ATK, other.HP, 0)
+    public Monster(Monster other, int targetPower = 0) : base(other.Name, other.ATK, other.DEF, other.HP, 0)
     {
+        ID = other.ID;
         Type = other.Type;
         Floor = other.Floor;
-        ID = other.ID;
         
         if (targetPower != 0 && targetPower != Power)
             ScaleStat(targetPower);
@@ -67,7 +67,13 @@ class Monster : Entity
         };
         
         base.Print();
-        Console.Write($"| ATK: {ATK,-3} ");
+        Console.Write(" | ");
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.Write($"▲ {ATK,-2}");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.Write($" ■ {DEF,-2}");
+        Console.ResetColor();
+        Console.Write(" | ");
         GameUIHelper.DrawBar(HP, MaxHP, true, barLen, ConsoleColor.Red);
     }
 }

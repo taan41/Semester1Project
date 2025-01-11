@@ -10,30 +10,32 @@ class Equipment : Item
 
     public EquipType Type { get; set; } = EquipType.Weapon;
     public int BonusATK { get; set; } = 0;
+    public int BonusDEF { get; set; } = 0;
     public int BonusHP { get; set; } = 0;
     public int BonusMP { get; set; } = 0;
 
     public Equipment() {}
 
-    public Equipment(string name, int atk, int hp, int mp, ItemRarity rarity = ItemRarity.Common, EquipType type = EquipType.Weapon, int price = -1)
-        : base(name, rarity, price)
-    {
-        Type = type;
-        BonusATK = atk;
-        BonusHP = hp;
-        BonusMP = mp;
+    // public Equipment(string name, int atk, int hp, int mp, ItemRarity rarity = ItemRarity.Common, EquipType type = EquipType.Weapon, int price = 0)
+    //     : base(name, rarity, price)
+    // {
+    //     Type = type;
+    //     BonusATK = atk;
+    //     BonusHP = hp;
+    //     BonusMP = mp;
 
-        ID = IDTracker[(int) Rarity]++;
-        Price = Price * (100 + EquipMultiplier) / 100;
-    }
+    //     ID = IDTracker[(int) Rarity]++;
+    //     Price = Price * (100 + EquipMultiplier) / 100;
+    // }
 
     public Equipment(Equipment other) : base(other.Name, other.Rarity, other.Price)
     {
+        ID = other.ID;
+        Type = other.Type;
         BonusATK = other.BonusATK;
+        BonusDEF = other.BonusDEF;
         BonusHP = other.BonusHP;
         BonusMP = other.BonusMP;
-        Type = other.Type;
-        ID = other.ID;
     }
 
     public override void Print()
@@ -44,19 +46,25 @@ class Equipment : Item
         if (BonusATK != 0)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.Write($" [ {(BonusATK > 0 ? "+" : "-")}{BonusATK} ATK]");
+            Console.Write($" [{(BonusATK > 0 ? "" : "-")}{BonusATK} ATK]");
+        }
+
+        if (BonusDEF != 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($" [{(BonusDEF > 0 ? "" : "-")}{BonusDEF} DEF]");
         }
 
         if (BonusHP != 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write($" [ {(BonusHP > 0 ? "+" : "-")}{BonusHP} HP]");
+            Console.Write($" [{(BonusHP > 0 ? "" : "-")}{BonusHP} HP]");
         }
 
         if (BonusMP != 0)
         {
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write($" [ {(BonusMP > 0 ? "+" : "-")}{BonusMP} MP]");
+            Console.Write($" [{(BonusMP > 0 ? "" : "-")}{BonusMP} MP]");
         }
         
         Console.ResetColor();
@@ -75,19 +83,25 @@ class Equipment : Item
         if (BonusATK != 0)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.Write($" [{(BonusATK > 0 ? "+" : "-")}{BonusATK}]");
+            Console.Write($" [{(BonusATK > 0 ? "" : "-")}{BonusATK}]");
+        }
+
+        if (BonusDEF != 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($" [{(BonusDEF > 0 ? "" : "-")}{BonusDEF}]");
         }
 
         if (BonusHP != 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write($" [{(BonusHP > 0 ? "+" : "-")}{BonusHP}]");
+            Console.Write($" [{(BonusHP > 0 ? "" : "-")}{BonusHP}]");
         }
 
         if (BonusMP != 0)
         {
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write($" [{(BonusMP > 0 ? "+" : "-")}{BonusMP}]");
+            Console.Write($" [{(BonusMP > 0 ? "" : "-")}{BonusMP}]");
         }
         
         Console.ResetColor();

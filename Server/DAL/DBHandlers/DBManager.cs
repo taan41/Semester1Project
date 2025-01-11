@@ -104,9 +104,11 @@ static class DBManager
                 Rarity INT NOT NULL,
                 Price INT NOT NULL,
                 Type INT NOT NULL,
-                BonusATK INT NOT NULL,
-                BonusHP INT NOT NULL,
-                BonusMP INT NOT NULL
+                ATKPoint INT NOT NULL,
+                DEFPoint INT NOT NULL,
+                HPPoint INT NOT NULL,
+                MPPoint INT NOT NULL,
+                INDEX idx_equipID (EquipID)
             )", conn))
         {
             createEquipments.ExecuteNonQuery();
@@ -119,9 +121,10 @@ static class DBManager
                 Rarity INT NOT NULL,
                 Price INT NOT NULL,
                 Type INT NOT NULL,
-                Damage INT NOT NULL,
-                Heal INT NOT NULL,
-                MPCost INT NOT NULL
+                DmgPoint INT NOT NULL,
+                HealPoint INT NOT NULL,
+                MPCost INT NOT NULL,
+                INDEX idx_skillID (SkillID)
             )", conn))
         {
             createSkills.ExecuteNonQuery();
@@ -134,7 +137,9 @@ static class DBManager
                 Type INT NOT NULL,
                 Floor INT NOT NULL,
                 ATK INT NOT NULL,
-                MaxHP INT NOT NULL
+                DEF INT NOT NULL,
+                HP INT NOT NULL,
+                INDEX idx_monsterID (MonsterID)
             )", conn))
         {
             createMonsters.ExecuteNonQuery();

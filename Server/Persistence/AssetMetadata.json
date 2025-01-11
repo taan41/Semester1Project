@@ -1,31 +1,4 @@
 {
-  "EquipIDTracker": [
-    1,
-    101,
-    201
-  ],
-  "SkillIDTracker": [
-    1,
-    101,
-    201
-  ],
-  "MonsterIDTracker": [
-    [
-      1,
-      101,
-      201
-    ],
-    [
-      1001,
-      1101,
-      1201
-    ],
-    [
-      2001,
-      2101,
-      2201
-    ]
-  ],
   "EquipRarityPoint": [
     3,
     6,
@@ -34,6 +7,7 @@
   ],
   "EquipPointMultiplier": [
     2,
+    1,
     10,
     4
   ],

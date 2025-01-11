@@ -11,52 +11,52 @@
   },
   "2": {
     "Type": 0,
-    "Damage": 10,
+    "Damage": 7,
     "Heal": 0,
     "MPCost": 5,
     "ID": 2,
     "Rarity": 0,
     "Price": 110,
-    "Name": "Light Jab"
+    "Name": "Weak Stab"
   },
   "3": {
     "Type": 2,
-    "Damage": 6,
+    "Damage": 4,
     "Heal": 0,
     "MPCost": 5,
     "ID": 3,
     "Rarity": 0,
     "Price": 110,
-    "Name": "Quick Slash"
+    "Name": "Careless Slash"
   },
   "101": {
     "Type": 0,
     "Damage": 0,
-    "Heal": 7,
+    "Heal": 10,
     "MPCost": 5,
     "ID": 101,
     "Rarity": 1,
-    "Price": 192,
+    "Price": 185,
     "Name": "Cure"
   },
   "201": {
     "Type": 0,
     "Damage": 0,
-    "Heal": 25,
+    "Heal": 30,
     "MPCost": 10,
     "ID": 201,
     "Rarity": 2,
-    "Price": 275,
+    "Price": 260,
     "Name": "Revitalize"
   },
   "301": {
     "Type": 0,
     "Damage": 0,
-    "Heal": 40,
+    "Heal": 50,
     "MPCost": 10,
     "ID": 301,
     "Rarity": 3,
-    "Price": 357,
-    "Name": "Revive"
+    "Price": 335,
+    "Name": "Re-life"
   }
 }

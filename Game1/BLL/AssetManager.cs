@@ -21,6 +21,6 @@ class AssetManager
             if (id >= Monster.IDTracker[id / 1000][id % 1000 / 100]) Monster.IDTracker[id / 1000][id % 1000 / 100] = id + 1;
     }
 
-    public static void SerializeToFile()
+    public static void SaveAsset()
         => FileManager.SaveAsset();
 }

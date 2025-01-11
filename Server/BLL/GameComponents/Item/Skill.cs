@@ -8,7 +8,7 @@ enum SkillType
 [Serializable]
 class Skill : Item
 {
-    public static readonly int[] IDTracker = [1, 101, 201, 301];
+    // public static readonly int[] IDTracker = [1, 101, 201, 301];
     
     public SkillType Type { get; set; }
     public int Damage { get; set; } = 0;
@@ -17,25 +17,25 @@ class Skill : Item
 
     public Skill() {}
 
-    public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, SkillType type = SkillType.Single, int price = -1)
-        : base(name, rarity, price)
-    {
-        Type = type;
-        Damage = dmg;
-        Heal = heal;
-        MPCost = mpcost;
+    // public Skill(string name, int dmg, int heal, int mpcost, ItemRarity rarity = ItemRarity.Common, SkillType type = SkillType.Single, int price = 0)
+    //     : base(name, rarity, price)
+    // {
+    //     Type = type;
+    //     Damage = dmg;
+    //     Heal = heal;
+    //     MPCost = mpcost;
 
-        ID = IDTracker[(int) Rarity]++;
-        Price = Price * (100 + SkillPriceMultiplier) / 100;
-    }
+    //     ID = IDTracker[(int) Rarity]++;
+    //     Price = Price * (100 + SkillPriceMultiplier) / 100;
+    // }
 
     public Skill(Skill other) : base(other.Name, other.Rarity, other.Price)
     {
+        ID = other.ID;
+        Type = other.Type;
         Damage = other.Damage;
         Heal = other.Heal;
         MPCost = other.MPCost;
-        Type = other.Type;
-        ID = other.ID;
     }
     public override string ToJson()
         => JsonSerializer.Serialize(this);
