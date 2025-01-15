@@ -4,7 +4,10 @@ using static Utilities;
 
 class NetworkHandler
 {
-    const string serverIP = "127.0.0.1";
+    const string serverIP
+        // = "127.0.0.1";
+        = "26.244.97.115";
+        
     const int port = 5000;
 
     public bool IsConnected => client != null && client.Connected && stream != null;
