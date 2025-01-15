@@ -44,7 +44,7 @@ class EventManager
             int floorNumber = roomIndex / GameProgress.MaxRoom + 1;
             int monsterPower =
                 BasePower
-                + (roomNumber - 1) * PowerPerRoom
+                + (roomNumber - 1) * PowerPerRoom / 2
                 + (floorNumber - 1) * GameProgress.MaxRoom * PowerPerRoom;
 
             if (roomNumber % GameProgress.MaxRoom == 0)

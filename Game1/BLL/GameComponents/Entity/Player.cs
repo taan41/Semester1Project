@@ -58,6 +58,7 @@ class Player : Entity
         if (oldEquipment != null)
         {
             ATK -= oldEquipment.BonusATK;
+            DEF -= oldEquipment.BonusDEF;
             MaxHP -= oldEquipment.BonusHP;
             if (oldEquipment.BonusHP < HP)
                 HP -= oldEquipment.BonusHP;
@@ -70,6 +71,7 @@ class Player : Entity
         }
 
         ATK += equipment.BonusATK;
+        DEF += equipment.BonusDEF;
         MaxHP += equipment.BonusHP;
         HP += equipment.BonusHP;
         MaxMP += equipment.BonusMP;
