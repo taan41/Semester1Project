@@ -6,7 +6,7 @@ class FileManager
 {
     public static class FileConstants
     {
-        public const string DirPath = "Persistence";
+        public const string DirPath = "GameData";
 
         public const string SaveFolder = "GameSaves";
 

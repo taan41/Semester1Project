@@ -5,4 +5,4 @@
 /test
 Project.sln
 /.vscode
-/Game1/Persistence/GameSaves/
+/Game1/GameData/GameSaves/

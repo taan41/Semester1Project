@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 class AssetMetadata
 {
     private const string FileName = "AssetMetadata.json";
-    private const string DirPath = "Persistence";
+    private const string DirPath = "Metadata";
 
     private static readonly JsonSerializerOptions toJsonOption = new()
     {
