@@ -1,7 +1,7 @@
 {
-  "SaveTime": "2025-01-11T09:08:51.4003342+07:00",
+  "SaveTime": "2025-01-16T15:59:10.5955501+07:00",
   "GameData": {
-    "Seed": 1699425083,
+    "Seed": 1014833367,
     "Player": {
       "EquippedWeapon": {
         "Type": 0,
@@ -30,88 +30,66 @@
         },
         {
           "Type": 0,
-          "BonusATK": 6,
-          "BonusDEF": 0,
-          "BonusHP": 0,
+          "BonusATK": 2,
+          "BonusDEF": 1,
+          "BonusHP": 10,
           "BonusMP": 0,
-          "ID": 2,
+          "ID": 1,
           "Rarity": 0,
           "Price": 130,
-          "Name": "Starter Bow"
-        },
-        {
-          "Type": 0,
-          "BonusATK": 6,
-          "BonusDEF": 0,
-          "BonusHP": 0,
-          "BonusMP": 0,
-          "ID": 2,
-          "Rarity": 0,
-          "Price": 130,
-          "Name": "Starter Bow"
+          "Name": "Starter Sword"
         },
         {
           "Type": 0,
           "BonusATK": 2,
-          "BonusDEF": 0,
-          "BonusHP": 0,
-          "BonusMP": 8,
-          "ID": 3,
+          "BonusDEF": 1,
+          "BonusHP": 10,
+          "BonusMP": 0,
+          "ID": 1,
           "Rarity": 0,
           "Price": 130,
-          "Name": "Starter Staff"
-        },
-        {
-          "Type": 0,
-          "BonusATK": 2,
-          "BonusDEF": 0,
-          "BonusHP": 0,
-          "BonusMP": 8,
-          "ID": 3,
-          "Rarity": 0,
-          "Price": 130,
-          "Name": "Starter Staff"
+          "Name": "Starter Sword"
         }
       ],
       "Skills": [
         {
-          "Type": 2,
-          "Damage": 4,
-          "Heal": 0,
+          "Type": 0,
+          "Damage": 0,
+          "Heal": 5,
           "MPCost": 5,
-          "ID": 3,
+          "ID": 1,
           "Rarity": 0,
           "Price": 110,
-          "Name": "Careless Slash"
+          "Name": "Bandage"
         },
         {
-          "Type": 2,
-          "Damage": 4,
-          "Heal": 0,
+          "Type": 0,
+          "Damage": 0,
+          "Heal": 10,
           "MPCost": 5,
-          "ID": 3,
-          "Rarity": 0,
-          "Price": 110,
-          "Name": "Careless Slash"
+          "ID": 101,
+          "Rarity": 1,
+          "Price": 185,
+          "Name": "Cure"
         }
       ],
       "SkillInventory": [],
       "PlayerGold": {
-        "Quantity": 658
+        "Quantity": 716
       },
       "ATK": 7,
       "DEF": 0,
       "MaxHP": 25,
-      "HP": 5,
+      "HP": 25,
       "MaxMP": 26,
-      "MP": 6,
+      "MP": 26,
       "Name": "Player"
     },
     "Progress": {
       "Floor": 1,
-      "Room": 8
+      "Room": 10
     },
-    "SavedTime": "00:01:13.4561708"
+    "SavedTime": "00:02:45.2584744"
   },
   "Name": "AutoSave"
 }

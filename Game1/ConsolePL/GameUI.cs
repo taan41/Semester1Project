@@ -964,9 +964,14 @@ static class GameUI
 
     public static void CampfireScreen(GameData gameData)
     {
-        GenericGameScreen(gameData);
-        CursorTop = CursorPos.SubZoneTop;
-        DrawLine(' ');
+        Clear();
+        DrawHeader();
+        gameData.Progress.Print();
+        DrawLine('-');
+        CursorTop = CursorPos.PlayerZoneTop - 1;
+        DrawLine('-');
+        gameData.Player.Print();
+        DrawLine('-');
 
         CancellationTokenSource animTokenSource = new();
         _ = Task.Run(() => DrawCampfire(animTokenSource.Token));

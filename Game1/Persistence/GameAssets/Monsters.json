@@ -3,10 +3,10 @@
     "ID": 1,
     "Type": 0,
     "Floor": 1,
-    "ATK": 1,
+    "ATK": 10,
     "DEF": 0,
-    "MaxHP": 10,
-    "HP": 10,
+    "MaxHP": 100,
+    "HP": 100,
     "MaxMP": 1,
     "MP": 0,
     "Name": "Slime"
@@ -15,10 +15,10 @@
     "ID": 2,
     "Type": 0,
     "Floor": 1,
-    "ATK": 2,
+    "ATK": 15,
     "DEF": 0,
-    "MaxHP": 5,
-    "HP": 5,
+    "MaxHP": 100,
+    "HP": 100,
     "MaxMP": 1,
     "MP": 0,
     "Name": "Rat"
@@ -27,10 +27,10 @@
     "ID": 101,
     "Type": 1,
     "Floor": 1,
-    "ATK": 3,
+    "ATK": 15,
     "DEF": 0,
-    "MaxHP": 20,
-    "HP": 20,
+    "MaxHP": 30,
+    "HP": 30,
     "MaxMP": 1,
     "MP": 0,
     "Name": "Mother Slime"
@@ -39,10 +39,10 @@
     "ID": 201,
     "Type": 2,
     "Floor": 1,
-    "ATK": 5,
+    "ATK": 10,
     "DEF": 1,
-    "MaxHP": 50,
-    "HP": 50,
+    "MaxHP": 100,
+    "HP": 100,
     "MaxMP": 1,
     "MP": 0,
     "Name": "King Slime"
@@ -51,72 +51,72 @@
     "ID": 1001,
     "Type": 0,
     "Floor": 2,
-    "ATK": 15,
+    "ATK": 10,
     "DEF": 1,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "floor 2 normal"
+    "Name": "Goldfish"
   },
   "1101": {
     "ID": 1101,
     "Type": 1,
     "Floor": 2,
-    "ATK": 15,
+    "ATK": 10,
     "DEF": 1,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "floor 2 elite"
+    "Name": "Shark"
   },
   "1201": {
     "ID": 1201,
     "Type": 2,
     "Floor": 2,
-    "ATK": 20,
+    "ATK": 10,
     "DEF": 2,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "floor 2 boss"
+    "Name": "Ocean God Neptune"
   },
   "2001": {
     "ID": 2001,
     "Type": 0,
     "Floor": 3,
-    "ATK": 15,
+    "ATK": 10,
     "DEF": 2,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "floor 3 normal"
+    "Name": "Skeleton"
   },
   "2101": {
     "ID": 2101,
     "Type": 1,
     "Floor": 3,
-    "ATK": 25,
+    "ATK": 10,
     "DEF": 2,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "floor 3 elite"
+    "Name": "Grave Digger"
   },
   "2201": {
     "ID": 2201,
     "Type": 2,
     "Floor": 3,
-    "ATK": 15,
+    "ATK": 10,
     "DEF": 3,
     "MaxHP": 100,
     "HP": 100,
     "MaxMP": 1,
     "MP": 0,
-    "Name": "floor 3 boss"
+    "Name": "Supreme Necromancer"
   }
 }
