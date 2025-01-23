@@ -1,190 +1,91 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
-using static System.Console;
+using System.Threading.Tasks;
+using DAL;
+using DAL.DBHandlers;
 
-class Server
+namespace BLL
 {
-    const int defaultPort = 5000;
-
-    static readonly List<ClientHandler> clientHandlers = [];
-    static TcpListener? listener;
-
-    public static async Task Start()
+    public static class Server
     {
-        string? serverIP = null;
-        int port = defaultPort;
+        private static ConfigManager Config => ConfigManager.Instance;
 
-        if (!ServerUI.FillDBInfo())
-            return;
+        private static TcpListener? listener;
+        private static CancellationTokenSource? serverStopToken;
 
-        while (true)
+        public static readonly List<ClientHandler> clientList = [];
+
+        public static async Task<bool> InitializeDB(string server, string db, string uid, string password)
         {
-            if (!StartServer(ref serverIP, ref port))
-                return;
+            if (!DBManager.Initialize(server, db, uid, password, out string errorMessage))
+            {
+                LogHandler.AddLog($"Error while connecting to MySql DB: {errorMessage}");
+                return false;
+            }
 
-            if (serverIP == null)
-                listener = new(IPAddress.Any, port);
-            else
-                listener = new(IPAddress.Parse(serverIP), port);
+            LogHandler.Initialize();
+            await ConfigManager.Instance.LoadConfig(true);
+            return true;
+        }
 
+        public static async Task StartServer(string? serverIP, int port)
+        {
+            listener = serverIP == null ? new(IPAddress.Any, port) : new(IPAddress.Parse(serverIP), port);
             listener.Start();
-            LogHandler.AddLog($"Server starts on address: {serverIP ?? "Any"}, port: {port}");
 
-            CancellationTokenSource serverStopToken = new();
+            Config.ServerConfig.Port = port;
+            await Config.ServerConfig.Save();
+
+            LogHandler.AddLog($"Server started on address: {serverIP ?? "Any"}, port: {port}");
+
+            serverStopToken = new();
             _ = Task.Run(() => AcceptClientsAsync(listener, serverStopToken.Token));
-
-            await ServerOverview(serverIP, port);
-
-            serverStopToken.Cancel();
-            listener.Stop();
-            LogHandler.AddLog("Server stops");
         }
-    }
 
-    static bool StartServer(ref string? serverIP, ref int port)
-    {
-        while (true)
+        public static void StopServer()
         {
-            ServerUI.MainMenu(serverIP, port, false);
+            serverStopToken?.Cancel();
+            listener?.Stop();
 
-            switch (ServerUIHelper.ReadInput())
+            LogHandler.AddLog("Server stopped");
+        }
+        
+        static async Task AcceptClientsAsync(TcpListener listener, CancellationToken serverStopToken)
+        {
+            try
             {
-                case "1":
-                    return true;
+                while (true)
+                {
+                    TcpClient client = await listener.AcceptTcpClientAsync(serverStopToken);
 
-                case "2":
-                    Write(" Enter IP: ");
-                    serverIP = ReadLine();
+                    if (serverStopToken.IsCancellationRequested)
+                        return;
 
-                    if (serverIP == null || !CheckIPv4(serverIP))
-                    {
-                        serverIP = null;
-                        WriteLine(" Invalid IP.");
-                        ReadKey(true);
-                    }
-                    continue;
+                    ClientHandler clientHandler = new(client);
 
-                case "3":
-                    Write(" Enter port: ");
-                    try
-                    {
-                        port = Convert.ToInt32(ReadLine());
-                        
-                        if (port < 0 || port > 65535)
-                            throw new FormatException();
-                    }
-                    catch (FormatException)
-                    {
-                        port = defaultPort;
-                        WriteLine(" Invalid port");
-                        ReadKey(true);
-                    }
-                    continue;
+                    lock(clientList)
+                        clientList.Add(clientHandler);
 
-                case "4":
-                    ServerUI.ViewLog();
-                    continue;
-
-                case "0": case null:
-                    WriteLine(" Exiting program...");
-                    return false;
-
-                default: continue;
+                    _ = Task.Run(() => clientHandler.HandlingClientAsync(serverStopToken), CancellationToken.None);
+                }
+            }
+            catch (OperationCanceledException) {}
+            catch (Exception ex)
+            {
+                LogHandler.AddLog($"Error: {ex.Message}");
+            }
+            finally
+            {
+                listener.Stop();
             }
         }
-    }
 
-    static async Task ServerOverview(string? serverIP, int port)
-    {
-        while (true)
+        public static void RemoveClient(ClientHandler client)
         {
-            ServerUI.MainMenu(serverIP, port, true);
-
-            switch (ServerUIHelper.ReadInput())
+            lock(clientList)
             {
-                case "1":
-                    ServerUI.ViewConnectedClients(clientHandlers);
-                    continue;
-
-                case "2":
-                    await AssetManagerPL.Intance.Start();
-                    continue;
-
-                case "3":
-                    break;
-
-                case "4":
-                    ServerUI.ViewLog();
-                    continue;
-
-                case "0": case null:
-                    WriteLine(" Shutting down server...");
-                    ReadKey(true);
-                    return;
-
-                default: continue;
+                clientList.Remove(client);
             }
         }
-    }
-    
-    static async Task AcceptClientsAsync(TcpListener listener, CancellationToken token)
-    {
-        try
-        {
-            while (true)
-            {
-                TcpClient client = await listener.AcceptTcpClientAsync(token);
-
-                if (token.IsCancellationRequested)
-                    return;
-
-                ClientHandler clientHandler = new(client);
-
-                lock(clientHandlers)
-                    clientHandlers.Add(clientHandler);
-
-                _ = Task.Run(() => clientHandler.HandlingClientAsync(token), token);
-            }
-        }
-        catch (OperationCanceledException) {}
-        catch (Exception ex)
-        {
-            LogHandler.AddLog($"Error: {ex.Message}");
-        }
-        finally
-        {
-            listener.Stop();
-        }
-    }
-
-    public static void RemoveClient(ClientHandler client)
-    {
-        lock(clientHandlers)
-        {
-            clientHandlers.Remove(client);
-        }
-    }
-
-    private static bool CheckIPv4(string? ipAddress)
-    {
-        if (!IPAddress.TryParse(ipAddress, out _))
-            return false;
-
-        string[] parts = ipAddress.Split('.');
-        if (parts.Length != 4) return false;
-
-        foreach(string part in parts)
-        {
-            if (!int.TryParse(part, out int number))
-                return false;
-
-            if (number < 0 || number > 255)
-                return false;
-
-            if (part.Length > 1 && part[0] == '0')
-                return false;
-        }
-
-        return true;
     }
 }

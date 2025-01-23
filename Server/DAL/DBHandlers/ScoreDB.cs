@@ -1,153 +1,157 @@
+using DAL.Persistence.DataTransferObjects;
 using MySql.Data.MySqlClient;
 
-static class ScoreDB
+namespace DAL.DBHandlers
 {
-    public static async Task<(bool success, string errorMessage)> Add(Score score)
+    public static class ScoreDB
     {
-        string query = "INSERT INTO Scores (UserID, ClearTime) VALUES (@userID, @clearTime)";
-
-        try
+        public static async Task<(bool success, string errorMessage)> Add(Score score)
         {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
+            string query = "INSERT INTO Scores (UserID, ClearTime) VALUES (@userID, @clearTime)";
 
-            using MySqlCommand cmd = new(query, conn);
-            cmd.Parameters.AddWithValue("@userID", score.UserID);
-            cmd.Parameters.AddWithValue("@clearTime", score.ClearTime);
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
 
-            await cmd.ExecuteNonQueryAsync();
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@userID", score.UserID);
+                cmd.Parameters.AddWithValue("@clearTime", score.ClearTime);
 
-            return (true, "");
+                await cmd.ExecuteNonQueryAsync();
+
+                return (true, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (false, ex.Message);
+            }
         }
-        catch (MySqlException ex)
+
+        public static async Task<(List<Score>? scores, string errorMessage)> GetPersonal(int userID)
         {
-            return (false, ex.Message);
+            string query = @"
+                SELECT
+                    U.Nickname,
+                    S.ClearTime,
+                    S.UploadedTime
+                FROM 
+                    Scores S
+                JOIN
+                    Users U ON S.UserID = U.UserID AND U.UserID = @userID
+                WHERE 
+                    S.UserID = @userID
+                ORDER BY 
+                    S.ClearTime ASC
+                LIMIT 20";
+
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@userID", userID);
+
+                List<Score> scores = [];
+
+                using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                    scores.Add(new(
+                        userID, 
+                        reader.GetString("Nickname"), 
+                        reader.GetTimeSpan("ClearTime")
+                    ));
+
+                return (scores, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
         }
-    }
-
-    public static async Task<(List<Score>? scores, string errorMessage)> GetUser(int userID)
-    {
-        string query = @"
-            SELECT
-                U.Nickname,
-                S.ClearTime,
-                S.UploadedTime
-            FROM 
-                Scores S
-            JOIN
-                Users U ON S.UserID = U.UserID AND U.UserID = @userID
-            WHERE 
-                S.UserID = @userID
-            ORDER BY 
-                S.ClearTime ASC
-            LIMIT 20";
-
-        try
+        
+        public static async Task<(List<Score>? scores, string errorMessage)> GetMonthly()
         {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
+            string query = @"
+                SELECT
+                    U.Nickname,
+                    S.ClearTime,
+                    S.UploadedTime
+                FROM 
+                    Scores S
+                JOIN
+                    Users U ON S.UserID = U.UserID
+                WHERE 
+                    MONTH(S.UploadedTime) = MONTH(CURRENT_DATE())
+                    AND YEAR(S.UploadedTime) = YEAR(CURRENT_DATE())
+                ORDER BY 
+                    S.ClearTime ASC
+                LIMIT 10";
 
-            using MySqlCommand cmd = new(query, conn);
-            cmd.Parameters.AddWithValue("@userID", userID);
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
 
-            List<Score> scores = [];
+                using MySqlCommand cmd = new(query, conn);
 
-            using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-                scores.Add(new(
-                    userID, 
-                    reader.GetString("Nickname"), 
-                    reader.GetTimeSpan("ClearTime")
-                ));
+                List<Score> scores = [];
 
-            return (scores, "");
+                using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                    scores.Add(new(
+                        null,
+                        reader.GetString("Nickname"), 
+                        reader.GetTimeSpan("ClearTime")
+                    ));
+
+                return (scores, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
         }
-        catch (MySqlException ex)
+        
+        public static async Task<(List<Score>? scores, string errorMessage)> GetAllTime()
         {
-            return (null, ex.Message);
-        }
-    }
-    
-    public static async Task<(List<Score>? scores, string errorMessage)> GetMonthly()
-    {
-        string query = @"
-            SELECT
-                U.Nickname,
-                S.ClearTime,
-                S.UploadedTime
-            FROM 
-                Scores S
-            JOIN
-                Users U ON S.UserID = U.UserID
-            WHERE 
-                MONTH(S.UploadedTime) = MONTH(CURRENT_DATE())
-                AND YEAR(S.UploadedTime) = YEAR(CURRENT_DATE())
-            ORDER BY 
-                S.ClearTime ASC
-            LIMIT 10";
+            string query = @"
+                SELECT
+                    U.Nickname,
+                    S.ClearTime,
+                    S.UploadedTime
+                FROM 
+                    Scores S
+                JOIN
+                    Users U ON S.UserID = U.UserID
+                ORDER BY 
+                    S.ClearTime ASC
+                LIMIT 10";
 
-        try
-        {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
 
-            using MySqlCommand cmd = new(query, conn);
+                using MySqlCommand cmd = new(query, conn);
 
-            List<Score> scores = [];
+                List<Score> scores = [];
 
-            using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-                scores.Add(new(
-                    null,
-                    reader.GetString("Nickname"), 
-                    reader.GetTimeSpan("ClearTime")
-                ));
+                using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                    scores.Add(new(
+                        null,
+                        reader.GetString("Nickname"), 
+                        reader.GetTimeSpan("ClearTime")
+                    ));
 
-            return (scores, "");
-        }
-        catch (MySqlException ex)
-        {
-            return (null, ex.Message);
-        }
-    }
-    
-    public static async Task<(List<Score>? scores, string errorMessage)> GetAllTime()
-    {
-        string query = @"
-            SELECT
-                U.Nickname,
-                S.ClearTime,
-                S.UploadedTime
-            FROM 
-                Scores S
-            JOIN
-                Users U ON S.UserID = U.UserID
-            ORDER BY 
-                S.ClearTime ASC
-            LIMIT 10";
-
-        try
-        {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
-
-            using MySqlCommand cmd = new(query, conn);
-
-            List<Score> scores = [];
-
-            using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-                scores.Add(new(
-                    null,
-                    reader.GetString("Nickname"), 
-                    reader.GetTimeSpan("ClearTime")
-                ));
-
-            return (scores, "");
-        }
-        catch (MySqlException ex)
-        {
-            return (null, ex.Message);
+                return (scores, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
         }
     }
 }

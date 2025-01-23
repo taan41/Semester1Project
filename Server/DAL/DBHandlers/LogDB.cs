@@ -1,80 +1,84 @@
 using System.Data;
+using DAL.Persistence;
 using MySql.Data.MySqlClient;
 
-static class LogDB
+namespace DAL.DBHandlers
 {
-    public static async Task<(bool success, string errorMessage)> Add(string? source, string logContent)
+    public static class LogDB
     {
-        string query = @"
-            INSERT INTO ActivityLog (Source, Content) 
-            VALUES (@source, @content);
-        ";
-
-        try
-        {    
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
-
-            using MySqlCommand cmd = new(query, conn);
-            cmd.Parameters.AddWithValue("@source", source ?? "null");
-            cmd.Parameters.AddWithValue("@content", logContent);
-
-            await cmd.ExecuteNonQueryAsync();
-            return (true, "");
-        }
-        catch (MySqlException ex)
+        public static async Task<(bool success, string errorMessage)> Add(string? source, string logContent)
         {
-            return (false, ex.Message);
-        }
-    }
-    
-    public static async Task<(List<Log>? requestedLogList, string errorMessage)> GetAll()
-    {
-        string query = "SELECT LogTime, Source, Content FROM ActivityLog ORDER BY LogTime";
+            string query = @"
+                INSERT INTO ActivityLog (Source, Content) 
+                VALUES (@source, @content);
+            ";
 
-        List<Log> logList = [];
-        
-        try
-        {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
+            try
+            {    
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
 
-            using MySqlCommand cmd = new(query, conn);
-            
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                logList.Add(new(reader.GetDateTime("LogTime"), reader.GetString("Source"), reader.GetString("Content")));
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@source", source ?? "null");
+                cmd.Parameters.AddWithValue("@content", logContent);
+
+                await cmd.ExecuteNonQueryAsync();
+                return (true, "");
             }
-
-            return (logList, "");
+            catch (MySqlException ex)
+            {
+                return (false, ex.Message);
+            }
         }
-        catch (MySqlException ex)
+        
+        public static async Task<(List<Log>? requestedLogList, string errorMessage)> GetAll()
         {
-            return (null, ex.Message);
+            string query = "SELECT LogTime, Source, Content FROM ActivityLog ORDER BY LogTime";
+
+            List<Log> logList = [];
+            
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+                
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    logList.Add(new(reader.GetDateTime("LogTime"), reader.GetString("Source"), reader.GetString("Content")));
+                }
+
+                return (logList, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
         }
-    }
 
-    public static async Task<(bool success, string errorMessage)> Clear()
-    {
-        string query = @"
-            DELETE FROM ActivityLog;
-            ALTER TABLE ActivityLog AUTO_INCREMENT = 1;
-        ";
-
-        try
+        public static async Task<(bool success, string errorMessage)> Clear()
         {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
+            string query = @"
+                DELETE FROM ActivityLog;
+                ALTER TABLE ActivityLog AUTO_INCREMENT = 1;
+            ";
 
-            using MySqlCommand cmd = new(query, conn);
-            await cmd.ExecuteNonQueryAsync();
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
 
-            return (true, "");
-        }
-        catch (MySqlException ex)
-        {
-            return (false, ex.Message);
+                using MySqlCommand cmd = new(query, conn);
+                await cmd.ExecuteNonQueryAsync();
+
+                return (true, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (false, ex.Message);
+            }
         }
     }
 }

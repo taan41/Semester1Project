@@ -8,11 +8,11 @@ class GameSave : Component
 
     public GameSave() {}
 
-    public GameSave(GameData gameData, string name = "New Save", DateTime? saveTime = null) : base(name)
-    {
-        GameData = gameData;
-        SaveTime = saveTime ?? DateTime.Now;
-    }
+    // public GameSave(GameData gameData, string name = "New Save", DateTime? saveTime = null) : base(name)
+    // {
+    //     GameData = gameData;
+    //     SaveTime = saveTime ?? DateTime.Now;
+    // }
 
     public override string ToJson()
         => JsonSerializer.Serialize(this);

@@ -3,7 +3,6 @@ using System.Text.Json;
 enum CommandType
 {
     Empty, Ping, Error, GetAES,
-    UpdateAsset,
     CheckUsername, Register,
     GetUserPwd, Login, Logout, ValidateEmail, ResetPwd,
     ChangeNickname, ChangeEmail, ChangePassword,

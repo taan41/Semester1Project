@@ -1,0 +1,62 @@
+{
+  "1": {
+    "SkillType": 0,
+    "DamagePoint": 0,
+    "HealPoint": 5,
+    "MPCost": 5,
+    "ID": 1,
+    "ItemRarity": 0,
+    "Price": 110,
+    "Name": "Bandage"
+  },
+  "2": {
+    "SkillType": 0,
+    "DamagePoint": 5,
+    "HealPoint": 0,
+    "MPCost": 5,
+    "ID": 2,
+    "ItemRarity": 0,
+    "Price": 110,
+    "Name": "Weak Stab"
+  },
+  "3": {
+    "SkillType": 2,
+    "DamagePoint": 5,
+    "HealPoint": 0,
+    "MPCost": 5,
+    "ID": 3,
+    "ItemRarity": 0,
+    "Price": 110,
+    "Name": "Careless Slash"
+  },
+  "101": {
+    "SkillType": 0,
+    "DamagePoint": 0,
+    "HealPoint": 5,
+    "MPCost": 5,
+    "ID": 101,
+    "ItemRarity": 1,
+    "Price": 185,
+    "Name": "Cure"
+  },
+  "201": {
+    "SkillType": 0,
+    "DamagePoint": 0,
+    "HealPoint": 10,
+    "MPCost": 10,
+    "ID": 201,
+    "ItemRarity": 2,
+    "Price": 260,
+    "Name": "Revitalize"
+  },
+  "301": {
+    "SkillType": 0,
+    "DamagePoint": 0,
+    "HealPoint": 10,
+    "MPCost": 10,
+    "ID": 301,
+    "ItemRarity": 3,
+    "Price": 335,
+    "Name": "Re-life"
+  }
+}

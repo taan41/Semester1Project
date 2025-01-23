@@ -18,12 +18,6 @@ class Monster : Entity
 
     public Monster() {}
 
-    // public Monster(string name, int atk, int def, int hp, int floor = 1, MonsterType type = MonsterType.Normal) : base(name, atk, def, hp, 0)
-    // {
-    //     Type = type;
-    //     Floor = floor;
-    // }
-
     public Monster(Monster other) : base(other.Name, other.ATK, other.DEF, other.HP, 0)
     {
         ID = other.ID;

@@ -1,233 +1,224 @@
 using System.Data;
+using DAL.Persistence.GameComponents.ItemComponents;
 using MySql.Data.MySqlClient;
 
-static class EquipmentDB
+namespace DAL.DBHandlers
 {
-    public static async Task<(bool success, string errorMessage)> Add(Equipment equipment)
+    public static class EquipmentDB
     {
-        string query = @"
-            INSERT INTO Equipments (EquipID, Name, Rarity, Price, Type, ATKPoint, DEFPoint, HPPoint, MPPoint)
-            VALUES (@id, @name, @rarity, @price, @type, @atk, @def, @hp, @mp);
-        ";
-
-        try
+        public static async Task<(bool success, string errorMessage)> Add(Equipment equipment)
         {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
+            string query = @"
+                INSERT INTO Equipments (
+                    EquipID,
+                    Name,
+                    Rarity,
+                    Price,
+                    Type,
+                    ATKPoint,
+                    DEFPoint,
+                    HPPoint,
+                    MPPoint
+                )
+                VALUES (
+                    @id,
+                    @name,
+                    @rarity,
+                    @price,
+                    @type,
+                    @atk,
+                    @def,
+                    @hp,
+                    @mp
+                )
+                ON DUPLICATE KEY UPDATE
+                    Name = @name,
+                    Rarity = @rarity,
+                    Price = @price,
+                    Type = @type,
+                    ATKPoint = @atk,
+                    DEFPoint = @def,
+                    HPPoint = @hp,
+                    MPPoint = @mp;
+            ";
 
-            using MySqlCommand cmd = new(query, conn);
-            cmd.Parameters.AddWithValue("@id", equipment.ID);
-            cmd.Parameters.AddWithValue("@name", equipment.Name);
-            cmd.Parameters.AddWithValue("@rarity", (int) equipment.Rarity);
-            cmd.Parameters.AddWithValue("@price", equipment.Price);
-            cmd.Parameters.AddWithValue("@type", (int) equipment.Type);
-            cmd.Parameters.AddWithValue("@atk", equipment.BonusATK / AssetMetadata.Instance.EquipPointMultiplier[0]);
-            cmd.Parameters.AddWithValue("@def", equipment.BonusDEF / AssetMetadata.Instance.EquipPointMultiplier[1]);
-            cmd.Parameters.AddWithValue("@hp", equipment.BonusHP / AssetMetadata.Instance.EquipPointMultiplier[2]);
-            cmd.Parameters.AddWithValue("@mp", equipment.BonusMP / AssetMetadata.Instance.EquipPointMultiplier[3]);
-
-            await cmd.ExecuteNonQueryAsync();
-            return (true, "");
-        }
-        catch (MySqlException ex)
-        {
-            return (false, ex.Message);
-        }
-    }
-
-    public static async Task<(Equipment? requestedEquipment, string errorMessage)> Get(int equipID)
-    {
-        string query = @"
-            SELECT 
-                EquipID,
-                Name,
-                Rarity,
-                Price,
-                Type,
-                ATKPoint,
-                DEFPoint,
-                HPPoint,
-                MPPoint
-            FROM 
-                Equipments
-            WHERE 
-                EquipID = @equipID
-        ";
-
-        try
-        {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
-
-            using MySqlCommand cmd = new(query, conn);
-            cmd.Parameters.AddWithValue("@equipID", equipID);
-
-            using var reader = await cmd.ExecuteReaderAsync();
-
-            if (! await reader.ReadAsync()) // Equipment not found
-                return (null, $"No equipment with ID '{equipID}' found");
-
-            return (new()
+            try
             {
-                ID = reader.GetInt32("EquipID"),
-                Name = reader.GetString("Name"),
-                Rarity = (ItemRarity) reader.GetInt32("Rarity"),
-                Price = reader.GetInt32("Price"),
-                Type = (EquipType) reader.GetInt32("Type"),
-                BonusATK = reader.GetInt32("ATKPoint") * AssetMetadata.Instance.EquipPointMultiplier[0],
-                BonusDEF = reader.GetInt32("DEFPoint") * AssetMetadata.Instance.EquipPointMultiplier[1],
-                BonusHP = reader.GetInt32("HPPoint") * AssetMetadata.Instance.EquipPointMultiplier[2],
-                BonusMP = reader.GetInt32("MPPoint") * AssetMetadata.Instance.EquipPointMultiplier[3]
-            }, "");
-        }
-        catch (MySqlException ex)
-        {
-            return (null, ex.Message);
-        }
-    }
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
 
-    public static async Task<(bool success, string errorMessage)> Update(Equipment equipment)
-    {
-        string query = @"
-            UPDATE Equipments
-            SET 
-                Name = @name,
-                Rarity = @rarity,
-                Price = @price,
-                Type = @type,
-                ATKPoint = @atk,
-                DEFPoint = @def,
-                HPPoint = @hp,
-                MPPoint = @mp
-            WHERE 
-                EquipID = @id
-        ";
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@id", equipment.ID);
+                cmd.Parameters.AddWithValue("@name", equipment.Name);
+                cmd.Parameters.AddWithValue("@rarity", (int) equipment.ItemRarity);
+                cmd.Parameters.AddWithValue("@price", equipment.Price);
+                cmd.Parameters.AddWithValue("@type", (int) equipment.EquipType);
+                cmd.Parameters.AddWithValue("@atk", equipment.BonusATKPoint);
+                cmd.Parameters.AddWithValue("@def", equipment.BonusDEFPoint);
+                cmd.Parameters.AddWithValue("@hp", equipment.BonusHPPoint);
+                cmd.Parameters.AddWithValue("@mp", equipment.BonusMPPoint);
 
-        try
-        {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
-
-            using MySqlCommand cmd = new(query, conn);
-            cmd.Parameters.AddWithValue("@id", equipment.ID);
-            cmd.Parameters.AddWithValue("@name", equipment.Name);
-            cmd.Parameters.AddWithValue("@rarity", (int) equipment.Rarity);
-            cmd.Parameters.AddWithValue("@price", equipment.Price);
-            cmd.Parameters.AddWithValue("@type", (int) equipment.Type);
-            cmd.Parameters.AddWithValue("@atk", equipment.BonusATK / AssetMetadata.Instance.EquipPointMultiplier[0]);
-            cmd.Parameters.AddWithValue("@def", equipment.BonusDEF / AssetMetadata.Instance.EquipPointMultiplier[1]);
-            cmd.Parameters.AddWithValue("@hp", equipment.BonusHP / AssetMetadata.Instance.EquipPointMultiplier[2]);
-            cmd.Parameters.AddWithValue("@mp", equipment.BonusMP / AssetMetadata.Instance.EquipPointMultiplier[3]);
-
-            await cmd.ExecuteNonQueryAsync();
-            return (true, "");
-        }
-        catch (MySqlException ex)
-        {
-            return (false, ex.Message);
-        }
-    }
-
-    public static async Task<(bool success, string errorMessage)> UpdateID(int oldID, int newID)
-    {
-        string query = @"
-            UPDATE Equipments
-            SET 
-                EquipID = @newID
-            WHERE 
-                EquipID = @oldID
-        ";
-
-        try
-        {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
-
-            using MySqlCommand cmd = new(query, conn);
-            cmd.Parameters.AddWithValue("@oldID", oldID);
-            cmd.Parameters.AddWithValue("@newID", newID);
-
-            await cmd.ExecuteNonQueryAsync();
-            return (true, "");
-        }
-        catch (MySqlException ex)
-        {
-            return (false, ex.Message);
-        }
-    }
-
-    public static async Task<(bool success, string errorMessage)> Delete(int equipID)
-    {
-        string query = @"
-            DELETE FROM Equipments
-            WHERE EquipID = @equipID
-        ";
-
-        try
-        {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
-
-            using MySqlCommand cmd = new(query, conn);
-            cmd.Parameters.AddWithValue("@equipID", equipID);
-
-            await cmd.ExecuteNonQueryAsync();
-            return (true, "");
-        }
-        catch (MySqlException ex)
-        {
-            return (false, ex.Message);
-        }
-    }
-
-    public static async Task<(Dictionary<int, Equipment>? equipments, string errorMessage)> GetAll()
-    {
-        string query = @"
-            SELECT 
-                EquipID,
-                Name,
-                Rarity,
-                Price,
-                Type,
-                ATKPoint,
-                DEFPoint,
-                HPPoint,
-                MPPoint
-            FROM 
-                Equipments
-        ";
-
-        try
-        {
-            using MySqlConnection conn = new(DBManager.ConnectionString);
-            await conn.OpenAsync();
-
-            using MySqlCommand cmd = new(query, conn);
-
-            using var reader = await cmd.ExecuteReaderAsync();
-
-            Dictionary<int, Equipment> equipments = [];
-            while (await reader.ReadAsync())
+                await cmd.ExecuteNonQueryAsync();
+                return (true, "");
+            }
+            catch (MySqlException ex)
             {
-                equipments[reader.GetInt32("EquipID")] = new()
+                return (false, ex.Message);
+            }
+        }
+
+        public static async Task<(Equipment? requestedEquipment, string errorMessage)> Get(int equipID)
+        {
+            string query = @"
+                SELECT 
+                    EquipID,
+                    Name,
+                    Rarity,
+                    Price,
+                    Type,
+                    ATKPoint,
+                    DEFPoint,
+                    HPPoint,
+                    MPPoint
+                FROM 
+                    Equipments
+                WHERE 
+                    EquipID = @equipID
+            ";
+
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@equipID", equipID);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+
+                if (! await reader.ReadAsync()) // Equipment not found
+                    return (null, $"No equipment with ID '{equipID}' found");
+
+                return (new()
                 {
                     ID = reader.GetInt32("EquipID"),
                     Name = reader.GetString("Name"),
-                    Rarity = (ItemRarity) reader.GetInt32("Rarity"),
+                    ItemRarity = (Item.Rarity) reader.GetInt32("Rarity"),
                     Price = reader.GetInt32("Price"),
-                    Type = (EquipType) reader.GetInt32("Type"),
-                    BonusATK = reader.GetInt32("ATKPoint") * AssetMetadata.Instance.EquipPointMultiplier[0],
-                    BonusDEF = reader.GetInt32("DEFPoint") * AssetMetadata.Instance.EquipPointMultiplier[1],
-                    BonusHP = reader.GetInt32("HPPoint") * AssetMetadata.Instance.EquipPointMultiplier[2],
-                    BonusMP = reader.GetInt32("MPPoint") * AssetMetadata.Instance.EquipPointMultiplier[3]
-                };
+                    EquipType = (Equipment.Type) reader.GetInt32("Type"),
+                    BonusATKPoint = reader.GetInt32("ATKPoint"),
+                    BonusDEFPoint = reader.GetInt32("DEFPoint"),
+                    BonusHPPoint = reader.GetInt32("HPPoint"),
+                    BonusMPPoint = reader.GetInt32("MPPoint")
+                }, "");
             }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
+        }
 
-            return (equipments, "");
-        }
-        catch (MySqlException ex)
+        public static async Task<(Dictionary<int, Equipment>? equipments, string errorMessage)> GetAll()
         {
-            return (null, ex.Message);
+            string query = @"
+                SELECT 
+                    EquipID,
+                    Name,
+                    Rarity,
+                    Price,
+                    Type,
+                    ATKPoint,
+                    DEFPoint,
+                    HPPoint,
+                    MPPoint
+                FROM 
+                    Equipments
+            ";
+
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+
+                Dictionary<int, Equipment> equipments = [];
+                while (await reader.ReadAsync())
+                {
+                    equipments[reader.GetInt32("EquipID")] = new()
+                    {
+                        ID = reader.GetInt32("EquipID"),
+                        Name = reader.GetString("Name"),
+                        ItemRarity = (Item.Rarity) reader.GetInt32("Rarity"),
+                        Price = reader.GetInt32("Price"),
+                        EquipType = (Equipment.Type) reader.GetInt32("Type"),
+                        BonusATKPoint = reader.GetInt32("ATKPoint"),
+                        BonusDEFPoint = reader.GetInt32("DEFPoint"),
+                        BonusHPPoint = reader.GetInt32("HPPoint"),
+                        BonusMPPoint = reader.GetInt32("MPPoint")
+                    };
+                }
+
+                return (equipments, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
         }
-    } 
+
+        public static async Task<(bool success, string errorMessage)> UpdateID(int oldID, int newID)
+        {
+            string query = @"
+                UPDATE Equipments
+                SET 
+                    EquipID = @newID
+                WHERE 
+                    EquipID = @oldID
+            ";
+
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@oldID", oldID);
+                cmd.Parameters.AddWithValue("@newID", newID);
+
+                await cmd.ExecuteNonQueryAsync();
+                return (true, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public static async Task<(bool success, string errorMessage)> Remove(int equipID)
+        {
+            string query = @"
+                DELETE FROM Equipments
+                WHERE EquipID = @equipID
+            ";
+
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@equipID", equipID);
+
+                await cmd.ExecuteNonQueryAsync();
+                return (true, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+    }
 }
