@@ -1,7 +1,5 @@
-/Game1/bin
-/Game1/obj
-/Server1/bin
-/Server1/obj
+/Game1
+/Server1
 /test
 Project.sln
 /.vscode
