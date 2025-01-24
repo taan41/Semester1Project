@@ -8,11 +8,10 @@ namespace BLL.GameComponents.EventComponents
         public List<Monster> Monsters { get; set; } = [];
         public List<Item> Rewards { get; set; } = [];
 
-        public FightEvent() {}
+        public FightEvent() : base(Type.Fight) {}
 
-        public FightEvent(List<Monster> monsters, List<Item> rewards)
+        public FightEvent(List<Monster> monsters, List<Item> rewards) : base(Type.Fight)
         {
-            EventType = Type.Fight;
             Monsters.AddRange(monsters);
             Rewards.AddRange(rewards);
 

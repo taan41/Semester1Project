@@ -6,7 +6,7 @@ namespace BLL.GameComponents.EventComponents
     {
         public List<Item> Treasures { get; set; } = [];
 
-        public TreasureEvent() {}
+        public TreasureEvent() : base(Type.Treasure) {}
 
         public TreasureEvent(List<Item> treasures) : base(Type.Treasure)
             => Treasures = treasures;

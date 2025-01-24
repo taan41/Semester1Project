@@ -122,7 +122,28 @@ namespace BLL.GameHelpers
             if (randomValue > 80 && roomIndex > 4)
                 return GenerateEliteFight(roomIndex, floorNumber, monsterPower);
 
+            if (randomValue > 50 && roomIndex > 2)
+                return GenerateRandomEvent(roomIndex, floorNumber, monsterPower);
+
             return GenerateNormalFight(roomIndex, floorNumber, monsterPower);
+        }
+
+        private RandomEvent GenerateRandomEvent(int roomIndex, int floorNumber, int monsterPower)
+        {
+            int randomValue = _rng.Next(1, 101);
+
+            RandomEvent randomEvent = new()
+            {
+                ChildEvent = randomValue switch
+                {
+                    > 90 => new Event(Event.Type.Camp),
+                    > 80 => GenerateShop(roomIndex),
+                    > 50 => GenerateTreasure(floorNumber),
+                    > 35 => GenerateEliteFight(roomIndex, floorNumber, monsterPower),
+                    _ => GenerateNormalFight(roomIndex, floorNumber, monsterPower)
+                }
+            };
+            return randomEvent;
         }
 
         private FightEvent GenerateNormalFight(int roomIndex, int floorNumber, int monsterPower)
@@ -165,13 +186,13 @@ namespace BLL.GameHelpers
             while (bossQuantity-- > 0)
             {
                 Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 201, IDTracker.MonsterIDs[floorNumber - 1][2])];
-                monsters.Add(new(pickedMonster, monsterPower * BossPowerPercentage));
+                monsters.Add(new(pickedMonster, monsterPower * BossPowerPercentage / 100));
             }
 
             while (eliteQuantity-- > 0)
             {
                 Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 101, IDTracker.MonsterIDs[floorNumber - 1][1])];
-                monsters.Add(new(pickedMonster, monsterPower * ElitePowerPercentage));
+                monsters.Add(new(pickedMonster, monsterPower * ElitePowerPercentage / 100));
             }
 
             while (normalQuantity-- > 0)

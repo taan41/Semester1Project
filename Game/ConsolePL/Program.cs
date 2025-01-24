@@ -334,17 +334,8 @@ namespace ConsolePL
                             break;
 
                         Event pickedRoute = routes[(int) pickedRouteInd];
-                        switch (pickedRoute)
-                        {
-                            case FightEvent fightEvent:
-                                if (!HandleFightEvent(gameHandler, fightEvent))
-                                    return;
-                                else break;
-
-                            default:
-                                HandleNonfightEvent(gameHandler, pickedRoute);
-                                break;
-                        }
+                        if (!HandleEvent(gameHandler, pickedRoute))
+                            return;
 
                         if (!gameHandler.Progress.Next())
                         {
@@ -451,6 +442,19 @@ namespace ConsolePL
                 }
 
                 skillInv = gameHandler.Player.SkillInventory;
+            }
+        }
+
+        static bool HandleEvent(GameLoopHandler gameHandler, Event route)
+        {
+            switch (route)
+            {
+                case FightEvent fightEvent:
+                    return HandleFightEvent(gameHandler, fightEvent);
+
+                default:
+                    HandleNonfightEvent(gameHandler, route);
+                    return true;
             }
         }
 
@@ -562,6 +566,11 @@ namespace ConsolePL
                 case TreasureEvent treasureEvent:
                     TreasureOpening(gameHandler.Progress);
                     if (!HandleRewards(gameHandler, treasureEvent.Treasures))
+                        return;
+                    break;
+
+                case RandomEvent randomEvent:
+                    if (!HandleEvent(gameHandler, randomEvent.ChildEvent))
                         return;
                     break;
 

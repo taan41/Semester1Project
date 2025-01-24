@@ -4,7 +4,7 @@ namespace BLL.GameComponents.EventComponents
     {
         public enum Type
         {
-            Fight, Shop, Camp, Treasure
+            Fight, Shop, Camp, Treasure, Random
         }
 
         public Type EventType { get; set; }

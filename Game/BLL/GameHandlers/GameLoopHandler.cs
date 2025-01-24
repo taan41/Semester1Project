@@ -72,7 +72,8 @@ namespace BLL.GameHandlers
         public void LoadPrefightState(FightEvent fightEvent)
         {
             Player.SetStats(null, null, null, _prefightHP, null, _prefightMP, null);
-            fightEvent.Monsters = _prefightMonsters;
+            fightEvent.Monsters.Clear();
+            fightEvent.Monsters.AddRange(_prefightMonsters);
             _prefightMonsters.Clear();
         }
 

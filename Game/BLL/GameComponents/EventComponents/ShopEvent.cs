@@ -6,7 +6,7 @@ namespace BLL.GameComponents.EventComponents
     {
         public List<Item> SellingItems { get; set; } = [];
 
-        public ShopEvent() {}
+        public ShopEvent() : base(Type.Shop) {}
 
         public ShopEvent(List<Item> sellingItems) : base(Type.Shop)
             => SellingItems = sellingItems;

@@ -1,9 +1,44 @@
 {
-  "SaveTime": "2025-01-24T05:09:52.4292056+07:00",
+  "SaveTime": "2025-01-24T21:21:00.5677816+07:00",
   "RunData": {
-    "Seed": 288804416,
+    "Seed": 2043014347,
     "Player": {
       "Equipped": [
+        {
+          "EquipType": 0,
+          "BonusATKPoint": 2,
+          "BonusDEFPoint": 0,
+          "BonusHPPoint": 0,
+          "BonusMPPoint": 4,
+          "ID": 103,
+          "ItemRarity": 1,
+          "Price": 227,
+          "Name": "Enchanted Staff"
+        },
+        {
+          "EquipType": 1,
+          "BonusATKPoint": 0,
+          "BonusDEFPoint": 1,
+          "BonusHPPoint": 3,
+          "BonusMPPoint": 0,
+          "ID": 104,
+          "ItemRarity": 1,
+          "Price": 227,
+          "Name": "Reinforced Scale Mail"
+        },
+        {
+          "EquipType": 2,
+          "BonusATKPoint": 0,
+          "BonusDEFPoint": 1,
+          "BonusHPPoint": 1,
+          "BonusMPPoint": 0,
+          "ID": 107,
+          "ItemRarity": 1,
+          "Price": 227,
+          "Name": "Tempered Iron Shield"
+        }
+      ],
+      "EquipInventory": [
         {
           "EquipType": 0,
           "BonusATKPoint": 1,
@@ -12,21 +47,19 @@
           "BonusMPPoint": 1,
           "ID": 3,
           "ItemRarity": 0,
-          "Price": 30,
+          "Price": 130,
           "Name": "Starter Staff"
-        }
-      ],
-      "EquipInventory": [
+        },
         {
-          "EquipType": 0,
-          "BonusATKPoint": 2,
+          "EquipType": 1,
+          "BonusATKPoint": 1,
           "BonusDEFPoint": 0,
-          "BonusHPPoint": 0,
+          "BonusHPPoint": 1,
           "BonusMPPoint": 0,
-          "ID": 2,
+          "ID": 8,
           "ItemRarity": 0,
-          "Price": 30,
-          "Name": "Starter Bow"
+          "Price": 130,
+          "Name": "Torn Leather Vest"
         }
       ],
       "Skills": [
@@ -37,7 +70,7 @@
           "MPCost": 5,
           "ID": 1,
           "ItemRarity": 0,
-          "Price": 10,
+          "Price": 110,
           "Name": "Bandage"
         },
         {
@@ -47,27 +80,48 @@
           "MPCost": 5,
           "ID": 3,
           "ItemRarity": 0,
-          "Price": 10,
+          "Price": 110,
+          "Name": "Careless Slash"
+        },
+        {
+          "SkillType": 2,
+          "DamagePoint": 5,
+          "HealPoint": 0,
+          "MPCost": 5,
+          "ID": 3,
+          "ItemRarity": 0,
+          "Price": 110,
           "Name": "Careless Slash"
         }
       ],
-      "SkillInventory": [],
+      "SkillInventory": [
+        {
+          "SkillType": 0,
+          "DamagePoint": 0,
+          "HealPoint": 5,
+          "MPCost": 5,
+          "ID": 1,
+          "ItemRarity": 0,
+          "Price": 110,
+          "Name": "Bandage"
+        }
+      ],
       "PlayerGold": {
-        "Quantity": 571
+        "Quantity": 231
       },
-      "ATK": 5,
-      "DEF": 0,
-      "MaxHP": 25,
-      "HP": 23,
-      "MaxMP": 14,
-      "MP": 13,
+      "ATK": 7,
+      "DEF": 2,
+      "MaxHP": 57,
+      "HP": 45,
+      "MaxMP": 26,
+      "MP": 26,
       "Name": "Player"
     },
     "Progress": {
       "Floor": 1,
-      "Room": 6
+      "Room": 7
     },
-    "SavedTime": "00:01:30.2588044"
+    "SavedTime": "00:01:37.0470492"
   },
   "Name": "AutoSave"
 }

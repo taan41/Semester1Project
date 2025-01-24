@@ -745,12 +745,12 @@ class AssetManagerPL
         if (mpCost == null)
             return null;
 
-        Write($" Damage Point (1 Pt = {GameConfig.SkillPtDamagePercentage / 100} Dmg) ({mpCost} Pt Left): ");
+        Write($" Damage Point (1 Pt = {GameConfig.SkillPtDamagePercentage / 100} Dmg) ({mpCost * AssetConfig.SkillPtPerMPPerRarity[(int) rarity]} Pt Left): ");
         int? dmgPt = EnterInt();
         if (dmgPt == null)
             return null;
 
-        Write($" Heal Point (1 Pt = {GameConfig.SkillPtHealPercentage / 100} Heal) ({mpCost - dmgPt.Value} Pt Left): ");
+        Write($" Heal Point (1 Pt = {GameConfig.SkillPtHealPercentage / 100} Heal) ({mpCost * AssetConfig.SkillPtPerMPPerRarity[(int) rarity] - dmgPt.Value} Pt Left): ");
         int? healPt = EnterInt();
         if (healPt == null)
             return null;

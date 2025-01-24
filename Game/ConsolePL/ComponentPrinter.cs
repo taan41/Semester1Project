@@ -148,8 +148,16 @@ namespace ConsolePL
 
             if (skill.DamagePoint > 0)
             {
+                int typePercentage = skill.SkillType switch
+                {
+                    Skill.Type.Single => GameConfig.SkillTypeSinglePercentage,
+                    Skill.Type.Random => GameConfig.SkillTypeRandomPercentage,
+                    Skill.Type.All => GameConfig.SkillTypeAllPercentage,
+                    _ => 0
+                };
+
                 ForegroundColor = ConsoleColor.DarkYellow;
-                Write($" [▲ {skill.DamagePoint * GameConfig.SkillPtDamagePercentage / 100}]");
+                Write($" [▲ {skill.DamagePoint * GameConfig.SkillPtDamagePercentage * typePercentage / 10000}]");
             }
 
             if (skill.HealPoint > 0)

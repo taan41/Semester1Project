@@ -27,7 +27,7 @@ namespace BLL.GameComponents.ItemComponents
             BonusHPPoint = other.BonusHPPoint;
             BonusMPPoint = other.BonusMPPoint;
             
-            Price = other.Price != -1 ? other.Price : Config.ItemPriceBase * (100 + (int) ItemRarity * Config.ItemPriceRarityBonusPercentage) / 100 * Config.ItemPriceEquipBonusPercentage / 100;
+            Price = other.Price != -1 ? other.Price : Config.ItemPriceBase * (100 + (int) ItemRarity * Config.ItemPriceRarityBonusPercentage) * (100 + Config.ItemPriceEquipBonusPercentage) / 10000;
         }
     }
 
