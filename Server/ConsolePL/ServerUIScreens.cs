@@ -47,7 +47,7 @@ static class ServerUI
         // DrawLine('-');
 
         // if (await Server.InitializeDB(server, db, uid, password))
-        if (await Server.InitializeDB("26.244.97.115", "consoleconquer", "roor", ""))
+        if (await Server.InitializeDB("26.244.97.115", "consoleconquer", "root", ""))
         {
             WriteLine(" Database connection successful!");
             ReadKey(true);
