@@ -1,8 +1,6 @@
 using System.Reflection;
-using System.Threading.Tasks;
 using BLL;
 using DAL;
-using DAL.DBHandlers;
 using DAL.Persistence.ConfigClasses;
 using static System.Console;
 using static ServerUIHelper;
@@ -13,40 +11,43 @@ static class ServerUI
 
     public static async Task<(bool success, bool exit)> FillDBInfoScreen()
     {
-        string? server, db, uid, password;
-
         Clear();
         DrawHeader(Header);
-        WriteLine(" MySql database info:");
-        WriteLine(" 'ESC' to return");
-        WriteLine(" Leave empty for default values");
-        DrawLine('-');
 
-        Write(" Server (default 'localhost'): ");
-        if ((server = ReadInput()) == null)
-            return (false, true);
-        if (string.IsNullOrWhiteSpace(server))
-            server = "localhost";
+        // WriteLine(" -- Filling MySql database info:");
+        // WriteLine(" 'ESC' to return");
+        // WriteLine(" Leave blank for default values");
+        // DrawLine('-');
 
-        Write(" Database (default 'consoleconquer'): ");
-        if ((db = ReadInput()) == null)
-            return (false, true);
-        if (string.IsNullOrWhiteSpace(db))
-            db = "consoleconquer";
+        // string? server, db, uid, password;
 
-        Write(" UID (default 'root'): ");
-        if ((uid = ReadInput()) == null)
-            return (false, true);
-        if (string.IsNullOrWhiteSpace(uid))
-            uid = "root";
+        // Write(" Server (default '26.244.97.115'): ");
+        // if ((server = ReadInput()) == null)
+        //     return (false, true);
+        // if (string.IsNullOrWhiteSpace(server))
+        //     server = "26.244.97.115";
 
-        Write(" Password (default empty): ");
-        if ((password = ReadInput(true)) == null)
-            return (false, true);
+        // Write(" Database (default 'consoleconquer'): ");
+        // if ((db = ReadInput()) == null)
+        //     return (false, true);
+        // if (string.IsNullOrWhiteSpace(db))
+        //     db = "consoleconquer";
 
-        DrawLine('-');
+        // Write(" UID (default 'root'): ");
+        // if ((uid = ReadInput()) == null)
+        //     return (false, true);
+        // if (string.IsNullOrWhiteSpace(uid))
+        //     uid = "root";
 
-        if (await Server.InitializeDB(server, db, uid, password))
+        // Write(" Password (default empty): ");
+        // if ((password = ReadInput(true)) == null)
+        //     return (false, true);
+        // password = "";
+
+        // DrawLine('-');
+
+        // if (await Server.InitializeDB(server, db, uid, password))
+        if (await Server.InitializeDB("26.244.97.115", "consoleconquer", "roor", ""))
         {
             WriteLine(" Database connection successful!");
             ReadKey(true);
@@ -177,7 +178,7 @@ static class ServerUI
                 filteredProps = properties;
             }
 
-            WriteLine(" (Leave empty to skip)");
+            WriteLine(" (Leave blank to skip)");
             WriteLine(" (Config will only be saved if all properties have been filled)");
             DrawLine('-');
             
