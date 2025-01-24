@@ -43,7 +43,7 @@ namespace ConsolePL
         
         static bool ModeSelection()
         {
-            List<string> options = ["PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
+            List<string> options = ["PLAY ONLINE", "PLAY OFFLINE", "TUTORIAL", "EXIT"];
 
             while (true)
             {
@@ -60,7 +60,7 @@ namespace ConsolePL
                         OfflineMode();
                         break;
                     
-                    default:
+                    case 3:
                         return false;
                 }
             }

@@ -105,27 +105,27 @@ namespace BLL.GameHelpers
 
                 if (addNormalEvent)
                 {
+                    int maxRandomQuantity = eventQuantity - 1;
                     while (eventQuantity-- > 0)
-                        possibleEvents.Add(GenerateNormalEvent(roomIndex, floorNumber, monsterPower));
+                    {
+                        int eventTypeRNG = _rng.Next(1, 101);
+
+                        if (eventTypeRNG > 70 && roomIndex > 2 && maxRandomQuantity > 0)
+                        {
+                            possibleEvents.Add(GenerateEliteFight(roomIndex, floorNumber, monsterPower));
+                            maxRandomQuantity--;
+                        }
+                        else if (eventTypeRNG > 50 && roomIndex > 4)
+                            possibleEvents.Add(GenerateRandomEvent(roomIndex, floorNumber, monsterPower));
+                        else
+                            possibleEvents.Add(GenerateNormalFight(roomIndex, floorNumber, monsterPower));
+                    }
                 }
 
                 allEvents.Add(possibleEvents);
             }
 
             return allEvents;
-        }
-
-        private Event GenerateNormalEvent(int roomIndex, int floorNumber, int monsterPower)
-        {
-            int randomValue = _rng.Next(1, 101);
-
-            if (randomValue > 80 && roomIndex > 4)
-                return GenerateEliteFight(roomIndex, floorNumber, monsterPower);
-
-            if (randomValue > 50 && roomIndex > 2)
-                return GenerateRandomEvent(roomIndex, floorNumber, monsterPower);
-
-            return GenerateNormalFight(roomIndex, floorNumber, monsterPower);
         }
 
         private RandomEvent GenerateRandomEvent(int roomIndex, int floorNumber, int monsterPower)

@@ -8,6 +8,7 @@ Project.sln
 /Game/BLL/obj
 /Game/ConsolePL/bin
 /Game/ConsolePL/obj
+/Game/ConsolePL/GameData/GameSaves/
 /Game/DAL/bin
 /Game/DAL/obj
 /Game/NetworkLL/bin
