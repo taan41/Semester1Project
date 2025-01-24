@@ -62,6 +62,10 @@ namespace ConsolePL
             int lineIndex = 0, lineLength = background[0].Length;
             int randomTitle = RandomNumberGenerator.GetInt32(titles.Length);
 
+            ConsoleColor[] titleColors = [ ConsoleColor.Red, ConsoleColor.Blue, ConsoleColor.Magenta, ConsoleColor.Yellow ];
+            ConsoleColor[] backgroundColors = [ ConsoleColor.Green, ConsoleColor.Cyan ];
+            int colorIndex = RandomNumberGenerator.GetInt32(10);
+
             try
             {
                 while(!stopToken.IsCancellationRequested)
@@ -71,8 +75,11 @@ namespace ConsolePL
                         SetCursorPosition(0, CursorPos.TitleAnimationTop);
                         for (int i = 0; i < background.Length; i++)
                         {
+                            ForegroundColor = backgroundColors[colorIndex % backgroundColors.Length];
                             Write($"{background[i][lineIndex..]}{background[i][0..lineIndex]}");
+                            ForegroundColor = titleColors[colorIndex % titleColors.Length];
                             WriteCenter(titles[randomTitle][i]);
+                            ResetColor();
                         }
                     }
 
@@ -112,8 +119,11 @@ namespace ConsolePL
             DrawLine();
 
             CursorLeft = 5;
-            CursorTop -= 3;
+            CursorTop -= 4;
             Write("-- Please resize the console window to fit the game screen");
+            CursorLeft = 5;
+            CursorTop++;
+            Write("-- All lines must be straight and fully visible");
             CursorLeft = 5;
             CursorTop++;
             Write("-- Press any key to continue...");
@@ -156,9 +166,9 @@ namespace ConsolePL
             {
                 WriteCenter(@"   .   ");
                 WriteCenter(@"  / \  ");
-                WriteCenter(@" / ┃ \ ");
-                WriteCenter(@"/  •  \");
-                WriteCenter(@"‾‾‾‾‾‾‾");
+                WriteCenter(@" / | \ ");
+                WriteCenter(@"/  .  \");
+                WriteCenter(@"-------");
             }
             else if (popupType == PopupType.Success)
             {
@@ -233,6 +243,64 @@ namespace ConsolePL
                 CursorLeft = CursorPos.TitleScreenMenuLeft;
                 WriteLine($" {option,-(UIConstants.UIWidth - CursorPos.TitleScreenMenuLeft - 1)}");
             }
+        }
+
+        public static void ManualNavigatingUI()
+        {
+            TitleScreenDrawBorders(false, true);
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop;
+                WriteLine(" -- Navigating the UI:");
+                WriteLine(" Use 'W', 'S' or 'Up' & 'Down' Arrow Keys to navigate");
+                WriteLine(" Press 'Enter', 'Space', 'D' or 'Right' Arrow Key to select");
+                WriteLine(" Press 'ESC', 'A' or 'Left' Arrow Key to return");
+                WriteLine(" (Press any key to return)");
+            }
+
+            ReadKey(true);
+        }
+
+        public static void ManualGameplay()
+        {
+            TitleScreenDrawBorders(false, true);
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop;
+                WriteLine(" -- Gameplay:");
+                WriteLine(" Beat the game by progressing through all the rooms and floors");
+                WriteLine(" Each room offers various events with the last being the floor's boss");
+                WriteLine(" During battle, you can either attack directly or use skills");
+                WriteLine(" + When attacking, both parties will deal damage to each other");
+                WriteLine(" ++ The damage is based on the attacker's ATK and the defender's DEF");
+                WriteLine(" + When using skills, you won't take damage but will consume MP");
+                WriteLine(" ++ MP will be restored slowly after each direct attack");
+                WriteLine(" (Press any key to return)");
+            }
+
+            ReadKey(true);
+        }
+
+        public static void ManualAboutOnlineMode()
+        {
+            TitleScreenDrawBorders(false, true);
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop;
+                WriteLine(" -- About Online Mode:");
+                WriteLine(" The game's data is automatically updated and saved locally");
+                WriteLine(" You need an account to access other online features");
+                WriteLine(" You can reset your password using registered email");
+                WriteLine(" Online mode allows you to:");
+                WriteLine(" + Upload your progress to access from anywhere");
+                WriteLine(" + Compete with other players in the leaderboard");
+                WriteLine(" (Press any key to return)");
+            }
+
+            ReadKey(true);
         }
 
         public static void ServerConnectScreen()

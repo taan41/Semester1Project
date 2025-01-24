@@ -43,7 +43,7 @@ namespace ConsolePL
         
         static bool ModeSelection()
         {
-            List<string> options = ["PLAY ONLINE", "PLAY OFFLINE", "TUTORIAL", "EXIT"];
+            List<string> options = ["MANUAL", "PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
 
             while (true)
             {
@@ -53,15 +53,48 @@ namespace ConsolePL
                 switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
                 {
                     case 0:
+                        Manual();
+                        break;
+                    
+                    case 1:
                         OnlineMode();
                         break;
 
-                    case 1:
+                    case 2:
                         OfflineMode();
                         break;
-                    
+
                     case 3: case null:
                         return false;
+                }
+            }
+        }
+
+        static void Manual()
+        {
+            List<string> options = ["NAVIGATING UI", "GAMEPLAY", "ABOUT ONLINE MODE", "RETURN"];
+
+            while (true)
+            {
+                TitleScreenDrawBorders(false, true);
+                StartTitleAnim();
+
+                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                {
+                    case 0:
+                        ManualNavigatingUI();
+                        break;
+
+                    case 1:
+                        ManualGameplay();
+                        break;
+
+                    case 2:
+                        ManualAboutOnlineMode();
+                        break;
+
+                    case 3: case null:
+                        return;
                 }
             }
         }

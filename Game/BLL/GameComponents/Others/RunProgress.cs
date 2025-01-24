@@ -64,11 +64,11 @@ namespace BLL.GameComponents.Others
             for (int i = 1; i <= _room; i++)
             {
                 if (i == MaxRoom)
-                    sb.Append(" ▲ ");
+                    sb.Append(" X ");
                 else if (i % 5 == 0)
-                    sb.Append(" ● ");
+                    sb.Append(" + ");
                 else
-                    sb.Append(" • ");
+                    sb.Append(" - ");
             }
             Console.WriteLine(sb);
         }
