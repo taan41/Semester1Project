@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Sockets;
 using DAL;
 using DAL.ConfigClasses;
@@ -28,7 +29,8 @@ namespace NetworkLL
 
             try
             {
-                client = new TcpClient(ServerConfig.ServerIP, ServerConfig.Port);
+                string ip = CheckIPv4(ServerConfig.ServerIP) ? ServerConfig.ServerIP : "127.0.0.1";
+                client = new TcpClient(ip, ServerConfig.Port);
                 stream = client.GetStream();
                 return true;
             }

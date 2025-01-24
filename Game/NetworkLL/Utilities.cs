@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using NetworkLL.DataTransferObjects;
@@ -6,6 +7,29 @@ namespace NetworkLL
 {
     public static class Utilities
     {
+        public static bool CheckIPv4(string? ipAddress)
+        {
+            if (!IPAddress.TryParse(ipAddress, out _))
+                return false;
+
+            string[] parts = ipAddress.Split('.');
+            if (parts.Length != 4) return false;
+
+            foreach(string part in parts)
+            {
+                if (!int.TryParse(part, out int number))
+                    return false;
+
+                if (number < 0 || number > 255)
+                    return false;
+
+                if (part.Length > 1 && part[0] == '0')
+                    return false;
+            }
+
+            return true;
+        }
+        
         public static class Encode
         {
             public static string GetString(byte[] data) => Encoding.UTF8.GetString(data);

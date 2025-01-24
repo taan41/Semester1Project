@@ -50,17 +50,17 @@ namespace BLL.GameHandlers
                 FileManager.WriteJson(FileManager.FolderNames.Configs, FileManager.FileNames.GameConfig, gameConfig);
             }
 
-            if (!NetworkHandler.Communicate(new(Command.Type.ServerConfig), out result))
-            {
-                error = result;
-                return false;
-            }
+            // if (!NetworkHandler.Communicate(new(Command.Type.ServerConfig), out result))
+            // {
+            //     error = result;
+            //     return false;
+            // }
 
-            var serverConfig = JsonSerializer.Deserialize<ServerConfig>(result);
-            if (serverConfig != null)
-            {
-                FileManager.WriteJson(FileManager.FolderNames.Configs, FileManager.FileNames.ServerConfig, serverConfig);
-            }
+            // var serverConfig = JsonSerializer.Deserialize<ServerConfig>(result);
+            // if (serverConfig != null)
+            // {
+            //     FileManager.WriteJson(FileManager.FolderNames.Configs, FileManager.FileNames.ServerConfig, serverConfig);
+            // }
 
             if (!NetworkHandler.Communicate(new(Command.Type.DatabaseConfig), out result))
             {
