@@ -255,7 +255,7 @@ namespace BLL.GameHelpers
             List<Item> rewards = [];
             rewards.Add(new Gold(
                 TreasureGold *
-                (floorNumber - 1) * TreasureGoldPerFloorPercentage *
+                (100 + (floorNumber - 1) * TreasureGoldPerFloorPercentage) *
                 _rng.Next(85, 140) / 10000
             ));
 

@@ -3,12 +3,11 @@
 /test
 Project.sln
 /.vscode
-/Game1/GameData/GameSaves/
 /Game/BLL/bin
 /Game/BLL/obj
 /Game/ConsolePL/bin
 /Game/ConsolePL/obj
-/Game/ConsolePL/GameData/GameSaves/
+/Game/ConsolePL/GameData/Saves
 /Game/DAL/bin
 /Game/DAL/obj
 /Game/NetworkLL/bin

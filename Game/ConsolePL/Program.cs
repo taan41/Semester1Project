@@ -60,7 +60,7 @@ namespace ConsolePL
                         OfflineMode();
                         break;
                     
-                    case 3:
+                    case 3: case null:
                         return false;
                 }
             }
@@ -85,7 +85,7 @@ namespace ConsolePL
                         LoadGame();
                         break;
                     
-                    default:
+                    case 2: case null:
                         return;
                 }
             }
@@ -120,7 +120,7 @@ namespace ConsolePL
                         ResetPasswordScreen();
                         break;
 
-                    default:
+                    case 3: case null:
                         ServerHandler.Close();
                         return;
                 }
@@ -160,7 +160,7 @@ namespace ConsolePL
                         ViewScore();
                         break;
 
-                    default:
+                    case 3: case null:
                         if (!ServerHandler.Logout(out string? error))
                             Popup(error);
                         return;
@@ -200,7 +200,7 @@ namespace ConsolePL
                         ViewScoresScreen(alltime, "TOP OF ALL TIME");
                         break;
 
-                    default:
+                    case 3: case null:
                         return;
                 }
             }
@@ -233,6 +233,8 @@ namespace ConsolePL
                     GameLoop(new(saves[(int) pickedSaveInd]));
                     return;
                 }
+                else
+                    return;
             }
             else
             {
@@ -262,7 +264,7 @@ namespace ConsolePL
                             StartNewRun(seed);
                         break;
                     
-                    default:
+                    case 2: case null:
                         return;
                 }
             }
@@ -447,15 +449,11 @@ namespace ConsolePL
 
         static bool HandleEvent(GameLoopHandler gameHandler, Event route)
         {
-            switch (route)
+            return route switch
             {
-                case FightEvent fightEvent:
-                    return HandleFightEvent(gameHandler, fightEvent);
-
-                default:
-                    HandleNonfightEvent(gameHandler, route);
-                    return true;
-            }
+                FightEvent fightEvent => HandleFightEvent(gameHandler, fightEvent),
+                _ => HandleNonfightEvent(gameHandler, route),
+            };
         }
 
         static bool HandleFightEvent(GameLoopHandler gameHandler, FightEvent fightEvent)
@@ -555,7 +553,7 @@ namespace ConsolePL
             return HandleRewards(gameHandler, fightEvent.Rewards);
         }
 
-        static void HandleNonfightEvent(GameLoopHandler gameHandler, Event route)
+        static bool HandleNonfightEvent(GameLoopHandler gameHandler, Event route)
         {
             switch (route)
             {
@@ -566,12 +564,12 @@ namespace ConsolePL
                 case TreasureEvent treasureEvent:
                     TreasureOpening(gameHandler.Progress);
                     if (!HandleRewards(gameHandler, treasureEvent.Treasures))
-                        return;
+                        return false;
                     break;
 
                 case RandomEvent randomEvent:
                     if (!HandleEvent(gameHandler, randomEvent.ChildEvent))
-                        return;
+                        return false;
                     break;
 
                 default:
@@ -584,6 +582,31 @@ namespace ConsolePL
                     }
                     break;
             }
+
+            return true;
+        }
+
+        static bool HandleRewards(GameLoopHandler gameHandler, List<Item> rewards)
+        {
+            while (rewards.Count > 0)
+            {
+                GenericGameScreen(gameHandler.Progress, gameHandler.Player);
+                PrintMainZone(rewards, "Rewards:");
+
+                int? pickedRewardInd = Picker.Component(rewards, CursorPos.MainZoneTop + 1);
+                if (pickedRewardInd == null)
+                    if (HandlePause(gameHandler))
+                        continue;
+                    else
+                        return false;
+
+                Item pickedReward = rewards[(int) pickedRewardInd];
+
+                gameHandler.Player.AddItem(pickedReward);
+                rewards.Remove(pickedReward);
+            }
+
+            return true;
         }
 
         static void HandleShop(GameLoopHandler gameHandler, ShopEvent shopEvent)
@@ -632,29 +655,6 @@ namespace ConsolePL
                         return;
                 }
             }
-        }
-
-        static bool HandleRewards(GameLoopHandler gameHandler, List<Item> rewards)
-        {
-            while (rewards.Count > 0)
-            {
-                GenericGameScreen(gameHandler.Progress, gameHandler.Player);
-                PrintMainZone(rewards, "Rewards:");
-
-                int? pickedRewardInd = Picker.Component(rewards, CursorPos.MainZoneTop + 1);
-                if (pickedRewardInd == null)
-                    if (HandlePause(gameHandler))
-                        continue;
-                    else
-                        return false;
-
-                Item pickedReward = rewards[(int) pickedRewardInd];
-
-                gameHandler.Player.AddItem(pickedReward);
-                rewards.Remove(pickedReward);
-            }
-
-            return true;
         }
 
         static void HandleShopBuy(GameLoopHandler gameHandler, ShopEvent shopEvent)

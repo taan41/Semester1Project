@@ -29,8 +29,8 @@
     "MonsterType": 1,
     "ATK": 15,
     "DEF": 0,
-    "MaxHP": 30,
-    "HP": 30,
+    "MaxHP": 100,
+    "HP": 100,
     "MaxMP": 1,
     "MP": 0,
     "Name": "Mother Slime"
