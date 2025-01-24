@@ -6,6 +6,7 @@ namespace DAL
     {
         public static class FolderNames
         {
+            public const string GameData = "GameData";
             public const string Saves = "Saves";
             public const string Assets = "Assets";
             public const string Configs = "Configs";
@@ -23,13 +24,27 @@ namespace DAL
             public const string DatabaseConfig = "DatabaseConfig";
         }
 
-        // public static readonly string DirPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.FullName, "GameData");
-        public static readonly string DirPath = Path.Combine(Directory.GetCurrentDirectory(), "GameData");
+        private static readonly string[] UnwantedPaths = ["ConsolePL", "bin", "obj", "Debug"];
+
+        public static readonly string DirPath = RemoveUnwantedParts(Directory.GetCurrentDirectory());
         
         private static readonly JsonSerializerOptions _toJsonOption = new()
         {
             WriteIndented = true
         };
+
+        private static string RemoveUnwantedParts(string path)
+        {
+            foreach (string unwanted in UnwantedPaths)
+            {
+                while (path.Contains(unwanted, StringComparison.OrdinalIgnoreCase))
+                {
+                    path = Path.GetDirectoryName(path)!;
+                }
+            }
+
+            return Path.Combine(path, FolderNames.GameData);
+        }
 
         public static void WriteJson(string folderName, string fileName, object obj)
         {
