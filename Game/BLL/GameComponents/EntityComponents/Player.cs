@@ -7,11 +7,11 @@ namespace BLL.GameComponents.EntityComponents
     {
         private static int MaxSkillCount => Config.PlayerMaxSkillCount;
 
-        public List<Equipment> Equipped { get; protected set; } = [];
-        public List<Equipment> EquipInventory { get; protected set; } = [];
-        public List<Skill> Skills { get; protected set; } = [];
-        public List<Skill> SkillInventory { get; protected set; } = [];
-        public Gold PlayerGold { get; protected set; } = new(0);
+        public List<Equipment> Equipped { get; set; } = [];
+        public List<Equipment> EquipInventory { get; set; } = [];
+        public List<Skill> Skills { get; set; } = [];
+        public List<Skill> SkillInventory { get; set; } = [];
+        public Gold PlayerGold { get; set; } = new(0);
 
         public Player() {}
 
@@ -23,38 +23,37 @@ namespace BLL.GameComponents.EntityComponents
         public static Player DefaultPlayer() 
             => new("Player", Config.PlayerDefaultATK, Config.PlayerDefaultDEF, Config.PlayerDefaultHP, Config.PlayerDefaultMP, Config.PlayerDefaultGold);
 
-        public void ChangeEquip(Equipment equipment)
+        public void ChangeEquip(Equipment equipToChange)
         {
             Equipment? oldEquipment = null;
 
             Equipped.ForEach(equip =>
             {
-                if (equip.EquipType == equipment.EquipType)
-                {
+                if (equip.EquipType == equipToChange.EquipType)
                     oldEquipment = equip;
-                    return;
-                }
             });
+            
+            ATK += equipToChange.BonusATKPoint * Config.EquipPtATKPercentage / 100;
+            DEF += equipToChange.BonusDEFPoint * Config.EquipPtDEFPercentage / 100;
+            MaxHP += equipToChange.BonusHPPoint * Config.EquipPtHPPercentage / 100;
+            HP += equipToChange.BonusHPPoint * Config.EquipPtHPPercentage / 100;
+            MaxMP += equipToChange.BonusMPPoint * Config.EquipPtMPPercentage / 100;
+            MP += equipToChange.BonusMPPoint * Config.EquipPtMPPercentage / 100;
 
-            base.ATK += equipment.BonusATKPoint * ComponentAbstract.Config.EquipATKPtPercentage / 100;
-            base.DEF += equipment.BonusDEFPoint * ComponentAbstract.Config.EquipDEFPtPercentage / 100;
-            base.MaxHP += equipment.BonusHPPoint * ComponentAbstract.Config.EquipHPPtPercentage / 100;
-            base.HP += equipment.BonusHPPoint * ComponentAbstract.Config.EquipHPPtPercentage / 100;
-            base.MaxMP += equipment.BonusMPPoint * ComponentAbstract.Config.EquipMPPtPercentage / 100;
-            base.MP += equipment.BonusMPPoint * ComponentAbstract.Config.EquipMPPtPercentage / 100;
-
-            EquipInventory.Remove(equipment);
+            Equipped.Add(equipToChange);
+            EquipInventory.Remove(equipToChange);
             
             if (oldEquipment != null)
             {
-                base.ATK -= oldEquipment.BonusATKPoint * ComponentAbstract.Config.EquipATKPtPercentage / 100;
-                base.DEF -= oldEquipment.BonusDEFPoint * ComponentAbstract.Config.EquipDEFPtPercentage / 100;
-                base.MaxHP -= oldEquipment.BonusHPPoint * ComponentAbstract.Config.EquipHPPtPercentage / 100;
-                int newHP = base.HP - oldEquipment.BonusHPPoint * ComponentAbstract.Config.EquipHPPtPercentage / 100;
+                ATK -= oldEquipment.BonusATKPoint * Config.EquipPtATKPercentage / 100;
+                DEF -= oldEquipment.BonusDEFPoint * Config.EquipPtDEFPercentage / 100;
+                MaxHP -= oldEquipment.BonusHPPoint * Config.EquipPtHPPercentage / 100;
+                int newHP = HP - oldEquipment.BonusHPPoint * Config.EquipPtHPPercentage / 100;
                 HP = newHP < 1 ? 1 : newHP;
-                base.MaxMP -= oldEquipment.BonusMPPoint * ComponentAbstract.Config.EquipMPPtPercentage / 100;
-                base.MP -= oldEquipment.BonusMPPoint * ComponentAbstract.Config.EquipMPPtPercentage / 100;
+                MaxMP -= oldEquipment.BonusMPPoint * Config.EquipPtMPPercentage / 100;
+                MP -= oldEquipment.BonusMPPoint * Config.EquipPtMPPercentage / 100;
                 
+                Equipped.Remove(oldEquipment);
                 EquipInventory.Add(oldEquipment);
             }
         }
@@ -66,7 +65,7 @@ namespace BLL.GameComponents.EntityComponents
             Skills.Insert(index, skillToChange);
             
             SkillInventory.Remove(skillToChange);
-            AddItem(removedSkill);
+            SkillInventory.Add(removedSkill);
         }
 
         public void AddItem<T>(T item) where T : Item
@@ -74,11 +73,11 @@ namespace BLL.GameComponents.EntityComponents
             switch (item)
             {
                 case Equipment equipment:
-                    AddItem(equipment);
+                    AddEquip(equipment);
                     break;
 
                 case Skill skill:
-                    AddItem(skill);
+                    AddSkill(skill);
                     break;
 
                 case Gold gold:
@@ -87,29 +86,30 @@ namespace BLL.GameComponents.EntityComponents
             }
         }
 
-        private void AddItem(Equipment equipment)
+        private void AddEquip(Equipment equipToAdd)
         {
             bool alreadyEquipped = false;
 
             Equipped.ForEach(equip =>
             {
-                if (equip.EquipType == equipment.EquipType)
+                if (equip.EquipType == equipToAdd.EquipType)
                 {
                     alreadyEquipped = true;
-                    return;
                 }
             });
 
             if (!alreadyEquipped)
-                Equipped.Add(equipment);
+            {
+                ChangeEquip(equipToAdd);
+            }
             else
             {
-                EquipInventory.Add(equipment);
+                EquipInventory.Add(equipToAdd);
                 EquipInventory.Sort(new EquipmentComparer());
             }
         }
 
-        private void AddItem(Skill skill)
+        private void AddSkill(Skill skill)
         {
             if (Skills.Count < MaxSkillCount)
                 Skills.Add(skill);
@@ -152,12 +152,12 @@ namespace BLL.GameComponents.EntityComponents
                 if (item is Equipment equip)
                 {
                     if (EquipInventory.Remove(equip))
-                        PlayerGold.Quantity += equip.Price * ComponentAbstract.Config.ItemSellPricePercentage / 100;
+                        PlayerGold.Quantity += equip.Price * Config.ItemPriceSellingPercentage / 100;
                 }
                 else if (item is Skill skill)
                 {
                     if (SkillInventory.Remove(skill))
-                        PlayerGold.Quantity += skill.Price * ComponentAbstract.Config.ItemSellPricePercentage / 100;
+                        PlayerGold.Quantity += skill.Price * Config.ItemPriceSellingPercentage / 100;
 
                 }
             }

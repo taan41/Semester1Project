@@ -155,17 +155,17 @@ namespace ConsolePL
             if (popupType == PopupType.Warning)
             {
                 WriteCenter(@"   .   ");
-                WriteCenter(@"  ╱ ╲  ");
-                WriteCenter(@" ╱ ┃ ╲ ");
-                WriteCenter(@"╱  •  ╲");
+                WriteCenter(@"  / \  ");
+                WriteCenter(@" / ┃ \ ");
+                WriteCenter(@"/  •  \");
                 WriteCenter(@"‾‾‾‾‾‾‾");
             }
             else if (popupType == PopupType.Success)
             {
                 WriteCenter(@"┌            ┐");
-                WriteCenter(@"│        ╱   │");
-                WriteCenter(@"│    ╲  ╱    │");
-                WriteCenter(@"│     ╲╱     │");
+                WriteCenter(@"│        /   │");
+                WriteCenter(@"│    \  /    │");
+                WriteCenter(@"│     \/     │");
                 WriteCenter(@"└            ┘");
             }
 
@@ -692,7 +692,7 @@ namespace ConsolePL
             DrawLine();
         }
 
-        public static void PrintMainZone(List<string> options, string? msg = null)
+        public static void PrintMainZone(List<string> options, string? msg = null, int optionCursorLeft = 1)
         {
             CursorTop = CursorPos.MainZoneTop;
             for (int i = 0; i < UIConstants.MainZoneHeight; i++)
@@ -701,7 +701,11 @@ namespace ConsolePL
             CursorTop = CursorPos.MainZoneTop;
             if (msg != null)
                 WriteLine($" -- {msg}");
-            options.ForEach(option => WriteLine($" {option}"));
+            options.ForEach(option =>
+            {
+                CursorLeft = optionCursorLeft;
+                WriteLine(option);
+            });
         }
 
         public static void PrintMainZone<T>(List<T> components, string? msg = null) where T : ComponentAbstract
@@ -713,10 +717,10 @@ namespace ConsolePL
             CursorTop = CursorPos.MainZoneTop;
             if (msg != null)
                 WriteLine($" -- {msg}");
-            components.ForEach(PrintComponent);
+            components.ForEach(Print);
         }
 
-        public static void PrintSubZone(List<string> options, string? msg = null)
+        public static void PrintSubZone(List<string> options, string? msg = null, int optionCursorLeft = 1)
         {
             CursorTop = CursorPos.SubZoneTop;
             for (int i = 0; i < UIConstants.SubZoneHeight; i++)
@@ -725,7 +729,11 @@ namespace ConsolePL
             CursorTop = CursorPos.SubZoneTop;
             if (msg != null)
                 WriteLine($" -- {msg}");
-            options.ForEach(option => WriteLine($" {option}"));
+            options.ForEach(option =>
+            {
+                CursorLeft = optionCursorLeft;
+                WriteLine(option);
+            });
         }
 
         public static void PrintSubZone<T>(List<T> components, string? msg = null) where T : ComponentAbstract
@@ -737,7 +745,7 @@ namespace ConsolePL
             CursorTop = CursorPos.SubZoneTop;
             if (msg != null)
                 WriteLine($" -- {msg}");
-            components.ForEach(PrintComponent);
+            components.ForEach(Print);
         }
 
         public static void ShopBanner()

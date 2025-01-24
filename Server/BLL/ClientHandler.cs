@@ -37,7 +37,7 @@ namespace BLL
         {
             try
             {
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[2048];
                 Memory<byte> memory = new(buffer, 0, buffer.Length);
                 int bytesRead;
 

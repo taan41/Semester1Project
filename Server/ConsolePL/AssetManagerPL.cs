@@ -53,20 +53,24 @@ class AssetManagerPL
         }
     }
 
-    private async Task ManageEquip()
+    private static async Task ManageEquip()
     {
         while (true)
         {
             Clear();
             DrawHeader(Header);
             WriteLine(" -- Equipments");
-            Write(" - Stat Points Per Rarity:\n  ");
-            for (int i = 0; i < Enum.GetValues(typeof(Item.Rarity)).Length; i++)
+            WriteLine(" - Stat Points Per Rarity:");
+            for (int i = 0; i < Enum.GetValues(typeof(Equipment.Type)).Length; i++)
             {
-                Write($" {(Item.Rarity) i}: {AssetConfig.EquipPtPerRarity[i]} |");
+                WriteLine($" {(Equipment.Type) i}:");
+                for (int j = 0; j < Enum.GetValues(typeof(Item.Rarity)).Length; j++)
+                {
+                    Write($" {(Item.Rarity) j}: {AssetConfig.EquipPtPerRarityPerType[i][j]} |");
+                }
+                WriteLine();
             }
-            WriteLine();
-            WriteLine($" - 1 Stat Point = {GameConfig.EquipATKPtPercentage / 100} ATK = {GameConfig.EquipDEFPtPercentage / 100} DEF = {GameConfig.EquipHPPtPercentage / 100} HP = {GameConfig.EquipMPPtPercentage / 100} MP");
+            WriteLine($" - 1 Stat Point -> {GameConfig.EquipPtATKPercentage / 100} ATK | {GameConfig.EquipPtDEFPercentage / 100} DEF | {GameConfig.EquipPtHPPercentage / 100} HP | {GameConfig.EquipPtMPPercentage / 100} MP");
             DrawLine('-');
             WriteLine(" 1. Create");
             WriteLine(" 2. Update");
@@ -124,8 +128,17 @@ class AssetManagerPL
 
                             DrawLine('-');
                             WriteLine(" Equipment Info:");
-                            WriteLine(" ID  | Name                      | Rarity     | Type   | ATK | DEF | HP | MP | Price");
-                            WriteLine($" {equipToUpdate.ID, -3} | {equipToUpdate.Name, -25} | {equipToUpdate.ItemRarity, -10} | {equipToUpdate.EquipType, -6} | {equipToUpdate.BonusATKPoint, -3} | {equipToUpdate.BonusDEFPoint, -3} | {equipToUpdate.BonusHPPoint, -2} | {equipToUpdate.BonusMPPoint, -2} | {equipToUpdate.Price} G");
+                            WriteLine($" 1 stat point -> {GameConfig.EquipPtATKPercentage / 100} ATK | {GameConfig.EquipPtDEFPercentage / 100} DEF | {GameConfig.EquipPtHPPercentage / 100} HP | {GameConfig.EquipPtMPPercentage / 100} MP");
+                            WriteLine(" ID  | Name                      | Rarity    | Type   | ATK | DEF | HP | MP | Price");
+                            Write($" {equipToUpdate.ID, -3} |");
+                            Write($" {equipToUpdate.Name, -25} |");
+                            Write($" {equipToUpdate.ItemRarity, -9} |");
+                            Write($" {equipToUpdate.EquipType, -6} |");
+                            Write($" {equipToUpdate.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100, -3} |");
+                            Write($" {equipToUpdate.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100, -3} |");
+                            Write($" {equipToUpdate.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100, -2} |");
+                            Write($" {equipToUpdate.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100, -2} |");
+                            WriteLine($" {equipToUpdate.Price} G");
                             DrawLine('-');
 
                             Equipment? equipToReplace = EnterEquipInfo();
@@ -168,8 +181,17 @@ class AssetManagerPL
 
                             DrawLine('-');
                             WriteLine(" Equipment Info:");
-                            WriteLine(" ID  | Name                      | Rarity     | Type   | ATK | DEF | HP | MP | Price");
-                            WriteLine($" {equipToDelete.ID, -3} | {equipToDelete.Name, -25} | {equipToDelete.ItemRarity, -10} | {equipToDelete.EquipType, -6} | {equipToDelete.BonusATKPoint, -3} | {equipToDelete.BonusDEFPoint, -3} | {equipToDelete.BonusHPPoint, -2} | {equipToDelete.BonusMPPoint, -2} | {equipToDelete.Price} G");
+                            WriteLine($" 1 stat point -> {GameConfig.EquipPtATKPercentage / 100} ATK | {GameConfig.EquipPtDEFPercentage / 100} DEF | {GameConfig.EquipPtHPPercentage / 100} HP | {GameConfig.EquipPtMPPercentage / 100} MP");
+                            WriteLine(" ID  | Name                      | Rarity    | Type   | ATK | DEF | HP | MP | Price");
+                            Write($" {equipToDelete.ID, -3} |");
+                            Write($" {equipToDelete.Name, -25} |");
+                            Write($" {equipToDelete.ItemRarity, -9} |");
+                            Write($" {equipToDelete.EquipType, -6} |");
+                            Write($" {equipToDelete.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100, -3} |");
+                            Write($" {equipToDelete.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100, -3} |");
+                            Write($" {equipToDelete.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100, -2} |");
+                            Write($" {equipToDelete.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100, -2} |");
+                            WriteLine($" {equipToDelete.Price} G");
                             DrawLine('-');
 
                             Write(" Are you sure you want to delete this equipment? (Y/N): ");
@@ -201,6 +223,7 @@ class AssetManagerPL
 
                     case "4": // view list
                         List<Equipment> equipmentList = [.. Manager.Equipments.Values];
+                        equipmentList.Sort((a, b) => a.ID - b.ID);
                         int maxPage = equipmentList.Count / 15;
                         int page = 0;
                         bool exit = false;
@@ -212,11 +235,20 @@ class AssetManagerPL
                             WriteLine($" -- Equipment List ({page + 1}/{maxPage + 1})");
                             WriteLine(" Arrow Keys To Turn Page, 'ESC' To Exit");
                             DrawLine('-');
-                            WriteLine(" ID  | Name                      | Rarity     | Type   | ATK | DEF | HP | MP | Price");
+                            WriteLine($" 1 stat point -> {GameConfig.EquipPtATKPercentage / 100} ATK | {GameConfig.EquipPtDEFPercentage / 100} DEF | {GameConfig.EquipPtHPPercentage / 100} HP | {GameConfig.EquipPtMPPercentage / 100} MP");
+                            WriteLine(" ID  | Name                      | Rarity    | Type   | ATK | DEF | HP | MP | Price");
                             DrawLine('-');
                             foreach (Equipment equip in equipmentList.Skip(page * 15).Take(15))
                             {
-                                WriteLine($" {equip.ID, -3} | {equip.Name, -25} | {equip.ItemRarity, -10} | {equip.EquipType, -6} | {equip.BonusATKPoint, -3} | {equip.BonusDEFPoint, -3} | {equip.BonusHPPoint, -2} | {equip.BonusMPPoint, -2} | {equip.Price} G");
+                                Write($" {equip.ID, -3} |");
+                                Write($" {equip.Name, -25} |");
+                                Write($" {equip.ItemRarity, -9} |");
+                                Write($" {equip.EquipType, -6} |");
+                                Write($" {equip.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100, -3} |");
+                                Write($" {equip.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100, -3} |");
+                                Write($" {equip.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100, -2} |");
+                                Write($" {equip.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100, -2} |");
+                                WriteLine($" {equip.Price} G");
                             }
                             DrawLine('=');
 
@@ -247,48 +279,52 @@ class AssetManagerPL
                         WriteLine(" -- Update Config");
                         DrawLine('-');
 
-                        int[] newPtPerRarity = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
+                        int[][] newPtPerRarityPerType = new int[Enum.GetValues(typeof(Equipment.Type)).Length][];
                         WriteLine(" - Stat points per rarity:");
 
-                        for (int i = 0; i < Enum.GetValues(typeof(Item.Rarity)).Length; i++)
+                        for (int i = 0; i < Enum.GetValues(typeof(Equipment.Type)).Length; i++)
                         {
-                            Write($" {(Item.Rarity) i} (old: {AssetConfig.EquipPtPerRarity[i]}): ");
-                            intInput = EnterInt();
-                            if (intInput == null) break;
-                            newPtPerRarity[i] = intInput.Value;
+                            for (int j = 0; i < Enum.GetValues(typeof(Item.Rarity)).Length; j++)
+                            {
+                                newPtPerRarityPerType[i] = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
+                                Write($" {(Item.Rarity) j} {(Equipment.Type) i} (old: {AssetConfig.EquipPtPerRarityPerType[i][j]}): ");
+                                intInput = EnterInt();
+                                if (intInput == null) break;
+                                newPtPerRarityPerType[i][j] = intInput.Value;
+                            }
                         }
                         if (intInput == null) continue;
 
                         int[] newPtPercentage = new int[4];
                         WriteLine(" - Stat point percentage (%) (100% -> 1 stat per 1 point):");
 
-                        Write($" ATK: (old: {GameConfig.EquipATKPtPercentage}): ");
+                        Write($" ATK: (old: {GameConfig.EquipPtATKPercentage}): ");
                         intInput = EnterInt();
                         if (intInput == null) continue;
                         newPtPercentage[0] = intInput.Value;
 
-                        Write($" DEF: (old: {GameConfig.EquipDEFPtPercentage}): ");
+                        Write($" DEF: (old: {GameConfig.EquipPtDEFPercentage}): ");
                         intInput = EnterInt();
                         if (intInput == null) continue;
                         newPtPercentage[1] = intInput.Value;
 
-                        Write($" HP: (old: {GameConfig.EquipHPPtPercentage}): ");
+                        Write($" HP: (old: {GameConfig.EquipPtHPPercentage}): ");
                         intInput = EnterInt();
                         if (intInput == null) continue;
                         newPtPercentage[2] = intInput.Value;
 
-                        Write($" MP: (old: {GameConfig.EquipMPPtPercentage}): ");
+                        Write($" MP: (old: {GameConfig.EquipPtMPPercentage}): ");
                         intInput = EnterInt();
                         if (intInput == null) continue;
                         newPtPercentage[3] = intInput.Value;
 
-                        AssetConfig.EquipPtPerRarity = newPtPerRarity;
+                        AssetConfig.EquipPtPerRarityPerType = newPtPerRarityPerType;
                         await AssetConfig.Save();
 
-                        GameConfig.EquipATKPtPercentage = newPtPercentage[0];
-                        GameConfig.EquipDEFPtPercentage = newPtPercentage[1];
-                        GameConfig.EquipHPPtPercentage = newPtPercentage[2];
-                        GameConfig.EquipMPPtPercentage = newPtPercentage[3];
+                        GameConfig.EquipPtATKPercentage = newPtPercentage[0];
+                        GameConfig.EquipPtDEFPercentage = newPtPercentage[1];
+                        GameConfig.EquipPtHPPercentage = newPtPercentage[2];
+                        GameConfig.EquipPtMPPercentage = newPtPercentage[3];
                         await GameConfig.Save();
 
                         await ConfigManager.Instance.LoadConfig();
@@ -340,37 +376,33 @@ class AssetManagerPL
         if (rarity == null)
             return null;
 
-        int point = AssetConfig.EquipPtPerRarity[(int) rarity];
+        int point = AssetConfig.EquipPtPerRarityPerType[(int) type][(int) rarity];
 
-        WriteLine($" - Stat Point Left: {point}");
-        Write($" Atk Point (1 Pt = {GameConfig.EquipATKPtPercentage / 100} ATK): ");
+        Write($" Atk Point (1 Pt = {GameConfig.EquipPtATKPercentage / 100} ATK) ({point} Pt Left): ");
         int? atkPt = EnterInt();
         if (atkPt == null)
             return null;
         point -= atkPt.Value;
 
-        WriteLine($" - Stat Point Left: {point}");
-        Write($" DEF Point (1 Pt = {GameConfig.EquipDEFPtPercentage / 100} DEF): ");
+        Write($" DEF Point (1 Pt = {GameConfig.EquipPtDEFPercentage / 100} DEF) ({point} Pt Left): ");
         int? defPt = EnterInt();
         if (defPt == null)
             return null;
         point -= defPt.Value;
 
-        WriteLine($" - Stat Point Left: {point}");
-        Write($" HP Point (1 Pt = {GameConfig.EquipHPPtPercentage / 100} HP): ");
+        Write($" HP Point (1 Pt = {GameConfig.EquipPtHPPercentage / 100} HP) ({point} Pt Left): ");
         int? hpPt = EnterInt();
         if (hpPt == null)
             return null;
         point -= hpPt.Value;
 
-        WriteLine($" - Stat Point Left: {point}");
-        Write($" MP Point (1 Pt = {GameConfig.EquipMPPtPercentage / 100} MP): ");
+        Write($" MP Point (1 Pt = {GameConfig.EquipPtMPPercentage / 100} MP) ({point} Pt Left): ");
         int? mpPt = EnterInt();
         if (mpPt == null)
             return null;
         point -= mpPt.Value;
 
-        Write(" Price (default -1 for auto-calc): ");
+        Write(" Price (default (-1) for auto-calc): ");
         int? price = EnterInt(-1);
         if (price == null)
             return null;
@@ -388,7 +420,7 @@ class AssetManagerPL
         };
     }
 
-    private async Task ManageSkill()
+    private static async Task ManageSkill()
     {
         while (true)
         {
@@ -402,8 +434,8 @@ class AssetManagerPL
             }
             WriteLine();
             Write(" - Skill Type Damage Multiplier:\n  ");
-            WriteLine($" Single: {GameConfig.SkillSinglePercentage}% | Random: {GameConfig.SkillRandomPercentage}% | All: {GameConfig.SkillAllPercentage}%");
-            WriteLine($" - 1 MP = {(float) GameConfig.SkillDamagePtPercentage / 100:F1} Damage = {(float) GameConfig.SkillHealPtPercentage / 100:F1} Heal");
+            WriteLine($" Single: {GameConfig.SkillTypeSinglePercentage}% | Random: {GameConfig.SkillTypeRandomPercentage}% | All: {GameConfig.SkillTypeAllPercentage}%");
+            WriteLine($" - 1 MP -> {GameConfig.SkillPtDamagePercentage / 100} Damage | {GameConfig.SkillPtHealPercentage / 100} Heal");
             DrawLine('-');
             WriteLine(" 1. Create");
             WriteLine(" 2. Update");
@@ -461,8 +493,16 @@ class AssetManagerPL
 
                             DrawLine('-');
                             WriteLine(" Skill Info:");
-                            WriteLine(" ID  | Name                      | Rarity     | Type   | MP | Dmg | Heal | Price");
-                            WriteLine($" {skillToUpdate.ID, -3} | {skillToUpdate.Name, -25} | {skillToUpdate.ItemRarity, -10} | {skillToUpdate.SkillType, -6} | {skillToUpdate.MPCost, -2} | {skillToUpdate.DamagePoint, -3} | {skillToUpdate.HealPoint, -4} | {skillToUpdate.Price} G");
+                            WriteLine($" 1 stat point -> {GameConfig.SkillPtDamagePercentage / 100} Dmg | {GameConfig.SkillPtHealPercentage / 100} Heal");
+                            WriteLine(" ID  | Name                      | Rarity    | Type   | MP | Dmg | Heal | Price");
+                            Write($" {skillToUpdate.ID, -3} |");
+                            Write($" {skillToUpdate.Name, -25} |");
+                            Write($" {skillToUpdate.ItemRarity, -9} |");
+                            Write($" {skillToUpdate.SkillType, -6} |");
+                            Write($" {skillToUpdate.MPCost, -2} |");
+                            Write($" {skillToUpdate.DamagePoint, -3} |");
+                            Write($" {skillToUpdate.HealPoint, -4} |");
+                            WriteLine($" {skillToUpdate.Price} G");
                             DrawLine('-');
 
                             Skill? skillToReplace = EnterSkillInfo();
@@ -505,8 +545,16 @@ class AssetManagerPL
 
                             DrawLine('-');
                             WriteLine(" Skill Info:");
-                            WriteLine(" ID  | Name                      | Rarity     | Type   | MP | Dmg | Heal | Price");
-                            WriteLine($" {skillToDelete.ID, -3} | {skillToDelete.Name, -25} | {skillToDelete.ItemRarity, -10} | {skillToDelete.SkillType, -6} | {skillToDelete.MPCost, -2} | {skillToDelete.DamagePoint, -3} | {skillToDelete.HealPoint, -4} | {skillToDelete.Price} G");
+                            WriteLine($" 1 stat point -> {GameConfig.SkillPtDamagePercentage / 100} Dmg | {GameConfig.SkillPtHealPercentage / 100} Heal");
+                            WriteLine(" ID  | Name                      | Rarity    | Type   | MP | Dmg | Heal | Price");
+                            Write($" {skillToDelete.ID, -3} |");
+                            Write($" {skillToDelete.Name, -25} |");
+                            Write($" {skillToDelete.ItemRarity, -9} |");
+                            Write($" {skillToDelete.SkillType, -6} |");
+                            Write($" {skillToDelete.MPCost, -2} |");
+                            Write($" {skillToDelete.DamagePoint, -3} |");
+                            Write($" {skillToDelete.HealPoint, -4} |");
+                            WriteLine($" {skillToDelete.Price} G");
                             DrawLine('-');
 
                             Write(" Are you sure you want to delete this skill? (Y/N): ");
@@ -535,6 +583,7 @@ class AssetManagerPL
 
                     case "4":
                         List<Skill> skillList = [.. Manager.Skills.Values];
+                        skillList.Sort((a, b) => a.ID - b.ID);
                         int maxPage = skillList.Count / 15;
                         int page = 0;
                         bool exit = false;
@@ -546,11 +595,19 @@ class AssetManagerPL
                             WriteLine($" -- Skill List ({page + 1}/{maxPage + 1})");
                             WriteLine(" Arrow Keys To Turn Page, 'ESC' To Exit");
                             DrawLine('-');
-                            WriteLine(" ID  | Name                      | Rarity     | Type   | MP | Dmg | Heal | Price");
+                            WriteLine($" 1 stat point -> {GameConfig.SkillPtDamagePercentage / 100} Dmg | {GameConfig.SkillPtHealPercentage / 100} Heal");
+                            WriteLine(" ID  | Name                      | Rarity    | Type   | MP | Dmg | Heal | Price");
                             DrawLine('-');
                             foreach (Skill skill in skillList.Skip(page * 15).Take(15))
                             {
-                                WriteLine($" {skill.ID, -3} | {skill.Name, -25} | {skill.ItemRarity, -10} | {skill.SkillType, -6} | {skill.MPCost, -2} | {skill.DamagePoint, -3} | {skill.HealPoint, -4} | {skill.Price} G");
+                                Write($" {skill.ID, -3} |");
+                                Write($" {skill.Name, -25} |");
+                                Write($" {skill.ItemRarity, -9} |");
+                                Write($" {skill.SkillType, -6} |");
+                                Write($" {skill.MPCost, -2} |");
+                                Write($" {skill.DamagePoint, -3} |");
+                                Write($" {skill.HealPoint, -4} |");
+                                WriteLine($" {skill.Price} G");
                             }
                             DrawLine('=');
 
@@ -596,12 +653,12 @@ class AssetManagerPL
                         int[] newStatPtPercentage = new int[2];
                         WriteLine(" - Stat point percentage (%) (100% -> 1 stat per point):");
 
-                        Write($" Damage (old: {GameConfig.SkillDamagePtPercentage}): ");
+                        Write($" Damage (old: {GameConfig.SkillPtDamagePercentage}): ");
                         intInput = EnterInt();
                         if (intInput == null) continue;
                         newStatPtPercentage[0] = intInput.Value;
 
-                        Write($" Heal (old: {GameConfig.SkillHealPtPercentage}): ");
+                        Write($" Heal (old: {GameConfig.SkillPtHealPercentage}): ");
                         intInput = EnterInt();
                         if (intInput == null) continue;
                         newStatPtPercentage[1] = intInput.Value;
@@ -609,17 +666,17 @@ class AssetManagerPL
                         int[] newTypeDmgMultiplier = new int[Enum.GetValues(typeof(Skill.Type)).Length];
                         WriteLine(" - Skill type damage multiplier (%):");
 
-                        Write($" Single (old: {GameConfig.SkillSinglePercentage}): ");
+                        Write($" Single (old: {GameConfig.SkillTypeSinglePercentage}): ");
                         intInput = EnterInt();
                         if (intInput == null) continue;
                         newTypeDmgMultiplier[0] = intInput.Value;
 
-                        Write($" Random (old: {GameConfig.SkillRandomPercentage}): ");
+                        Write($" Random (old: {GameConfig.SkillTypeRandomPercentage}): ");
                         intInput = EnterInt();
                         if (intInput == null) continue;
                         newTypeDmgMultiplier[1] = intInput.Value;
 
-                        Write($" All (old: {GameConfig.SkillAllPercentage}): ");
+                        Write($" All (old: {GameConfig.SkillTypeAllPercentage}): ");
                         intInput = EnterInt();
                         if (intInput == null) continue;
                         newTypeDmgMultiplier[2] = intInput.Value;
@@ -627,12 +684,12 @@ class AssetManagerPL
                         AssetConfig.SkillPtPerMPPerRarity = newPtPerMPPerRarity;
                         await AssetConfig.Save();
 
-                        GameConfig.SkillDamagePtPercentage = newStatPtPercentage[0];
-                        GameConfig.SkillHealPtPercentage = newStatPtPercentage[1];
+                        GameConfig.SkillPtDamagePercentage = newStatPtPercentage[0];
+                        GameConfig.SkillPtHealPercentage = newStatPtPercentage[1];
 
-                        GameConfig.SkillSinglePercentage = newTypeDmgMultiplier[0];
-                        GameConfig.SkillRandomPercentage = newTypeDmgMultiplier[1];
-                        GameConfig.SkillAllPercentage = newTypeDmgMultiplier[2];
+                        GameConfig.SkillTypeSinglePercentage = newTypeDmgMultiplier[0];
+                        GameConfig.SkillTypeRandomPercentage = newTypeDmgMultiplier[1];
+                        GameConfig.SkillTypeAllPercentage = newTypeDmgMultiplier[2];
                         await GameConfig.Save();
 
                         await ConfigManager.Instance.LoadConfig();
@@ -683,19 +740,17 @@ class AssetManagerPL
         if (rarity == null)
             return null;
 
-        Write(" MP Cost: ");
+        Write(" MP Cost (1 MP Cost = 1 Stat Pt): ");
         int? mpCost = EnterInt();
         if (mpCost == null)
             return null;
 
-        WriteLine($" MP Point Left: {mpCost}");
-        Write($" Damage Point (1 Pt = {(float) GameConfig.SkillDamagePtPercentage / 100:F1} Dmg): ");
+        Write($" Damage Point (1 Pt = {GameConfig.SkillPtDamagePercentage / 100} Dmg) ({mpCost} Pt Left): ");
         int? dmgPt = EnterInt();
         if (dmgPt == null)
             return null;
 
-        WriteLine($" MP Point Left: {mpCost - dmgPt.Value}");
-        Write($" Heal Point (1 Pt = {(float) GameConfig.SkillHealPtPercentage / 100:F1} Heal): ");
+        Write($" Heal Point (1 Pt = {GameConfig.SkillPtHealPercentage / 100} Heal) ({mpCost - dmgPt.Value} Pt Left): ");
         int? healPt = EnterInt();
         if (healPt == null)
             return null;
@@ -720,7 +775,7 @@ class AssetManagerPL
         };
     }
 
-    private async Task ManageMonster()
+    private static async Task ManageMonster()
     {
         while (true)
         {
@@ -782,6 +837,7 @@ class AssetManagerPL
 
                             DrawLine('-');
                             WriteLine(" Monster Info:");
+                            WriteLine(" (Monster's ATK and HP will scale with progress)");
                             WriteLine(" ID   | Name                      | Floor | Type   | ATK | DEF | HP");
                             WriteLine($" {monsterToUpdate.ID, -4} | {monsterToUpdate.Name, -25} | {monsterToUpdate.Floor, -5} | {monsterToUpdate.MonsterType, -6} | {monsterToUpdate.ATK, -3} | {monsterToUpdate.DEF, -3} | {monsterToUpdate.HP, -2}");
                             DrawLine('-');
@@ -826,6 +882,7 @@ class AssetManagerPL
 
                             DrawLine('-');
                             WriteLine(" Monster Info:");
+                            WriteLine(" (Monster's ATK and HP will scale with progress)");
                             WriteLine(" ID   | Name                      | Floor | Type   | ATK | DEF | HP");
                             WriteLine($" {monsterToDelete.ID, -4} | {monsterToDelete.Name, -25} | {monsterToDelete.Floor, -5} | {monsterToDelete.MonsterType, -6} | {monsterToDelete.ATK, -3} | {monsterToDelete.DEF, -3} | {monsterToDelete.HP, -2}");
                             DrawLine('-');
@@ -858,6 +915,7 @@ class AssetManagerPL
 
                     case "4":
                         List<Monster> monsterList = [.. Manager.Monsters.Values];
+                        monsterList.Sort((a, b) => a.ID - b.ID);
                         int maxPage = monsterList.Count / 15;
                         int page = 0;
                         bool exit = false;
@@ -869,6 +927,7 @@ class AssetManagerPL
                             WriteLine($" -- Monster List ({page + 1}/{maxPage + 1})");
                             WriteLine(" Arrow Keys To Turn Page, 'ESC' To Exit");
                             DrawLine('-');
+                            WriteLine(" (Monster's ATK and HP will scale with progress)");
                             WriteLine(" ID   | Name                      | Floor | Type   | ATK | DEF | HP");
                             DrawLine('-');
                             foreach (Monster monster in monsterList.Skip(page * 15).Take(15))

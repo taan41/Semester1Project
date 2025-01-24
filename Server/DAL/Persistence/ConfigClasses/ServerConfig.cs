@@ -13,6 +13,6 @@ namespace DAL.Persistence.ConfigClasses
         public ServerConfig() {}
 
         public async Task<bool> Save()
-            => (await ConfigDB.Add(DBManager.Configs.ServerConfig, Utitlities.ToJson(this))).success;
+            => (await ConfigDB.Add(DBManager.ConfigNames.ServerConfig, Utitlities.ToJson(this))).success;
     }
 }

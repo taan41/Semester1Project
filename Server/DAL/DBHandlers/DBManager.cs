@@ -17,7 +17,7 @@ namespace DAL.DBHandlers
             public const string Configs = "Configs";
         }
 
-        public static class Configs
+        public static class ConfigNames
         {
             public const string ServerConfig = "ServerConfig";
             public const string GameConfig = "GameConfig";

@@ -1,0 +1,73 @@
+{
+  "SaveTime": "2025-01-24T05:09:52.4292056+07:00",
+  "RunData": {
+    "Seed": 288804416,
+    "Player": {
+      "Equipped": [
+        {
+          "EquipType": 0,
+          "BonusATKPoint": 1,
+          "BonusDEFPoint": 0,
+          "BonusHPPoint": 0,
+          "BonusMPPoint": 1,
+          "ID": 3,
+          "ItemRarity": 0,
+          "Price": 30,
+          "Name": "Starter Staff"
+        }
+      ],
+      "EquipInventory": [
+        {
+          "EquipType": 0,
+          "BonusATKPoint": 2,
+          "BonusDEFPoint": 0,
+          "BonusHPPoint": 0,
+          "BonusMPPoint": 0,
+          "ID": 2,
+          "ItemRarity": 0,
+          "Price": 30,
+          "Name": "Starter Bow"
+        }
+      ],
+      "Skills": [
+        {
+          "SkillType": 0,
+          "DamagePoint": 0,
+          "HealPoint": 5,
+          "MPCost": 5,
+          "ID": 1,
+          "ItemRarity": 0,
+          "Price": 10,
+          "Name": "Bandage"
+        },
+        {
+          "SkillType": 2,
+          "DamagePoint": 5,
+          "HealPoint": 0,
+          "MPCost": 5,
+          "ID": 3,
+          "ItemRarity": 0,
+          "Price": 10,
+          "Name": "Careless Slash"
+        }
+      ],
+      "SkillInventory": [],
+      "PlayerGold": {
+        "Quantity": 571
+      },
+      "ATK": 5,
+      "DEF": 0,
+      "MaxHP": 25,
+      "HP": 23,
+      "MaxMP": 14,
+      "MP": 13,
+      "Name": "Player"
+    },
+    "Progress": {
+      "Floor": 1,
+      "Room": 6
+    },
+    "SavedTime": "00:01:30.2588044"
+  },
+  "Name": "AutoSave"
+}

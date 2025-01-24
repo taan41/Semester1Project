@@ -6,8 +6,8 @@ namespace BLL.GameComponents.Others
     [Serializable]
     public class GameSave : ComponentAbstract
     {
-        public DateTime SaveTime { get; protected set; } = DateTime.Now;
-        public RunData RunData { get; protected set; } = new();
+        public DateTime SaveTime { get; set; } = DateTime.Now;
+        public RunData RunData { get; set; } = new();
 
         public GameSave() {}
 

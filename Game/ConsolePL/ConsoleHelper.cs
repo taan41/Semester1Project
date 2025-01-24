@@ -58,11 +58,11 @@ namespace ConsolePL
             WriteLine(str);
         }
 
-        public static void DrawEmptyLine()
-            => DrawLine(' ');
+        public static void DrawEmptyLine(int length = 0)
+            => DrawLine(' ', length);
 
-        public static void DrawLine(char lineChar = '-')
-            => WriteLine(new string(lineChar, Math.Min(UIWidth, WindowWidth - CursorLeft - 1)));
+        public static void DrawLine(char lineChar = '-', int length = 0)
+            => WriteLine(new string(lineChar, length != 0 ? length : Math.Min(UIWidth, WindowWidth - CursorLeft - 1)));
 
         public static void DrawBar(int currentValue, int maxValue, bool includeValue, int barLength, ConsoleColor color)
         {
@@ -180,13 +180,36 @@ namespace ConsolePL
 
         public static class Picker
         {
-            public static int? Component<T>(List<T> components, int startCursorTop = 0, int startCursorLeft = 0, int zoneHeight = -1, bool exitUpwards = false, bool exitDownwards = false) where T : ComponentAbstract
+            private enum ControlKey
+            {
+                None, Up, Down, Confirm, Cancel
+            }
+
+            private static ControlKey GetCtrlKey(ConsoleKey key)
+            {
+                return key switch
+                {
+                    ConsoleKey.UpArrow or ConsoleKey.W
+                        => ControlKey.Up,
+                    ConsoleKey.DownArrow or ConsoleKey.S
+                        => ControlKey.Down,
+                    ConsoleKey.Enter or ConsoleKey.RightArrow or ConsoleKey.Spacebar or ConsoleKey.D
+                        => ControlKey.Confirm,
+                    ConsoleKey.Escape or ConsoleKey.LeftArrow or ConsoleKey.A
+                        => ControlKey.Cancel,
+                    _ => ControlKey.None,
+                };
+            }
+
+            public static int? Component<T>(List<T> components, int startCursorTop = 0, int startCursorLeft = 0, int zoneHeight = -1) where T : ComponentAbstract
             {
                 if (components.Count == 0)
                 {
                     while (true)
-                        if (ReadKey(true).Key == ConsoleKey.Escape)
+                    {
+                        if (GetCtrlKey(ReadKey(true).Key) == ControlKey.Cancel)
                             return null;
+                    }
                 }
 
                 if (zoneHeight == -1)
@@ -197,133 +220,95 @@ namespace ConsolePL
                 int stopIndex = Math.Min(components.Count, zoneHeight);
                 int indexCursorTop = startCursorTop;
                 int? resultIndex;
-
-                lock (ConsoleLock)
-                {
-                    CursorTop = startCursorTop;
-                    for (int i = startIndex; i < stopIndex; i++)
-                    {
-                        CursorLeft = startCursorLeft;
-
-                        if (startIndex > 0 && i == startIndex)
-                        {
-                            Write("▲".PadLeft(NameLen + 2));
-                            continue;
-                        }
-                        else if (stopIndex < components.Count && i == stopIndex - 1)
-                        {
-                            Write("▼".PadLeft(NameLen + 2));
-                            continue;
-                        }
-                        else if (i == index)
-                        {
-                            indexCursorTop = CursorTop;
-                            Write(" ►");
-                        }
-
-                        PrintComponent(components[i]);
-                    }
-                }
+                bool refreshScreen = true;
 
                 while (true)
                 {
-                    switch (ReadKey(true).Key)
+                    if (refreshScreen)
                     {
-                        case ConsoleKey.UpArrow:
+                        lock (ConsoleLock)
+                        {
+                            CursorTop = startCursorTop;
+                            for (int i = startIndex; i < stopIndex; i++)
+                            {
+                                CursorLeft = startCursorLeft;
+
+                                if (startIndex > 0 && i == startIndex)
+                                {
+                                    Write("▲".PadLeft(NameLen + 2));
+                                    continue;
+                                }
+                                else if (stopIndex < components.Count && i == stopIndex - 1)
+                                {
+                                    Write("▼".PadLeft(NameLen + 2));
+                                    continue;
+                                }
+                                else if (i == index)
+                                {
+                                    indexCursorTop = CursorTop;
+                                    Write(" ►");
+                                }
+
+                                Print(components[i]);
+                            }
+                        }
+
+                        refreshScreen = false;
+                    }
+
+                    switch (GetCtrlKey(ReadKey(true).Key))
+                    {
+                        case ControlKey.Up:
                             if (index > 0)
                             {
-                                if (index == startIndex)
+                                index--;
+                                if (index == startIndex + 1 && startIndex > 0)
                                 {
                                     startIndex--;
                                     stopIndex--;
                                 }
-                                else
-                                {
-                                    index--;
-                                }
-
+                                refreshScreen = true;
                                 break;
-                            }
-                            else if (exitUpwards)
-                            {
-                                resultIndex = -1;
-                                goto cancel_label;
                             }
                             continue;
 
-                        case ConsoleKey.DownArrow:
+                        case ControlKey.Down:
                             if (index < components.Count - 1)
                             {
-                                if (index == stopIndex - 1)
+                                index++;
+                                if (index == stopIndex - 2 && stopIndex < components.Count)
                                 {
                                     startIndex++;
                                     stopIndex++;
                                 }
-                                else
-                                {
-                                    index++;
-                                }
-
+                                refreshScreen = true;
                                 break;
-                            }
-                            else if (exitDownwards)
-                            {
-                                resultIndex = components.Count;
-                                goto cancel_label;
                             }
                             continue;
 
-                        case ConsoleKey.Enter:
-                            return index + startIndex;
+                        case ControlKey.Confirm:
+                            return index;
 
-                        case ConsoleKey.Escape:
+                        case ControlKey.Cancel:
                             resultIndex = null;
-                            goto cancel_label;
-
-                        cancel_label:
                             SetCursorPosition(startCursorLeft, indexCursorTop);
-                            PrintComponent(components[index]);
+                            Print(components[index]);
                             return resultIndex;
 
                         default: continue;
                     }
-                    
-                    lock (ConsoleLock)
-                    {
-                        CursorTop = startCursorTop;
-                        for (int i = startIndex; i < stopIndex; i++)
-                        {
-                            CursorLeft = startCursorLeft;
-
-                            if (startIndex > 0 && i == startIndex)
-                            {
-                                Write("▲".PadLeft(NameLen + 2));
-                                continue;
-                            }
-                            else if (stopIndex < components.Count && i == stopIndex - 1)
-                            {
-                                Write("▼".PadLeft(NameLen + 2));
-                                continue;
-                            }
-                            else if (i == index)
-                            {
-                                indexCursorTop = CursorTop;
-                                Write(" ►");
-                            }
-
-                            PrintComponent(components[i]);
-                        }
-                    }
                 }
             }
 
-            public static int? TradeItem<T>(List<T> items, bool buying = true, int startCursorTop = 0, int startCursorLeft = 0, int zoneHeight = -1, bool exitUpwards = false, bool exitDownwards = false) where T : Item
+            public static int? TradeItem<T>(List<T> items, bool buying = true, int startCursorTop = 0, int startCursorLeft = 0, int zoneHeight = -1) where T : Item
             {
                 if (items.Count == 0)
                 {
                     while (true)
-                        if (ReadKey(true).Key == ConsoleKey.Escape)
+                    {
+                        if (GetCtrlKey(ReadKey(true).Key) == ControlKey.Cancel)
                             return null;
+                    }
                 }
 
                 if (zoneHeight == -1)
@@ -333,115 +318,94 @@ namespace ConsolePL
                 int startIndex = 0;
                 int stopIndex = Math.Min(items.Count, zoneHeight);
                 int indexCursorTop = startCursorTop;
-                int? resultIndex;
-
-                lock (ConsoleLock)
-                {
-                    CursorTop = startCursorTop;
-                    for (int i = startIndex; i < stopIndex; i++)
-                    {
-                        CursorLeft = startCursorLeft;
-
-                        if (startIndex > 0 && i == startIndex)
-                        {
-                            Write("▲".PadLeft(NameLen + 2));
-                            continue;
-                        }
-                        else if (stopIndex < items.Count && i == stopIndex - 1)
-                        {
-                            Write("▼".PadLeft(NameLen + 2));
-                            continue;
-                        }
-                        else if (i == index)
-                        {
-                            indexCursorTop = CursorTop;
-                            Write(" ►");
-                        }
-
-                        PrintPrice(items[i], buying);
-                    }
-                }
+                bool refreshScreen = true;
 
                 while (true)
                 {
-                    switch (ReadKey(true).Key)
+                    if (refreshScreen)
                     {
-                        case ConsoleKey.UpArrow:
+                        lock (ConsoleLock)
+                        {
+                            CursorTop = startCursorTop;
+                            for (int i = startIndex; i < stopIndex; i++)
+                            {
+                                CursorLeft = startCursorLeft;
+
+                                if (startIndex > 0 && i == startIndex)
+                                {
+                                    Write("▲".PadLeft(NameLen + 2));
+                                    continue;
+                                }
+                                else if (stopIndex < items.Count && i == stopIndex - 1)
+                                {
+                                    Write("▼".PadLeft(NameLen + 2));
+                                    continue;
+                                }
+                                else if (i == index)
+                                {
+                                    indexCursorTop = CursorTop;
+                                    Write(" ►");
+                                }
+
+                                PrintPrice(items[i], buying);
+                            }
+                        }
+
+                        refreshScreen = false;
+                    }
+
+                    switch (GetCtrlKey(ReadKey(true).Key))
+                    {
+                        case ControlKey.Up:
                             if (index > 0)
                             {
                                 index--;
+                                if (index == startIndex + 1 && startIndex > 0)
+                                {
+                                    startIndex--;
+                                    stopIndex--;
+                                }
+                                refreshScreen = true;
                                 break;
-                            }
-                            else if (exitUpwards)
-                            {
-                                resultIndex = -1;
-                                goto cancel_label;
                             }
                             continue;
 
-                        case ConsoleKey.DownArrow:
+                        case ControlKey.Down:
                             if (index < items.Count - 1)
                             {
                                 index++;
+                                if (index == stopIndex - 2 && stopIndex < items.Count)
+                                {
+                                    startIndex++;
+                                    stopIndex++;
+                                }
+                                refreshScreen = true;
                                 break;
-                            }
-                            else if (exitDownwards)
-                            {
-                                resultIndex = items.Count;
-                                goto cancel_label;
                             }
                             continue;
 
-                        case ConsoleKey.Enter:
-                            return index + startIndex;
+                        case ControlKey.Confirm:
+                            return index;
 
-                        case ConsoleKey.Escape:
-                            return null;
-
-                        cancel_label:
+                        case ControlKey.Cancel:
                             SetCursorPosition(startCursorLeft, indexCursorTop);
                             PrintPrice(items[index], buying);
-                            return resultIndex;
+                            return null;
 
                         default: continue;
-                    }
-                    
-                    lock (ConsoleLock)
-                    {
-                        CursorTop = startCursorTop;
-                        for (int i = startIndex; i < stopIndex; i++)
-                        {
-                            CursorLeft = startCursorLeft;
-
-                            if (startIndex > 0 && i == startIndex)
-                            {
-                                Write("▲".PadLeft(NameLen + 2));
-                                continue;
-                            }
-                            else if (stopIndex < items.Count && i == stopIndex - 1)
-                            {
-                                Write("▼".PadLeft(NameLen + 2));
-                                continue;
-                            }
-                            else if (i == index)
-                            {
-                                indexCursorTop = CursorTop;
-                                Write(" ►");
-                            }
-
-                            PrintPrice(items[i], buying);
-                        }
                     }
                 }
             }
 
-            public static int? String(List<string> actions, int startCursorTop = 0, int startCursorLeft = 0, int zoneHeight = -1)
+            public static int? String(List<string> actions, int startCursorTop = 0, int startCursorLeft = 0, int zoneHeight = -1, int padLength = 0)
             {
                 if (actions.Count == 0)
                 {
                     while (true)
-                        if (ReadKey(true).Key == ConsoleKey.Escape)
+                    {
+                        if (GetCtrlKey(ReadKey(true).Key) == ControlKey.Cancel)
                             return null;
+                    }
                 }
 
                 if (zoneHeight == -1)
@@ -451,35 +415,41 @@ namespace ConsolePL
                 int startIndex = 0;
                 int stopIndex = Math.Min(actions.Count, zoneHeight);
                 int indexCursorTop = startCursorTop;
-
-                lock (ConsoleLock)
-                {
-                    CursorTop = startCursorTop;
-                    for (int i = startIndex; i < stopIndex; i++)
-                    {
-                        CursorLeft = startCursorLeft;
-
-                        if (startIndex > 0 && i == startIndex)
-                            Write("▲".PadLeft(6));
-                        else if (stopIndex < actions.Count && i == stopIndex - 1)
-                            Write("▼".PadLeft(6));
-                        else if (i != index)
-                            Write($" {actions[i]}");
-                        else
-                        {
-                            indexCursorTop = CursorTop;
-                            Write($" ► {actions[i]}");
-                        }
-
-                        DrawEmptyLine();
-                    }
-                }
+                bool refreshScreen = true;
 
                 while (true)
                 {
-                    switch (ReadKey(true).Key)
+                    if (refreshScreen)
                     {
-                        case ConsoleKey.UpArrow:
+                        lock (ConsoleLock)
+                        {
+                            CursorTop = startCursorTop;
+
+                            for (int i = startIndex; i < stopIndex; i++)
+                            {
+                                CursorLeft = startCursorLeft;
+
+                                if (startIndex > 0 && i == startIndex)
+                                    Write("▲".PadLeft(6));
+                                else if (stopIndex < actions.Count && i == stopIndex - 1)
+                                    Write("▼".PadLeft(6));
+                                else if (i == index)
+                                {
+                                    indexCursorTop = CursorTop;
+                                    Write("► ");
+                                }
+
+                                Write(actions[i]);
+                                DrawEmptyLine(padLength);
+                            }
+                        }
+
+                        refreshScreen = false;
+                    }
+                    
+                    switch (GetCtrlKey(ReadKey(true).Key))
+                    {
+                        case ControlKey.Up:
                             if (index > 0)
                             {
                                 index--;
@@ -488,11 +458,12 @@ namespace ConsolePL
                                     startIndex--;
                                     stopIndex--;
                                 }
+                                refreshScreen = true;
                                 break;
                             }
                             continue;
 
-                        case ConsoleKey.DownArrow:
+                        case ControlKey.Down:
                             if (index < actions.Count - 1)
                             {
                                 index++;
@@ -501,47 +472,24 @@ namespace ConsolePL
                                     startIndex++;
                                     stopIndex++;
                                 }
+                                refreshScreen = true;
                                 break;
                             }
                             continue;
 
-                        case ConsoleKey.Enter:
+                        case ControlKey.Confirm:
                             SetCursorPosition(startCursorLeft, indexCursorTop);
-                            Write($" ► {actions[index]} ◄");
+                            Write($"► {actions[index]} ◄");
                             DrawEmptyLine();
                             return index;
 
-                        case ConsoleKey.Escape:
+                        case ControlKey.Cancel:
                             SetCursorPosition(startCursorLeft, indexCursorTop);
-                            Write($" {actions[index]}");
+                            Write(actions[index]);
                             DrawEmptyLine();
                             return null;
 
                         default: continue;
-                    }
-
-                    lock (ConsoleLock)
-                    {
-                        CursorTop = startCursorTop;
-
-                        for (int i = startIndex; i < stopIndex; i++)
-                        {
-                            CursorLeft = startCursorLeft;
-
-                            if (startIndex > 0 && i == startIndex)
-                                Write("▲".PadLeft(6));
-                            else if (stopIndex < actions.Count && i == stopIndex - 1)
-                                Write("▼".PadLeft(6));
-                            else if (i != index)
-                                Write($" {actions[i]}");
-                            else
-                            {
-                                indexCursorTop = CursorTop;
-                                Write($" ► {actions[i]}");
-                            }
-
-                            DrawEmptyLine();
-                        }
                     }
                 }
             }

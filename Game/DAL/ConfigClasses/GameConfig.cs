@@ -4,7 +4,7 @@ namespace DAL.ConfigClasses
     public class GameConfig
     {
         // Entity config
-        public int EntityMPPercentagePerAttack { get; set; } = 20;
+        public int EntityMPRegenPercentage { get; set; } = 20;
 
         // Player config
         public int PlayerDefaultATK { get; set; } = 3;
@@ -21,44 +21,44 @@ namespace DAL.ConfigClasses
         public int MonsterPowerHPPercentage { get; set; } = 100;
 
         // Item config
-        public int ItemBasePrice { get; set; } = 100;
+        public int ItemPriceBase { get; set; } = 100;
         public int ItemPriceRarityBonusPercentage { get; set; } = 75;
         public int ItemPriceEquipBonusPercentage { get; set; } = 30;
         public int ItemPriceSkillBonusPercentage { get; set; } = 10;
-        public int ItemSellPricePercentage { get; set; } = 60;
+        public int ItemPriceSellingPercentage { get; set; } = 60;
 
         // Equip config
-        public int EquipATKPtPercentage { get; set; } = 200;
-        public int EquipDEFPtPercentage { get; set; } = 100;
-        public int EquipHPPtPercentage { get; set; } = 800;
-        public int EquipMPPtPercentage { get; set; } = 400;
+        public int EquipPtATKPercentage { get; set; } = 200;
+        public int EquipPtDEFPercentage { get; set; } = 100;
+        public int EquipPtHPPercentage { get; set; } = 800;
+        public int EquipPtMPPercentage { get; set; } = 400;
 
         // Skill config
-        public int SkillDamagePtPercentage { get; set; } = 200;
-        public int SkillHealPtPercentage { get; set; } = 100;
-        public int SkillSinglePercentage { get; set; } = 100;
-        public int SkillRandomPercentage { get; set; } = 120;
-        public int SkillAllPercentage { get; set; } = 70;
+        public int SkillPtDamagePercentage { get; set; } = 200;
+        public int SkillPtHealPercentage { get; set; } = 100;
+        public int SkillTypeSinglePercentage { get; set; } = 100;
+        public int SkillTypeRandomPercentage { get; set; } = 120;
+        public int SkillTypeAllPercentage { get; set; } = 70;
 
         // Game progress config
         public int ProgressMaxFloor { get; set; } = 3;
         public int ProgressMaxRoom { get; set; } = 16;
 
         // Event manager config
-        public int EventPowerPerRoomPercentage { get; set; } = 50;
-        public int EventPowerPerFloorPercentage { get; set; } = 50;
-        public int EventElitePowerPercentage { get; set; } = 200;
-        public int EventBossPowerPercentage { get; set; } = 500;
-        public int EventTreasureRoomCount { get; set; } = 10;
-        public int EventShopRoomCount { get; set; } = 5;
-        public int EventCampRoomCount { get; set; } = 5;
-        public int EventBaseGold { get; set; } = 100;
+        public int EventPowerPerRoom { get; set; } = 50;
+        public int EventPowerPerFloorRatio { get; set; } = 50;
+        public int EventPowerElitePercentage { get; set; } = 200;
+        public int EventPowerBossPercentage { get; set; } = 500;
+        public int EventRoomCountTreasure { get; set; } = 10;
+        public int EventRoomCountCamp { get; set; } = 5;
+        public int EventRoomCountShop { get; set; } = 5;
+        public int EventGoldBase { get; set; } = 100;
         public int EventGoldPerNormal { get; set; } = 25;
         public int EventGoldPerElite { get; set; } = 50;
         public int EventGoldPerBoss { get; set; } = 100;
         public int EventGoldFloorPercentage { get; set; } = 50;
-        public int EventGoldPerTreasure { get; set; } = 100;
-        public int EventTreasureGoldPerFloorPercentage { get; set; } = 80;
+        public int EventGoldTreasure { get; set; } = 100;
+        public int EventGoldTreasurePerFloorPercentage { get; set; } = 80;
 
         public GameConfig() {}
 

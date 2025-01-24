@@ -13,7 +13,7 @@ namespace NetworkLL
 
         private TcpClient? client;
         private NetworkStream? stream;
-        private byte[] buffer = new byte[1024];
+        private byte[] buffer = new byte[2048];
 
         public static NetworkHandler Instance { get; private set; } = new();
 

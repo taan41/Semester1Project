@@ -9,7 +9,7 @@ namespace BLL
     {
         private static ConfigManager Config => ConfigManager.Instance;
 
-        public static AssetManager Instance { get; } = new();
+        public static AssetManager Instance { get; } = new(true);
 
         public Dictionary<int, Equipment> Equipments = [];
         public Dictionary<int, Skill> Skills  = [];
@@ -19,7 +19,7 @@ namespace BLL
         public int[] SkillIDs = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
         public int[][] MonsterIDs = new int[Config.GameConfig.ProgressMaxFloor][];
 
-        private AssetManager()
+        private AssetManager(bool load = false)
         {
             for (int i = 0; i < EquipIDs.Length; i++)
             {
@@ -40,6 +40,9 @@ namespace BLL
                     MonsterIDs[i][j] = i * 1000 + j * 100 + 1;
                 }
             }
+
+            if (load)
+                LoadAssets().Wait();
         }
 
         public async Task LoadAssets()
@@ -49,15 +52,15 @@ namespace BLL
             Monsters = (await MonsterDB.GetAll(Config.GameConfig.ProgressMaxFloor)).monsters ?? [];
 
             foreach (var equipment in Equipments.Values)
-                if (equipment.ID > EquipIDs[(int) equipment.ItemRarity])
+                if (equipment.ID >= EquipIDs[(int) equipment.ItemRarity])
                     EquipIDs[(int) equipment.ItemRarity] = equipment.ID + 1;
 
             foreach (var skill in Skills.Values)
-                if (skill.ID > SkillIDs[(int) skill.ItemRarity])
+                if (skill.ID >= SkillIDs[(int) skill.ItemRarity])
                     SkillIDs[(int) skill.ItemRarity] = skill.ID + 1;
 
             foreach (var monster in Monsters.Values)
-                if (monster.ID > MonsterIDs[monster.Floor - 1][(int) monster.MonsterType])
+                if (monster.ID >= MonsterIDs[monster.Floor - 1][(int) monster.MonsterType])
                     MonsterIDs[monster.Floor - 1][(int) monster.MonsterType] = monster.ID + 1;
         }
 
@@ -66,7 +69,7 @@ namespace BLL
             if (!(await EquipmentDB.Add(equip)).success)
                 return false;
 
-            Equipments.Add(equip.ID, equip);
+            Equipments[equip.ID] = equip;
             if (equip.ID >= EquipIDs[(int) equip.ItemRarity])
                 EquipIDs[(int) equip.ItemRarity] = equip.ID + 1;
             return true;
@@ -77,7 +80,7 @@ namespace BLL
             if (!(await SkillDB.Add(skill)).success)
                 return false;
 
-            Skills.Add(skill.ID, skill);
+            Skills[skill.ID] = skill;
             if (skill.ID >= SkillIDs[(int) skill.ItemRarity])
                 SkillIDs[(int) skill.ItemRarity] = skill.ID + 1;
             return true;
@@ -88,7 +91,7 @@ namespace BLL
             if (!(await MonsterDB.Add(monster)).success)
                 return false;
 
-            Monsters.Add(monster.ID, monster);
+            Monsters[monster.ID] = monster;
             if (monster.ID >= MonsterIDs[monster.Floor - 1][(int) monster.MonsterType])
                 MonsterIDs[monster.Floor - 1][(int) monster.MonsterType] = monster.ID + 1;
             return true;

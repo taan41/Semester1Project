@@ -88,7 +88,7 @@ namespace BLL.GameComponents.EntityComponents
         {
             target.HP -= Math.Max(ATK - target.DEF, 1);
             HP -= Math.Max(target.ATK - DEF, 1);
-            MP += MaxMP * Config.EntityMPPercentagePerAttack / 100;
+            MP += MaxMP * Config.EntityMPRegenPercentage / 100;
         }
 
         public bool UseSkill<T>(Skill skill, List<T> targets) where T : Entity
@@ -97,16 +97,16 @@ namespace BLL.GameComponents.EntityComponents
 
             int typePercentage = skill.SkillType switch
             {
-                Skill.Type.Single => Config.SkillSinglePercentage,
-                Skill.Type.Random => Config.SkillRandomPercentage,
-                Skill.Type.All => Config.SkillAllPercentage,
+                Skill.Type.Single => Config.SkillTypeSinglePercentage,
+                Skill.Type.Random => Config.SkillTypeRandomPercentage,
+                Skill.Type.All => Config.SkillTypeAllPercentage,
                 _ => 0
             };
 
             foreach (var target in targets)
-                target.HP -= Math.Max(skill.DamagePoint * Config.SkillDamagePtPercentage * typePercentage / 10000 - target.DEF, 1);
+                target.HP -= Math.Max(skill.DamagePoint * Config.SkillPtDamagePercentage * typePercentage / 10000 - target.DEF, 1);
 
-            HP += skill.HealPoint * Config.SkillHealPtPercentage / 100;
+            HP += skill.HealPoint * Config.SkillPtHealPercentage / 100;
             MP -= skill.MPCost;
 
             return true;

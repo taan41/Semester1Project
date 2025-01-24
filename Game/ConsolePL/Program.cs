@@ -30,7 +30,7 @@ namespace ConsolePL
                 catch (Exception ex)
                 {
                     Console.Clear();
-                    Console.WriteLine($"Game crashed: {ex.Message}");
+                    Console.WriteLine($"Game crashed: {ex}");
                     Console.ReadKey(true);
                 }
                 finally
@@ -226,7 +226,7 @@ namespace ConsolePL
                     Console.WriteLine(" -- Choose Save:");
                 }
 
-                int? pickedSaveInd = Picker.Component(saves, CursorPos.TitleScreenMenuTop + 1, 0, saves.Count * 2);
+                int? pickedSaveInd = Picker.Component(saves, CursorPos.TitleScreenMenuTop + 1);
                 if (pickedSaveInd != null)
                 {
                     StopTitleAnim();
@@ -276,15 +276,15 @@ namespace ConsolePL
 
             List<Equipment> startEquips =
             [
-                new(AssetLoader.Equipments[1]),
-                new(AssetLoader.Equipments[2]),
-                new(AssetLoader.Equipments[3])
+                AssetLoader.Equipments[1],
+                AssetLoader.Equipments[2],
+                AssetLoader.Equipments[3]
             ];
             List<Skill> startSkills =
             [
-                new(AssetLoader.Skills[1]),
-                new(AssetLoader.Skills[2]),
-                new(AssetLoader.Skills[3])
+                AssetLoader.Skills[1],
+                AssetLoader.Skills[2],
+                AssetLoader.Skills[3]
             ];
 
             GenericGameScreen(gameHandler.Progress, gameHandler.Player);
@@ -294,21 +294,23 @@ namespace ConsolePL
             if (pickedEquipInd == null)
                 return;
 
+            gameHandler.Player.AddItem(new Equipment(startEquips[(int) pickedEquipInd]));
+
             GenericGameScreen(gameHandler.Progress, gameHandler.Player);
             PrintMainZone(startSkills, "Choose Starting Skill:");
             
             int? pickedSkillInd = Picker.Component(startSkills, CursorPos.MainZoneTop + 1);
             if (pickedSkillInd == null)
                 return;
-
-            gameHandler.AddStarters(startEquips[(int) pickedEquipInd], startSkills[(int) pickedSkillInd]);
+                
+            gameHandler.Player.AddItem(new Skill(startSkills[(int) pickedSkillInd]));
             gameHandler.Progress.Next();
             GameLoop(gameHandler);
         }
 
         static void GameLoop(GameLoopHandler gameHandler)
         {
-            List<string> actions = ["Pick A Route", "Inventory", "Pause"];
+            List<string> actions = ["Pick A Route", "Inventory"];
             List<string> invOptions = ["Change Equipment", "Change Skill"];
 
             gameHandler.Timer(true);
@@ -321,7 +323,7 @@ namespace ConsolePL
 
                 GenericGameScreen(gameHandler.Progress, gameHandler.Player);
                 PrintMainZone(routes, "Routes:");
-                PrintSubZone(actions, "Actions");
+                PrintSubZone(actions, "Actions:");
 
                 int? pickedActionInd = Picker.String(actions, CursorPos.SubZoneTop + 1);
                 switch (pickedActionInd)
@@ -386,11 +388,11 @@ namespace ConsolePL
             gameHandler.Timer(false);
             PausePopup(pauseOptions, gameHandler.GetElapsedTime());
 
-            int? pickedPauseInd = Picker.String(pauseOptions, CursorPos.PauseMenuTop, CursorPos.PauseMenuLeft);
+            int? pickedPauseInd = Picker.String(pauseOptions, CursorPos.PauseMenuTop, CursorPos.PauseMenuLeft, pauseOptions.Count, 4);
             switch (pickedPauseInd)
             {
                 case 1:
-                    gameHandler.SaveAs("LocalSave");
+                    gameHandler.SaveAs("LocalSave", true);
                     return false;
 
                 case 0: default:
@@ -467,7 +469,12 @@ namespace ConsolePL
 
                 int? pickedActionInd = Picker.String(fightActions, CursorPos.SubZoneTop + 1);
                 if (pickedActionInd == null)
-                    return false;
+                {
+                    if (HandlePause(gameHandler))
+                        continue;
+                    else
+                        return false;
+                }
 
                 switch (pickedActionInd)
                 {
@@ -516,8 +523,10 @@ namespace ConsolePL
                         }
                         else
                             gameHandler.Player.UseSkill<Monster>(pickedSkill, []);
-
                         break;
+
+                    default:
+                        continue;
                 }
 
                 fightEvent.Monsters.RemoveAll(monster => monster.HP == 0);
@@ -526,7 +535,7 @@ namespace ConsolePL
                 {
                     LostScreen(lostOptions);
 
-                    int? pickLostOptInd = Picker.String(lostOptions, CursorPos.EndScreenMenuLeft, CursorPos.EndScreenMenuTop);
+                    int? pickLostOptInd = Picker.String(lostOptions, CursorPos.EndScreenMenuTop, CursorPos.EndScreenMenuLeft);
                     switch (pickLostOptInd)
                     {
                         case 0:
@@ -609,6 +618,9 @@ namespace ConsolePL
                                 break;
                         }
                         break;
+
+                    default:
+                        return;
                 }
             }
         }

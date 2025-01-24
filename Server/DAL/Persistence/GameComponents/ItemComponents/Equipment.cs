@@ -6,7 +6,7 @@ namespace DAL.Persistence.GameComponents.ItemComponents
     {
         public enum Type
         {
-            Weapon, Armor, Ring
+            Weapon, Armor, Relic
         }
 
         public Type EquipType { get; set; } = Type.Weapon;

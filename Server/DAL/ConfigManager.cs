@@ -19,10 +19,10 @@ namespace DAL
 
         public async Task LoadConfig(bool rewrite = false)
         {
-            GameConfig = (await ConfigDB.Get<GameConfig>(DBManager.Configs.GameConfig)).config ?? new();
-            ServerConfig = (await ConfigDB.Get<ServerConfig>(DBManager.Configs.ServerConfig)).config ?? new();
-            DatabaseConfig = (await ConfigDB.Get<DatabaseConfig>(DBManager.Configs.DatabaseConfig)).config ?? new();
-            AssetConfig = (await ConfigDB.Get<AssetConfig>(DBManager.Configs.AssetConfig)).config ?? new();
+            GameConfig = (await ConfigDB.Get<GameConfig>(DBManager.ConfigNames.GameConfig)).config ?? new();
+            ServerConfig = (await ConfigDB.Get<ServerConfig>(DBManager.ConfigNames.ServerConfig)).config ?? new();
+            DatabaseConfig = (await ConfigDB.Get<DatabaseConfig>(DBManager.ConfigNames.DatabaseConfig)).config ?? new();
+            AssetConfig = (await ConfigDB.Get<AssetConfig>(DBManager.ConfigNames.AssetConfig)).config ?? new();
 
             if (rewrite)
                 await SaveConfig();

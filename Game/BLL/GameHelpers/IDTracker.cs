@@ -9,19 +9,19 @@ namespace BLL.GameHelpers
     {
         private static GameConfig Config => ConfigManager.Instance.GameConfig;
 
-        public static readonly int[] Equip;
-        public static readonly int[] Skill;
-        public static readonly int[][] Monster;
+        public static readonly int[] EquipIDs;
+        public static readonly int[] SkillIDs;
+        public static readonly int[][] MonsterIDs;
 
         static IDTracker()
         {
-            Equip = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
-            Skill = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
+            EquipIDs = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
+            SkillIDs = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
 
-            Monster = new int[Config.ProgressMaxFloor][];
+            MonsterIDs = new int[Config.ProgressMaxFloor][];
             for (int i = 0; i < Config.ProgressMaxFloor; i++)
             {
-                Monster[i] = new int[Enum.GetValues(typeof(Monster.Type)).Length];
+                MonsterIDs[i] = new int[Enum.GetValues(typeof(Monster.Type)).Length];
             }
 
             Initialize();
@@ -31,19 +31,19 @@ namespace BLL.GameHelpers
         {
             for (int i = 0; i < Enum.GetValues(typeof(Equipment.Type)).Length; i++)
             {
-                Equip[i] = i * 100 + 1;
+                EquipIDs[i] = i * 100 + 1;
             }
 
             for (int i = 0; i < Enum.GetValues(typeof(Skill.Type)).Length; i++)
             {
-                Skill[i] = i * 100 + 1;
+                SkillIDs[i] = i * 100 + 1;
             }
 
             for (int i = 0; i < Config.ProgressMaxFloor; i++)
             {
                 for (int j = 0; j < Enum.GetValues(typeof(Monster.Type)).Length; j++)
                 {
-                    Monster[i][j] = i * 1000 + j * 100 + 1;
+                    MonsterIDs[i][j] = i * 1000 + j * 100 + 1;
                 }
             }
         }

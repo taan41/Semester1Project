@@ -11,7 +11,7 @@ static class ServerUI
 {
     public static string Header { get; } = "Server Control Center";
 
-    public static async Task<bool> FillDBInfoScreen()
+    public static async Task<(bool success, bool exit)> FillDBInfoScreen()
     {
         string? server, db, uid, password;
 
@@ -24,25 +24,25 @@ static class ServerUI
 
         Write(" Server (default 'localhost'): ");
         if ((server = ReadInput()) == null)
-            return false;
+            return (false, true);
         if (string.IsNullOrWhiteSpace(server))
             server = "localhost";
 
         Write(" Database (default 'consoleconquer'): ");
         if ((db = ReadInput()) == null)
-            return false;
+            return (false, true);
         if (string.IsNullOrWhiteSpace(db))
             db = "consoleconquer";
 
         Write(" UID (default 'root'): ");
         if ((uid = ReadInput()) == null)
-            return false;
+            return (false, true);
         if (string.IsNullOrWhiteSpace(uid))
             uid = "root";
 
         Write(" Password (default empty): ");
         if ((password = ReadInput(true)) == null)
-            return false;
+            return (false, true);
 
         DrawLine('-');
 
@@ -50,13 +50,13 @@ static class ServerUI
         {
             WriteLine(" Database connection successful!");
             ReadKey(true);
-            return true;
+            return (true, false);
         }
         else
         {
             WriteLine(" Database connection failed.");
             ReadKey(true);
-            return false;
+            return (false, false);
         }
     }
     
@@ -131,7 +131,7 @@ static class ServerUI
 
     public static async Task ModifyGameConfig()
     {
-        GameConfig? config = (await ConfigDB.Get<GameConfig>("GameConfig")).config;
+        GameConfig config = ConfigManager.Instance.GameConfig;
 
         Clear();
         DrawHeader(Header);
@@ -139,7 +139,7 @@ static class ServerUI
         WriteLine(" 'ESC' to return");
         DrawLine('-');
 
-        if(config == null)
+        if (config == null)
         {
             WriteLine(" Error: Game config not found.");
             ReadKey(true);
@@ -147,41 +147,88 @@ static class ServerUI
         }
 
         string[] properties = [.. typeof(GameConfig).GetProperties(BindingFlags.Public | BindingFlags.Instance).Select(p => p.Name)];
-        
-        foreach (var prop in properties)
-        {
-            PropertyInfo propInfo = typeof(GameConfig).GetProperty(prop)!;
-            
-            Write($" {prop} (old value: {propInfo.GetValue(config)}): ");
+        string[] filteredProps = [];
 
-            string? input = ReadInput();
-            if (input == null)
+        while (true)
+        {
+            Clear();
+            DrawHeader(Header);
+            WriteLine(" -- Modifying game config");
+            WriteLine(" 'ESC' to return");
+            DrawLine('-');
+
+            Write(" Properties name filter (empty for all): ");
+            string? filter = ReadInput();
+            if (filter == null)
                 return;
 
-            if (string.IsNullOrWhiteSpace(input))
-                continue;
-
-            if (propInfo.CanWrite)
+            if (!string.IsNullOrWhiteSpace(filter))
             {
-                try
+                filteredProps = [.. properties.Where(p => p.Contains(filter, StringComparison.OrdinalIgnoreCase))];
+                if (filteredProps.Length == 0)
                 {
-                    propInfo.SetValue(config, Convert.ChangeType(input, propInfo.PropertyType));
-                }
-                catch (Exception)
-                {
-                    WriteLine(" Invalid input.");
+                    WriteLine(" No properties found.");
                     ReadKey(true);
-                    return;
+                    continue;
                 }
             }
+            else
+            {
+                filteredProps = properties;
+            }
+
+            WriteLine(" (Leave empty to skip)");
+            WriteLine(" (Config will only be saved if all properties have been filled)");
+            DrawLine('-');
+            
+            bool allFilled = true;
+            foreach (var prop in filteredProps)
+            {
+                PropertyInfo propInfo = typeof(GameConfig).GetProperty(prop)!;
+                
+                Write($" {prop} (old value: {propInfo.GetValue(config)}): ");
+
+                string? input = ReadInput();
+                if (input == null)
+                {
+                    allFilled = false;
+                    break;
+                }
+
+                if (string.IsNullOrWhiteSpace(input))
+                    continue;
+
+                if (propInfo.CanWrite)
+                {
+                    try
+                    {
+                        propInfo.SetValue(config, Convert.ChangeType(input, propInfo.PropertyType));
+                    }
+                    catch (Exception)
+                    {
+                        WriteLine(" Invalid input.");
+                        allFilled = false;
+                        break;
+                    }
+                }
+            }
+
+            if (allFilled)
+            {
+                await config.Save();
+                await ConfigManager.Instance.LoadConfig();
+
+                DrawLine('-');
+                WriteLine(" Game config updated.");
+                ReadKey(true);
+            }
+            else
+            {
+                DrawLine('-');
+                WriteLine(" Operation cancelled.");
+                ReadKey(true);
+            }
         }
-
-        await config.Save();
-        await ConfigManager.Instance.LoadConfig();
-
-        DrawLine('-');
-        WriteLine(" Game config updated.");
-        ReadKey(true);
     }
 
     public static void ViewLog()

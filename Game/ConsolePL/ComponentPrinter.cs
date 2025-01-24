@@ -14,10 +14,33 @@ namespace ConsolePL
     {
         private static GameConfig GameConfig => ConfigManager.Instance.GameConfig;
 
-        // public static void PrintComponent<T>(T component) where T : ComponentAbstract
-        // {
-        //     PrintComponent(component);
-        // }
+        public static void Print<T>(T component) where T : ComponentAbstract
+        {
+            switch (component)
+            {
+                case Player player:
+                    PrintComponent(player);
+                    break;
+                case Monster monster:
+                    PrintComponent(monster);
+                    break;
+                case Equipment equip:
+                    PrintComponent(equip);
+                    break;
+                case Skill skill:
+                    PrintComponent(skill);
+                    break;
+                case Gold gold:
+                    PrintComponent(gold);
+                    break;
+                case GameSave save:
+                    PrintComponent(save);
+                    break;
+                default:
+                    PrintComponent(component);
+                    break;
+            }
+        }
 
         public static void PrintComponent(ComponentAbstract component)
         {
@@ -84,25 +107,25 @@ namespace ConsolePL
             if (equip.BonusATKPoint != 0)
             {
                 ForegroundColor = ConsoleColor.DarkYellow;
-                Write($" [{(equip.BonusATKPoint > 0 ? "+" : "-")}{equip.BonusATKPoint * GameConfig.EquipATKPtPercentage} ATK]");
+                Write($" [{(equip.BonusATKPoint > 0 ? "+" : "-")}{equip.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100} ATK]");
             }
 
             if (equip.BonusDEFPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Green;
-                Write($" [{(equip.BonusDEFPoint > 0 ? "+" : "-")}{equip.BonusDEFPoint * GameConfig.EquipDEFPtPercentage} DEF]");
+                Write($" [{(equip.BonusDEFPoint > 0 ? "+" : "-")}{equip.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100} DEF]");
             }
 
             if (equip.BonusHPPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Red;
-                Write($" [{(equip.BonusHPPoint > 0 ? "+" : "-")}{equip.BonusHPPoint * GameConfig.EquipHPPtPercentage} HP]");
+                Write($" [{(equip.BonusHPPoint > 0 ? "+" : "-")}{equip.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100} HP]");
             }
 
             if (equip.BonusMPPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Blue;
-                Write($" [{(equip.BonusMPPoint > 0 ? "+" : "-")}{equip.BonusMPPoint * GameConfig.EquipMPPtPercentage} MP]");
+                Write($" [{(equip.BonusMPPoint > 0 ? "+" : "-")}{equip.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100} MP]");
             }
 
             ResetColor();
@@ -126,17 +149,17 @@ namespace ConsolePL
             if (skill.DamagePoint > 0)
             {
                 ForegroundColor = ConsoleColor.DarkYellow;
-                Write($" [▲ {skill.DamagePoint * GameConfig.SkillDamagePtPercentage / 100}]");
+                Write($" [▲ {skill.DamagePoint * GameConfig.SkillPtDamagePercentage / 100}]");
             }
 
             if (skill.HealPoint > 0)
             {
                 ForegroundColor = ConsoleColor.Green;
-                Write($" [+ {skill.HealPoint * GameConfig.SkillHealPtPercentage / 100}]");
+                Write($" [+ {skill.HealPoint * GameConfig.SkillPtHealPercentage / 100}]");
             }
 
             ForegroundColor = ConsoleColor.Blue;
-            WriteLine($" ({skill.MPCost} MP)");
+            Write($" ({skill.MPCost} MP)");
             ResetColor();
             DrawEmptyLine();
         }
@@ -144,20 +167,31 @@ namespace ConsolePL
         public static void PrintComponent(Gold gold)
         {
             ForegroundColor = ConsoleColor.Yellow;
-            WriteLine($" {gold.Quantity} Gold");
+            Write($" {gold.Quantity} Gold");
             ResetColor();
             DrawEmptyLine();
         }
 
         public static void PrintPrice<T>(T item, bool buying) where T : Item
         {
-            PrintPrice(item, buying);
+            switch (item)
+            {
+                case Equipment equip:
+                    PrintPrice(equip, buying);
+                    break;
+                case Skill skill:
+                    PrintPrice(skill, buying);
+                    break;
+                default:
+                    PrintComponent(item);
+                    break;
+            }
         }
 
         public static void PrintPrice(Equipment equip, bool buying)
         {
             ForegroundColor = ConsoleColor.Yellow;
-            Write($" ({equip.Price * (buying ? 100 : GameConfig.ItemSellPricePercentage) / 100} G)");
+            Write($" ({equip.Price * (buying ? 100 : GameConfig.ItemPriceSellingPercentage) / 100} G)");
             ResetColor();
 
             ForegroundColor = equip.ItemRarity switch
@@ -175,25 +209,25 @@ namespace ConsolePL
             if (equip.BonusATKPoint != 0)
             {
                 ForegroundColor = ConsoleColor.DarkYellow;
-                Write($" [{(equip.BonusATKPoint > 0 ? "+" : "-")}{equip.BonusATKPoint * GameConfig.EquipATKPtPercentage}]");
+                Write($" [{(equip.BonusATKPoint > 0 ? "+" : "-")}{equip.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100}]");
             }
 
             if (equip.BonusDEFPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Green;
-                Write($" [{(equip.BonusDEFPoint > 0 ? "+" : "-")}{equip.BonusDEFPoint * GameConfig.EquipDEFPtPercentage}]");
+                Write($" [{(equip.BonusDEFPoint > 0 ? "+" : "-")}{equip.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100}]");
             }
 
             if (equip.BonusHPPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Red;
-                Write($" [{(equip.BonusHPPoint > 0 ? "+" : "-")}{equip.BonusHPPoint * GameConfig.EquipHPPtPercentage}]");
+                Write($" [{(equip.BonusHPPoint > 0 ? "+" : "-")}{equip.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100}]");
             }
 
             if (equip.BonusMPPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Blue;
-                Write($" [{(equip.BonusMPPoint > 0 ? "+" : "-")}{equip.BonusMPPoint * GameConfig.EquipMPPtPercentage}]");
+                Write($" [{(equip.BonusMPPoint > 0 ? "+" : "-")}{equip.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100}]");
             }
 
             ResetColor();
@@ -203,7 +237,7 @@ namespace ConsolePL
         public static void PrintPrice(Skill skill, bool buying)
         {
             ForegroundColor = ConsoleColor.Yellow;
-            Write($" ({skill.Price * (buying ? 100 : GameConfig.ItemSellPricePercentage) / 100} G)");
+            Write($" ({skill.Price * (buying ? 100 : GameConfig.ItemPriceSellingPercentage) / 100} G)");
             ResetColor();
 
             PrintComponent(skill);

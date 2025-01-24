@@ -23,7 +23,7 @@ namespace BLL.GameHandlers
             _save = save;
             _data = save.RunData;
 
-            Events = new EventGenerator(_data);
+            Events = new(_data);
             Progress = _data.Progress;
             Player = _data.Player;
         }
@@ -44,11 +44,11 @@ namespace BLL.GameHandlers
         public TimeSpan GetElapsedTime()
             => _data.GetElapsedTime();
 
-        public void SaveAs(string saveName)
+        public void SaveAs(string saveName, bool saveToCloud = false)
         {
             _save.SaveAs(saveName);
 
-            if (ServerHandler.IsConnected)
+            if (ServerHandler.IsConnected && saveToCloud)
             {
                 _save.Name = "CloudSave";
                 ServerHandler.UploadSave(_save, out _);

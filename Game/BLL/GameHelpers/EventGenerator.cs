@@ -23,27 +23,27 @@ namespace BLL.GameHelpers
         private static int MaxRoom => Config.ProgressMaxRoom;
 
         private static int BasePower =>
-            Config.MonsterDefaultATK * Config.MonsterPowerATKPercentage +
-            Config.MonsterDefaultHP * Config.MonsterPowerHPPercentage;
+            (Config.MonsterDefaultATK * Config.MonsterPowerATKPercentage +
+            Config.MonsterDefaultHP * Config.MonsterPowerHPPercentage) / 100;
 
-        private static int PowerPerRoomPercentage => Config.EventPowerPerRoomPercentage;
-        private static int PowerPerFloorPercentage => Config.EventPowerPerFloorPercentage;
+        private static int PowerPerRoom => Config.EventPowerPerRoom;
+        private static int PowerPerFloorRatio => Config.EventPowerPerFloorRatio;
 
-        private static int ElitePowerPercentage => Config.EventElitePowerPercentage;
-        private static int BossPowerPercentage =>  Config.EventBossPowerPercentage;
+        private static int ElitePowerPercentage => Config.EventPowerElitePercentage;
+        private static int BossPowerPercentage =>  Config.EventPowerBossPercentage;
 
-        private static int TreasureRoomCount => Config.EventTreasureRoomCount;
-        private static int ShopRoomCount => Config.EventShopRoomCount;
-        private static int CampRoomCount => Config.EventCampRoomCount;
+        private static int TreasureRoomCount => Config.EventRoomCountTreasure;
+        private static int ShopRoomCount => Config.EventRoomCountShop;
+        private static int CampRoomCount => Config.EventRoomCountCamp;
 
-        private static int BaseGold => Config.EventBaseGold;
+        private static int BaseGold => Config.EventGoldBase;
         private static int NormalGold => Config.EventGoldPerNormal;
         private static int EliteGold => Config.EventGoldPerElite;  
         private static int BossGold => Config.EventGoldPerBoss;
         private static int GoldFloorPercentage => Config.EventGoldFloorPercentage;
 
-        private static int TreasureGold => Config.EventGoldPerTreasure;
-        private static int TreasureGoldPerFloorPercentage => Config.EventTreasureGoldPerFloorPercentage;
+        private static int TreasureGold => Config.EventGoldTreasure;
+        private static int TreasureGoldPerFloorPercentage => Config.EventGoldTreasurePerFloorPercentage;
 
         private readonly Random _rng;
         private readonly RunData _gameData;
@@ -58,7 +58,7 @@ namespace BLL.GameHelpers
 
         // Get events of current room
         public List<Event> GetEvents()
-            => _allEvents.ElementAt(_gameData.Progress.Room - 1 + (_gameData.Progress.Floor - 1) * MaxRoom);
+            => _allEvents.ElementAt(Math.Max(0, _gameData.Progress.Room - 1 + (_gameData.Progress.Floor - 1) * MaxRoom));
 
         private List<List<Event>> GenerateAllEvents()
         {
@@ -69,8 +69,8 @@ namespace BLL.GameHelpers
                 int roomNumber = roomIndex % MaxRoom + 1;
                 int floorNumber = roomIndex / MaxRoom + 1;
                 int monsterPower =
-                    BasePower * (floorNumber - 1) * PowerPerFloorPercentage / 100 +
-                    (roomNumber - 1) * PowerPerRoomPercentage / 100;
+                    (BasePower + (roomNumber - 1) * PowerPerRoom / 100) *
+                    (100 + (floorNumber - 1) * PowerPerFloorRatio) / 100;
 
                 if (roomNumber % MaxRoom == 0)
                 {
@@ -164,19 +164,19 @@ namespace BLL.GameHelpers
 
             while (bossQuantity-- > 0)
             {
-                Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 201, IDTracker.Monster[floorNumber - 1][2])];
+                Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 201, IDTracker.MonsterIDs[floorNumber - 1][2])];
                 monsters.Add(new(pickedMonster, monsterPower * BossPowerPercentage));
             }
 
             while (eliteQuantity-- > 0)
             {
-                Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 101, IDTracker.Monster[floorNumber - 1][1])];
+                Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 101, IDTracker.MonsterIDs[floorNumber - 1][1])];
                 monsters.Add(new(pickedMonster, monsterPower * ElitePowerPercentage));
             }
 
             while (normalQuantity-- > 0)
             {
-                Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 1, IDTracker.Monster[floorNumber - 1][0])];
+                Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 1, IDTracker.MonsterIDs[floorNumber - 1][0])];
                 monsters.Add(new(pickedMonster, monsterPower));
             }
 
@@ -189,7 +189,7 @@ namespace BLL.GameHelpers
             for (int i = 0; i < 6; i++)
             {
                 Item.Rarity rarity = GenerateRarity(roomIndex);
-                equipments.Add(new(AssetLoader.Equipments[_rng.Next((int) rarity * 100 + 1, IDTracker.Equip[(int) rarity])]));
+                equipments.Add(new(AssetLoader.Equipments[_rng.Next((int) rarity * 100 + 1, IDTracker.EquipIDs[(int) rarity])]));
             }
             equipments.Sort(new EquipmentComparer());
 
@@ -197,7 +197,7 @@ namespace BLL.GameHelpers
             for(int i = 0; i < 4; i++)
             {
                 Item.Rarity rarity = GenerateRarity(roomIndex);
-                skills.Add(new(AssetLoader.Skills[_rng.Next((int) rarity * 100 + 1, IDTracker.Equip[(int) rarity])]));
+                skills.Add(new(AssetLoader.Skills[_rng.Next((int) rarity * 100 + 1, IDTracker.SkillIDs[(int) rarity])]));
             }
             skills.Sort(new SkillComparer());
 
@@ -239,10 +239,10 @@ namespace BLL.GameHelpers
             ));
 
             Item.Rarity equipRarity = GenerateRarity(floorNumber  * MaxRoom);
-            rewards.Add(new Equipment(AssetLoader.Equipments[_rng.Next((int) equipRarity * 100 + 1, IDTracker.Equip[(int) equipRarity])]));
+            rewards.Add(new Equipment(AssetLoader.Equipments[_rng.Next((int) equipRarity * 100 + 1, IDTracker.EquipIDs[(int) equipRarity])]));
 
             Item.Rarity skillRarity = GenerateRarity(floorNumber  * MaxRoom);
-            rewards.Add(new Skill(AssetLoader.Skills[_rng.Next((int) skillRarity * 100 + 1, IDTracker.Skill[(int) skillRarity])]));
+            rewards.Add(new Skill(AssetLoader.Skills[_rng.Next((int) skillRarity * 100 + 1, IDTracker.SkillIDs[(int) skillRarity])]));
 
             return new(rewards);
         }
@@ -250,18 +250,18 @@ namespace BLL.GameHelpers
         private List<Item> GenerateFightRewards(int roomIndex, int floorNumber, int monsterPower, int normalQuantity, int eliteQuantity = 0, int bossQuantity = 0)
         {
             List<Item> rewards = [];
-            rewards.Add(CalculateGold(monsterPower, normalQuantity, eliteQuantity, bossQuantity));
+            rewards.Add(CalculateGold(floorNumber, normalQuantity, eliteQuantity, bossQuantity));
 
             // Guarantee drops after boss fight, and only epic & above rarity
             if (bossQuantity > 0)
             {
                 Item.Rarity equipRarity = _rng.Next(100 + (floorNumber - 1) * 200) < 75 ?
                     Item.Rarity.Epic : Item.Rarity.Legendary;
-                rewards.Add(new Equipment(AssetLoader.Equipments[_rng.Next((int) equipRarity * 100 + 1, IDTracker.Equip[(int) equipRarity])]));
+                rewards.Add(new Equipment(AssetLoader.Equipments[_rng.Next((int) equipRarity * 100 + 1, IDTracker.EquipIDs[(int) equipRarity])]));
 
                 Item.Rarity skillRarity = _rng.Next(100 + (floorNumber - 1) * 200) < 75 ?
                     Item.Rarity.Epic : Item.Rarity.Legendary;
-                rewards.Add(new Skill(AssetLoader.Skills[_rng.Next((int) skillRarity * 100 + 1, IDTracker.Skill[(int) skillRarity])]));
+                rewards.Add(new Skill(AssetLoader.Skills[_rng.Next((int) skillRarity * 100 + 1, IDTracker.SkillIDs[(int) skillRarity])]));
             }
             else
             {
@@ -269,14 +269,14 @@ namespace BLL.GameHelpers
                 if (itemChance < 91 && itemChance < 40 + roomIndex + eliteQuantity * 20)
                 {
                     Item.Rarity equipRarity = GenerateRarity(roomIndex);
-                    rewards.Add(new Equipment(AssetLoader.Equipments[_rng.Next((int) equipRarity * 100 + 1, IDTracker.Equip[(int) equipRarity])]));
+                    rewards.Add(new Equipment(AssetLoader.Equipments[_rng.Next((int) equipRarity * 100 + 1, IDTracker.EquipIDs[(int) equipRarity])]));
                 }
 
                 int skillChance = _rng.Next(1, 101);
-                if (skillChance < 71 && skillChance < 15 + roomIndex + eliteQuantity * 10)
+                if (skillChance < Math.Min(71, 15 + roomIndex + eliteQuantity * 10))
                 {
                     Item.Rarity skillRarity = GenerateRarity(roomIndex);
-                    rewards.Add(new Skill(AssetLoader.Skills[_rng.Next((int) skillRarity * 100 + 1, IDTracker.Skill[(int) skillRarity])]));
+                    rewards.Add(new Skill(AssetLoader.Skills[_rng.Next((int) skillRarity * 100 + 1, IDTracker.SkillIDs[(int) skillRarity])]));
                 }
             }
 
@@ -286,8 +286,7 @@ namespace BLL.GameHelpers
         private Gold CalculateGold(int floorNumber, int normalQuantity, int eliteQuantity, int bossQuantity)
             => new(
                 (BaseGold + NormalGold * normalQuantity + EliteGold * eliteQuantity + BossGold * bossQuantity) * 
-                (100 + (floorNumber - 1) * GoldFloorPercentage) *
-                _rng.Next(85, 115) / 10000
+                (100 + (floorNumber - 1) * GoldFloorPercentage) * _rng.Next(85, 115) / 10000
             );
     }
 }

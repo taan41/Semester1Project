@@ -24,7 +24,7 @@ namespace BLL.GameComponents.ItemComponents
             HealPoint = other.HealPoint;
             MPCost = other.MPCost;
 
-            Price = other.Price != -1 ? other.Price : Config.ItemBasePrice * (100 + (int) ItemRarity * Config.ItemPriceRarityBonusPercentage) / 100 * Config.ItemPriceSkillBonusPercentage / 100;
+            Price = other.Price != -1 ? other.Price : Config.ItemPriceBase * (100 + (int) ItemRarity * Config.ItemPriceRarityBonusPercentage) / 100 * Config.ItemPriceSkillBonusPercentage / 100;
         }
     }
 

@@ -20,16 +20,16 @@ namespace BLL.GameHelpers
             Monsters = FileManager.ReadJson<Dictionary<int, Monster>>(FileManager.FolderNames.Assets, FileManager.FileNames.Monsters) ?? [];
 
             foreach(Equipment equip in Equipments.Values)
-                if (equip.ID >= IDTracker.Equip[(int) equip.ItemRarity])
-                    IDTracker.Equip[(int) equip.ItemRarity] = equip.ID + 1;
+                if (equip.ID >= IDTracker.EquipIDs[(int) equip.ItemRarity])
+                    IDTracker.EquipIDs[(int) equip.ItemRarity] = equip.ID + 1;
 
             foreach(Skill skill in Skills.Values)
-                if (skill.ID >= IDTracker.Skill[(int) skill.SkillType])
-                    IDTracker.Skill[(int) skill.SkillType] = skill.ID + 1;
+                if (skill.ID >= IDTracker.SkillIDs[(int) skill.ItemRarity])
+                    IDTracker.SkillIDs[(int) skill.ItemRarity] = skill.ID + 1;
 
             foreach(Monster monster in Monsters.Values)
-                if (monster.ID >= IDTracker.Monster[monster.Floor - 1][(int) monster.MonsterType])
-                    IDTracker.Monster[monster.Floor - 1][(int) monster.MonsterType] = monster.ID + 1;
+                if (monster.ID >= IDTracker.MonsterIDs[monster.Floor - 1][(int) monster.MonsterType])
+                    IDTracker.MonsterIDs[monster.Floor - 1][(int) monster.MonsterType] = monster.ID + 1;
         }
     }
 }

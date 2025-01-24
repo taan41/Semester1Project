@@ -11,8 +11,16 @@ namespace ConsolePL
 
         public static async Task Main()
         {
-            if (!await ServerUI.FillDBInfoScreen())
-                return;
+            while (true)
+            {
+                var (success, exit) = await ServerUI.FillDBInfoScreen();
+
+                if (exit)
+                    return;
+
+                if (success)
+                    break;
+            }
 
             string? serverIP = null;
             int port = Config.ServerConfig.Port;
