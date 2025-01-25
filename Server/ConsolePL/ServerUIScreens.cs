@@ -47,10 +47,31 @@ static class ServerUI
         // DrawLine('-');
 
         // if (await Server.InitializeDB(server, db, uid, password))
-        var (success, error) = await Server.InitializeDB("26.244.97.115", "consoleconquer", "root", "");
+
+        WriteLine(" -- Connecting to MySql database");
+        WriteLine(" 'ESC' to return");
+        WriteLine(" Leave blank for default values");
+        DrawLine('-');
+
+        WriteLine(" Current available IP:");
+        WriteLine(" - Radmin VPN: 26.244.97.155");
+        WriteLine(" - Localhost: 127.0.0.1");
+        WriteLine(" Radmin network: consoleconquer (password: 000000)");
+        WriteLine(@" MySql dump file for localhost is located at: MySql Files\Dump\");
+        DrawLine('-');
+        
+        WriteLine(" Enter database IP (default localhost): ");
+        string? dbIP = ReadInput();
+        if (dbIP == null)
+            return (false, true);
+        if (string.IsNullOrWhiteSpace(dbIP))
+            dbIP = "127.0.0.1";
+
+        var (success, error) = await Server.InitializeDB(dbIP, "consoleconquer", "root", "");
         if (success)
         {
             WriteLine(" Database connection successful!");
+            WriteLine(" Press any key to continue...");
             ReadKey(true);
             return (true, false);
         }
