@@ -1,8 +1,14 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using BLL.GameComponents.ItemComponents;
+using BLL.GameHelpers;
+using DAL;
+using DAL.ConfigClasses;
 
 namespace BLL.GameComponents.EntityComponents
 {
     [Serializable]
+    [JsonConverter(typeof(PlayerJsonConverter))]
     public class Player : Entity
     {
         private static int MaxSkillCount => Config.PlayerMaxSkillCount;
@@ -161,6 +167,110 @@ namespace BLL.GameComponents.EntityComponents
 
                 }
             }
+        }
+    }
+
+    public class PlayerJsonConverter : JsonConverter<Player>
+    {
+        private static GameConfig GameConfig => ConfigManager.Instance.GameConfig;
+        
+        public override Player Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var player = new Player();
+            int currentHP = -1, currentMP = -1;
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.EndObject)
+                {
+                    break;
+                }
+
+                if (reader.TokenType == JsonTokenType.PropertyName)
+                {
+                    string? propertyName = reader.GetString();
+                    reader.Read();
+
+                    switch (propertyName)
+                    {
+                        case "Equipped":
+                            player.Equipped = JsonSerializer.Deserialize<List<int>>(ref reader, options)?
+                                .Select(id => new Equipment(AssetLoader.Equipments[id])).ToList() ?? [];
+                            break;
+
+                        case "EquipInventory":
+                            player.EquipInventory = JsonSerializer.Deserialize<List<int>>(ref reader, options)?
+                                .Select(id => new Equipment(AssetLoader.Equipments[id])).ToList() ?? [];
+                            break;
+
+                        case "Skills":
+                            player.Skills = JsonSerializer.Deserialize<List<int>>(ref reader, options)?
+                                .Select(id => new Skill(AssetLoader.Skills[id])).ToList() ?? [];
+                            break;
+                            
+                        case "SkillInventory":
+                            player.SkillInventory = JsonSerializer.Deserialize<List<int>>(ref reader, options)?
+                                .Select(id => new Skill(AssetLoader.Skills[id])).ToList() ?? [];
+                            break;
+
+                        case "PlayerGold":
+                            player.PlayerGold = JsonSerializer.Deserialize<Gold>(ref reader, options) ?? new Gold(GameConfig.PlayerDefaultGold);
+                            break;
+
+                        case "HP":
+                            currentHP = reader.GetInt32();
+                            break;
+
+                        case "MP":
+                            currentMP = reader.GetInt32();
+                            break;
+
+                        case "Name":
+                            player.Name = reader.GetString() ?? "Player";
+                            break;
+                    }
+                }
+            }
+
+            player.ATK = GameConfig.PlayerDefaultATK + player.Equipped.Sum(e => e.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100);
+            player.DEF = GameConfig.PlayerDefaultDEF + player.Equipped.Sum(e => e.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100);
+            player.MaxHP = GameConfig.PlayerDefaultHP + player.Equipped.Sum(e => e.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100);
+            player.HP = currentHP == -1 ? player.MaxHP : currentHP;
+            player.MaxMP = GameConfig.PlayerDefaultMP + player.Equipped.Sum(e => e.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100);
+            player.MP = currentMP == -1 ? player.MaxMP : currentMP;
+
+            return player;
+        }
+
+        public override void Write(Utf8JsonWriter writer, Player value, JsonSerializerOptions options)
+        {
+            writer.WriteStartObject();
+
+            writer.WritePropertyName("Equipped");
+            JsonSerializer.Serialize(writer, value.Equipped.Select(e => e.ID).ToList(), options);
+
+            writer.WritePropertyName("EquipInventory");
+            JsonSerializer.Serialize(writer, value.EquipInventory.Select(e => e.ID).ToList(), options);
+
+            writer.WritePropertyName("Skills");
+            JsonSerializer.Serialize(writer, value.Skills.Select(s => s.ID).ToList(), options);
+
+            writer.WritePropertyName("SkillInventory");
+            JsonSerializer.Serialize(writer, value.SkillInventory.Select(s => s.ID).ToList(), options);
+
+            writer.WritePropertyName("PlayerGold");
+            JsonSerializer.Serialize(writer, value.PlayerGold, options);
+
+            writer.WritePropertyName("HP");
+            JsonSerializer.Serialize(writer, value.HP, options);
+
+            writer.WritePropertyName("MP");
+            JsonSerializer.Serialize(writer, value.MP, options);
+
+            writer.WritePropertyName("Name");
+            JsonSerializer.Serialize(writer, value.Name, options);
+
+            writer.WriteEndObject();
         }
     }
 }

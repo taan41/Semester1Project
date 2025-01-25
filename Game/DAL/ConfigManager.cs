@@ -4,7 +4,6 @@ using static DAL.FileManager;
 
 namespace DAL
 {
-    [Serializable]
     public class ConfigManager
     {
         public static ConfigManager Instance { get; } = new(true);
@@ -13,9 +12,7 @@ namespace DAL
         public ServerConfig ServerConfig { get; set; } = new();
         public DatabaseConfig DatabaseConfig { get; set; } = new();
 
-        public ConfigManager() {}
-
-        public ConfigManager(bool loadConfig)
+        private ConfigManager(bool loadConfig)
         {
             if (loadConfig)
                 LoadConfig();

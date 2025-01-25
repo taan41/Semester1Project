@@ -53,14 +53,15 @@ static class ServerUI
         WriteLine(" Leave blank for default values");
         DrawLine('-');
 
-        WriteLine(" Current available IP:");
-        WriteLine(" - Radmin VPN: 26.244.97.155");
+        WriteLine(" Current available database IP:");
+        WriteLine(" - Radmin VPN: 26.244.97.115");
         WriteLine(" - Localhost: 127.0.0.1");
-        WriteLine(" Radmin network: consoleconquer (password: 000000)");
-        WriteLine(@" MySql dump file for localhost is located at: MySql Files\Dump\");
+        WriteLine(" Radmin VPN network: consoleconquer (password: 000000)");
+        WriteLine(@" MySql dump file for local db is located at: MySql Files\Dump\");
+        WriteLine(" Username & password for local db should be 'root' & empty");
         DrawLine('-');
         
-        WriteLine(" Enter database IP (default localhost): ");
+        Write(" Enter database IP (default localhost): ");
         string? dbIP = ReadInput();
         if (dbIP == null)
             return (false, true);
