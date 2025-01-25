@@ -27,9 +27,9 @@ namespace DAL.DBHandlers
         
         public static string ConnectionString { get; private set; } = "";
 
-        public static bool Initialize(string server, string db, string uid, string? password, out string errorMessage)
+        public static bool Initialize(string server, string db, string uid, string? password, out string error)
         {
-            errorMessage = "";
+            error = "";
 
             try
             {
@@ -58,7 +58,8 @@ namespace DAL.DBHandlers
             }
             catch (MySqlException ex)
             {
-                errorMessage = ex.Message;
+                // error = ex.Message;
+                error = ex.ToString();
                 return false;
             }
         }

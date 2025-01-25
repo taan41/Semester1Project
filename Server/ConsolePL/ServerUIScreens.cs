@@ -47,7 +47,8 @@ static class ServerUI
         // DrawLine('-');
 
         // if (await Server.InitializeDB(server, db, uid, password))
-        if (await Server.InitializeDB("26.244.97.115", "consoleconquer", "root", ""))
+        var (success, error) = await Server.InitializeDB("26.244.97.115", "consoleconquer", "root", "");
+        if (success)
         {
             WriteLine(" Database connection successful!");
             ReadKey(true);
@@ -56,6 +57,7 @@ static class ServerUI
         else
         {
             WriteLine(" Database connection failed.");
+            WriteLine($" Error: {error}");
             ReadKey(true);
             return (false, false);
         }

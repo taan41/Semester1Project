@@ -15,17 +15,17 @@ namespace BLL
 
         public static readonly List<ClientHandler> clientList = [];
 
-        public static async Task<bool> InitializeDB(string server, string db, string uid, string password)
+        public static async Task<(bool success, string error)> InitializeDB(string server, string db, string uid, string password)
         {
-            if (!DBManager.Initialize(server, db, uid, password, out string errorMessage))
+            if (!DBManager.Initialize(server, db, uid, password, out string error))
             {
-                LogHandler.AddLog($"Error while connecting to MySql DB: {errorMessage}");
-                return false;
+                LogHandler.AddLog($"Error while connecting to MySql DB: {error}");
+                return (false, error);
             }
 
             LogHandler.Initialize();
             await ConfigManager.Instance.LoadConfig(true);
-            return true;
+            return (true, "");
         }
 
         public static async Task StartServer(string? serverIP, int port)
