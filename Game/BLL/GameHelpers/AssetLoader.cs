@@ -6,14 +6,14 @@ namespace BLL.GameHelpers
 {
     public class AssetLoader
     {
-        public static Dictionary<int, Equipment> Equipments { get; protected set; } = [];
-        public static Dictionary<int, Skill> Skills { get; protected set; } = [];
-        public static Dictionary<int, Monster> Monsters { get; protected set; } = [];
+        private static Dictionary<int, Equipment> Equipments = [];
+        private static Dictionary<int, Skill> Skills = [];
+        private static Dictionary<int, Monster> Monsters = [];
         
         static AssetLoader()
-            => Load();
+            => LoadAsset();
 
-        public static void Load()
+        public static void LoadAsset()
         {
             Equipments = FileManager.ReadJson<Dictionary<int, Equipment>>(FileManager.FolderNames.Assets, FileManager.FileNames.Equips) ?? [];
             Skills = FileManager.ReadJson<Dictionary<int, Skill>>(FileManager.FolderNames.Assets, FileManager.FileNames.Skills) ?? [];
@@ -31,5 +31,14 @@ namespace BLL.GameHelpers
                 if (monster.ID >= IDTracker.MonsterIDs[monster.Floor - 1][(int) monster.MonsterType])
                     IDTracker.MonsterIDs[monster.Floor - 1][(int) monster.MonsterType] = monster.ID + 1;
         }
+
+        public static Equipment GetEquip(int id)
+            => Equipments.TryGetValue(id, out Equipment? equip) ? equip : Equipment.DefaultEquipment();
+
+        public static Skill GetSkill(int id)
+            => Skills.TryGetValue(id, out Skill? skill) ? skill : Skill.DefaultSkill();
+
+        public static Monster GetMonster(int id)
+            => Monsters.TryGetValue(id, out Monster? monster) ? monster : Monster.DefaultMonster();
     }
 }

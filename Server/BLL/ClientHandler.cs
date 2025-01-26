@@ -353,14 +353,14 @@ namespace BLL
             if (user == null || user.UserID < 1)
                 return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-            GameSave? gameSave = FromJson<GameSave>(cmd.Payload);
+            // GameSave? gameSave = FromJson<GameSave>(cmd.Payload);
 
-            if (gameSave == null)
-                return Helper.ErrorCmd(this, cmd, "Invalid game save");
+            // if (gameSave == null)
+            //     return Helper.ErrorCmd(this, cmd, "Invalid game save");
 
-            gameSave.Name = $"{user.Username}Save";
+            // gameSave.Name = $"{user.Username}Save";
 
-            var (success, errorMessage) = await GameSaveDB.Save(user.UserID, gameSave);
+            var (success, errorMessage) = await GameSaveDB.Save(user.UserID, cmd.Payload);
 
             if (!success)
                 return Helper.ErrorCmd(this, cmd, errorMessage);
@@ -374,12 +374,12 @@ namespace BLL
             if (user == null || user.UserID < 1)
                 return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-            var (gameSave, errorMessage) = await GameSaveDB.Load(user.UserID);
+            var (saveContent, errorMessage) = await GameSaveDB.Load(user.UserID);
 
-            if (gameSave == null)
+            if (saveContent == null)
                 return Helper.ErrorCmd(this, cmd, errorMessage, false);
 
-            return new(cmd.CommandType, ToJson(gameSave));
+            return new(cmd.CommandType, saveContent);
         }
 
         private async Task<Command> UploadScore(Command cmd)

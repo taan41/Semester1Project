@@ -118,7 +118,7 @@ namespace BLL.GameHandlers
                 FileManager.WriteJson(FileManager.FolderNames.Assets, FileManager.FileNames.Monsters, monsters);
             }
 
-            AssetLoader.Load();
+            AssetLoader.LoadAsset();
 
             error = "";
             return true;
@@ -199,7 +199,6 @@ namespace BLL.GameHandlers
                 return false;
             }
 
-            DownloadSave();
             error = "";
             return true;
         }
@@ -209,7 +208,7 @@ namespace BLL.GameHandlers
             if (!NetworkHandler.Communicate(new(Command.Type.DownloadSave), out string result))
                 return;
 
-            GameSave.FromJson(result)?.SaveAs("Cloud Save");
+            GameSave.FromJson(result)?.SaveAs("CloudSave");
         }
 
         public static bool UploadSave(GameSave save, out string error)

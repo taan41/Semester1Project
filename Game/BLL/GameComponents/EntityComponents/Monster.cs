@@ -36,6 +36,9 @@ namespace BLL.GameComponents.EntityComponents
             MaxHP = MaxHP * targetPower / ogPower;
             HP = HP * targetPower / ogPower;
         }
+
+        public static Monster DefaultMonster()
+            => new() { Name = "Default Monster", ATK = 0, DEF = 0, HP = 0, MonsterType = Type.Normal };
     }
 
     class MonsterComparer : IComparer<Monster>

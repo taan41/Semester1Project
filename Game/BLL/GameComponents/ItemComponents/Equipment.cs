@@ -29,6 +29,9 @@ namespace BLL.GameComponents.ItemComponents
             
             Price = other.Price != -1 ? other.Price : Config.ItemPriceBase * (100 + (int) ItemRarity * Config.ItemPriceRarityBonusPercentage) * (100 + Config.ItemPriceEquipBonusPercentage) / 10000;
         }
+
+        public static Equipment DefaultEquipment()
+            => new() { Name = "Default Equipment", ItemRarity = Rarity.Common, EquipType = Type.Weapon, BonusATKPoint = 0, BonusDEFPoint = 0, BonusHPPoint = 0, BonusMPPoint = 0 };
     }
 
     class EquipmentComparer : IComparer<Equipment>

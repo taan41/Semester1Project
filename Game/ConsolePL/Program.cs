@@ -241,6 +241,9 @@ namespace ConsolePL
 
         static void LoadGame()
         {
+            if (ServerHandler.IsLoggedIn)
+                ServerHandler.DownloadSave();
+
             List<GameSave> saves = GameSave.LoadGameSaves(out string? error);
 
             if (error != null)
@@ -311,15 +314,15 @@ namespace ConsolePL
 
             List<Equipment> startEquips =
             [
-                AssetLoader.Equipments[1],
-                AssetLoader.Equipments[2],
-                AssetLoader.Equipments[3]
+                AssetLoader.GetEquip(1),
+                AssetLoader.GetEquip(2),
+                AssetLoader.GetEquip(3)
             ];
             List<Skill> startSkills =
             [
-                AssetLoader.Skills[1],
-                AssetLoader.Skills[2],
-                AssetLoader.Skills[3]
+                AssetLoader.GetSkill(1),
+                AssetLoader.GetSkill(2),
+                AssetLoader.GetSkill(3)
             ];
 
             GenericGameScreen(gameHandler.Progress, gameHandler.Player);

@@ -26,6 +26,9 @@ namespace BLL.GameComponents.ItemComponents
 
             Price = other.Price != -1 ? other.Price : Config.ItemPriceBase * (100 + (int) ItemRarity * Config.ItemPriceRarityBonusPercentage) * (100 + Config.ItemPriceSkillBonusPercentage) / 10000;
         }
+
+        public static Skill DefaultSkill()
+            => new() { Name = "Default Skill", ItemRarity = Rarity.Common, SkillType = Type.Single, DamagePoint = 0, HealPoint = 0, MPCost = 0 };
     }
 
     class SkillComparer : IComparer<Skill>

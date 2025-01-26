@@ -185,19 +185,19 @@ namespace BLL.GameHelpers
 
             while (bossQuantity-- > 0)
             {
-                Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 201, IDTracker.MonsterIDs[floorNumber - 1][2])];
+                Monster pickedMonster = AssetLoader.GetMonster(_rng.Next((floorNumber - 1) * 1000 + 201, IDTracker.MonsterIDs[floorNumber - 1][2]));
                 monsters.Add(new(pickedMonster, monsterPower * BossPowerPercentage / 100));
             }
 
             while (eliteQuantity-- > 0)
             {
-                Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 101, IDTracker.MonsterIDs[floorNumber - 1][1])];
+                Monster pickedMonster = AssetLoader.GetMonster(_rng.Next((floorNumber - 1) * 1000 + 101, IDTracker.MonsterIDs[floorNumber - 1][1]));
                 monsters.Add(new(pickedMonster, monsterPower * ElitePowerPercentage / 100));
             }
 
             while (normalQuantity-- > 0)
             {
-                Monster pickedMonster = AssetLoader.Monsters[_rng.Next((floorNumber - 1) * 1000 + 1, IDTracker.MonsterIDs[floorNumber - 1][0])];
+                Monster pickedMonster = AssetLoader.GetMonster(_rng.Next((floorNumber - 1) * 1000 + 1, IDTracker.MonsterIDs[floorNumber - 1][0]));
                 monsters.Add(new(pickedMonster, monsterPower));
             }
 
@@ -210,7 +210,7 @@ namespace BLL.GameHelpers
             for (int i = 0; i < 6; i++)
             {
                 Item.Rarity rarity = GenerateRarity(roomIndex);
-                equipments.Add(new(AssetLoader.Equipments[_rng.Next((int) rarity * 100 + 1, IDTracker.EquipIDs[(int) rarity])]));
+                equipments.Add(new(AssetLoader.GetEquip(_rng.Next((int) rarity * 100 + 1, IDTracker.EquipIDs[(int) rarity]))));
             }
             equipments.Sort(new EquipmentComparer());
 
@@ -218,7 +218,7 @@ namespace BLL.GameHelpers
             for(int i = 0; i < 4; i++)
             {
                 Item.Rarity rarity = GenerateRarity(roomIndex);
-                skills.Add(new(AssetLoader.Skills[_rng.Next((int) rarity * 100 + 1, IDTracker.SkillIDs[(int) rarity])]));
+                skills.Add(new(AssetLoader.GetSkill(_rng.Next((int) rarity * 100 + 1, IDTracker.SkillIDs[(int) rarity]))));
             }
             skills.Sort(new SkillComparer());
 
@@ -260,10 +260,10 @@ namespace BLL.GameHelpers
             ));
 
             Item.Rarity equipRarity = GenerateRarity(floorNumber  * MaxRoom);
-            rewards.Add(new Equipment(AssetLoader.Equipments[_rng.Next((int) equipRarity * 100 + 1, IDTracker.EquipIDs[(int) equipRarity])]));
+            rewards.Add(new Equipment(AssetLoader.GetEquip(_rng.Next((int) equipRarity * 100 + 1, IDTracker.EquipIDs[(int) equipRarity]))));
 
             Item.Rarity skillRarity = GenerateRarity(floorNumber  * MaxRoom);
-            rewards.Add(new Skill(AssetLoader.Skills[_rng.Next((int) skillRarity * 100 + 1, IDTracker.SkillIDs[(int) skillRarity])]));
+            rewards.Add(new Skill(AssetLoader.GetSkill(_rng.Next((int) skillRarity * 100 + 1, IDTracker.SkillIDs[(int) skillRarity]))));
 
             return new(rewards);
         }
@@ -278,11 +278,11 @@ namespace BLL.GameHelpers
             {
                 Item.Rarity equipRarity = _rng.Next(100 + (floorNumber - 1) * 200) < 75 ?
                     Item.Rarity.Epic : Item.Rarity.Legendary;
-                rewards.Add(new Equipment(AssetLoader.Equipments[_rng.Next((int) equipRarity * 100 + 1, IDTracker.EquipIDs[(int) equipRarity])]));
+                rewards.Add(new Equipment(AssetLoader.GetEquip(_rng.Next((int) equipRarity * 100 + 1, IDTracker.EquipIDs[(int) equipRarity]))));
 
                 Item.Rarity skillRarity = _rng.Next(100 + (floorNumber - 1) * 200) < 75 ?
                     Item.Rarity.Epic : Item.Rarity.Legendary;
-                rewards.Add(new Skill(AssetLoader.Skills[_rng.Next((int) skillRarity * 100 + 1, IDTracker.SkillIDs[(int) skillRarity])]));
+                rewards.Add(new Skill(AssetLoader.GetSkill(_rng.Next((int) skillRarity * 100 + 1, IDTracker.SkillIDs[(int) skillRarity]))));
             }
             else
             {
@@ -290,14 +290,14 @@ namespace BLL.GameHelpers
                 if (itemChance < 91 && itemChance < 40 + roomIndex + eliteQuantity * 20)
                 {
                     Item.Rarity equipRarity = GenerateRarity(roomIndex);
-                    rewards.Add(new Equipment(AssetLoader.Equipments[_rng.Next((int) equipRarity * 100 + 1, IDTracker.EquipIDs[(int) equipRarity])]));
+                    rewards.Add(new Equipment(AssetLoader.GetEquip(_rng.Next((int) equipRarity * 100 + 1, IDTracker.EquipIDs[(int) equipRarity]))));
                 }
 
                 int skillChance = _rng.Next(1, 101);
                 if (skillChance < Math.Min(71, 15 + roomIndex + eliteQuantity * 10))
                 {
                     Item.Rarity skillRarity = GenerateRarity(roomIndex);
-                    rewards.Add(new Skill(AssetLoader.Skills[_rng.Next((int) skillRarity * 100 + 1, IDTracker.SkillIDs[(int) skillRarity])]));
+                    rewards.Add(new Skill(AssetLoader.GetSkill(_rng.Next((int) skillRarity * 100 + 1, IDTracker.SkillIDs[(int) skillRarity]))));
                 }
             }
 

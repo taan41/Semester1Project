@@ -8,7 +8,7 @@ namespace DAL.DBHandlers
 {
     public static class GameSaveDB
     {
-        public static async Task<(bool success, string errorMessage)> Save(int userID, GameSave save)
+        public static async Task<(bool success, string errorMessage)> Save(int userID, string saveContent)
         {
             string query = @"
                 INSERT INTO GameSaves (UserID, SaveContent)
@@ -23,7 +23,7 @@ namespace DAL.DBHandlers
 
                 using MySqlCommand cmd = new(query, conn);
                 cmd.Parameters.AddWithValue("@userID", userID);
-                cmd.Parameters.AddWithValue("@content", ToJson(save));
+                cmd.Parameters.AddWithValue("@content", saveContent);
 
                 await cmd.ExecuteNonQueryAsync();
                 return (true, "");
@@ -34,7 +34,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(GameSave? data, string errorMessage)> Load(int userID)
+        public static async Task<(string? saveContent, string errorMessage)> Load(int userID)
         {
             string query = @"
                 SELECT SaveContent
@@ -56,7 +56,7 @@ namespace DAL.DBHandlers
                     return (null, "No data found");
 
                 await reader.ReadAsync();
-                return (FromJson<GameSave>(reader.GetString("SaveContent")), "");
+                return (reader.GetString("SaveContent"), "");
             }
             catch (MySqlException ex)
             {

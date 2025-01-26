@@ -195,22 +195,22 @@ namespace BLL.GameComponents.EntityComponents
                     {
                         case "Equipped":
                             player.Equipped = JsonSerializer.Deserialize<List<int>>(ref reader, options)?
-                                .Select(id => new Equipment(AssetLoader.Equipments[id])).ToList() ?? [];
+                                .Select(id => new Equipment(AssetLoader.GetEquip(id))).ToList() ?? [];
                             break;
 
                         case "EquipInventory":
                             player.EquipInventory = JsonSerializer.Deserialize<List<int>>(ref reader, options)?
-                                .Select(id => new Equipment(AssetLoader.Equipments[id])).ToList() ?? [];
+                                .Select(id => new Equipment(AssetLoader.GetEquip(id))).ToList() ?? [];
                             break;
 
                         case "Skills":
                             player.Skills = JsonSerializer.Deserialize<List<int>>(ref reader, options)?
-                                .Select(id => new Skill(AssetLoader.Skills[id])).ToList() ?? [];
+                                .Select(id => new Skill(AssetLoader.GetSkill(id))).ToList() ?? [];
                             break;
                             
                         case "SkillInventory":
                             player.SkillInventory = JsonSerializer.Deserialize<List<int>>(ref reader, options)?
-                                .Select(id => new Skill(AssetLoader.Skills[id])).ToList() ?? [];
+                                .Select(id => new Skill(AssetLoader.GetSkill(id))).ToList() ?? [];
                             break;
 
                         case "PlayerGold":
