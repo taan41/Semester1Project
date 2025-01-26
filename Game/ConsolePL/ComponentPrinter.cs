@@ -107,25 +107,25 @@ namespace ConsolePL
             if (equip.BonusATKPoint != 0)
             {
                 ForegroundColor = ConsoleColor.DarkYellow;
-                Write($" [{(equip.BonusATKPoint > 0 ? "+" : "-")}{equip.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100} ATK]");
+                Write($"[{(equip.BonusATKPoint > 0 ? "+" : "-")}{equip.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100} ATK]");
             }
 
             if (equip.BonusDEFPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Green;
-                Write($" [{(equip.BonusDEFPoint > 0 ? "+" : "-")}{equip.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100} DEF]");
+                Write($"[{(equip.BonusDEFPoint > 0 ? "+" : "-")}{equip.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100} DEF]");
             }
 
             if (equip.BonusHPPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Red;
-                Write($" [{(equip.BonusHPPoint > 0 ? "+" : "-")}{equip.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100} HP]");
+                Write($"[{(equip.BonusHPPoint > 0 ? "+" : "-")}{equip.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100} HP]");
             }
 
             if (equip.BonusMPPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Blue;
-                Write($" [{(equip.BonusMPPoint > 0 ? "+" : "-")}{equip.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100} MP]");
+                Write($"[{(equip.BonusMPPoint > 0 ? "+" : "-")}{equip.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100} MP]");
             }
 
             ResetColor();
@@ -157,13 +157,13 @@ namespace ConsolePL
                 };
 
                 ForegroundColor = ConsoleColor.DarkYellow;
-                Write($" [▲ {skill.DamagePoint * GameConfig.SkillPtDamagePercentage * typePercentage / 10000}]");
+                Write($"[▲ {skill.DamagePoint * GameConfig.SkillPtDamagePercentage * typePercentage / 10000}]");
             }
 
             if (skill.HealPoint > 0)
             {
                 ForegroundColor = ConsoleColor.Green;
-                Write($" [+ {skill.HealPoint * GameConfig.SkillPtHealPercentage / 100}]");
+                Write($"[+ {skill.HealPoint * GameConfig.SkillPtHealPercentage / 100}]");
             }
 
             ForegroundColor = ConsoleColor.Blue;
@@ -217,25 +217,25 @@ namespace ConsolePL
             if (equip.BonusATKPoint != 0)
             {
                 ForegroundColor = ConsoleColor.DarkYellow;
-                Write($" [{(equip.BonusATKPoint > 0 ? "+" : "-")}{equip.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100}]");
+                Write($"[{(equip.BonusATKPoint > 0 ? "+" : "-")}{equip.BonusATKPoint * GameConfig.EquipPtATKPercentage / 100}]");
             }
 
             if (equip.BonusDEFPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Green;
-                Write($" [{(equip.BonusDEFPoint > 0 ? "+" : "-")}{equip.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100}]");
+                Write($"[{(equip.BonusDEFPoint > 0 ? "+" : "-")}{equip.BonusDEFPoint * GameConfig.EquipPtDEFPercentage / 100}]");
             }
 
             if (equip.BonusHPPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Red;
-                Write($" [{(equip.BonusHPPoint > 0 ? "+" : "-")}{equip.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100}]");
+                Write($"[{(equip.BonusHPPoint > 0 ? "+" : "-")}{equip.BonusHPPoint * GameConfig.EquipPtHPPercentage / 100}]");
             }
 
             if (equip.BonusMPPoint != 0)
             {
                 ForegroundColor = ConsoleColor.Blue;
-                Write($" [{(equip.BonusMPPoint > 0 ? "+" : "-")}{equip.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100}]");
+                Write($"[{(equip.BonusMPPoint > 0 ? "+" : "-")}{equip.BonusMPPoint * GameConfig.EquipPtMPPercentage / 100}]");
             }
 
             ResetColor();

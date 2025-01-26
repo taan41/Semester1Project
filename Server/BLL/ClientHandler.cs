@@ -4,7 +4,6 @@ using System.Text.Json;
 using DAL;
 using DAL.DBHandlers;
 using DAL.Persistence.DataTransferObjects;
-using DAL.Persistence.GameComponents.Others;
 
 using static BLL.ServerHelper;
 
@@ -352,13 +351,6 @@ namespace BLL
         {
             if (user == null || user.UserID < 1)
                 return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            // GameSave? gameSave = FromJson<GameSave>(cmd.Payload);
-
-            // if (gameSave == null)
-            //     return Helper.ErrorCmd(this, cmd, "Invalid game save");
-
-            // gameSave.Name = $"{user.Username}Save";
 
             var (success, errorMessage) = await GameSaveDB.Save(user.UserID, cmd.Payload);
 

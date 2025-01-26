@@ -542,7 +542,7 @@ namespace ConsolePL
                             switch (pickedSkill.SkillType)
                             {
                                 case Skill.Type.Single:
-                                    pickedMonsterInd = Picker.Component(fightEvent.Monsters, CursorPos.MainZoneTop + 1);
+                                    pickedMonsterInd = Picker.Component(fightEvent.Monsters, CursorPos.MainZoneTop);
                                     if (pickedMonsterInd == null)
                                         continue;
 
@@ -746,7 +746,7 @@ namespace ConsolePL
 
             VictoryScreen(gameHandler.GetElapsedTime(), winOptions);
 
-            switch (Picker.String(winOptions, CursorPos.TitleScreenMenuLeft, CursorPos.EndScreenMenuTop))
+            switch (Picker.String(winOptions, CursorPos.EndScreenMenuTop + 3, CursorPos.EndScreenMenuLeft))
             {
                 default:
                     return;

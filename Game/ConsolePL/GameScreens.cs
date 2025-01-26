@@ -733,12 +733,13 @@ namespace ConsolePL
             CursorTop++;
 
             WriteLine($" -- {listName}:");
+            WriteLine("     Nickname                  - Run Duration - Uploaded Time");
             for (int i = 1; i < 16; i++)
             {
                 if (i <= scores.Count)
-                    WriteLine($" {i}. {scores[i - 1]}");
+                    WriteLine($" {i,2}. {scores[i - 1]}");
                 else
-                    WriteLine($" {i}.");
+                    WriteLine($" {i,2}.");
             }
 
             CursorTop = CursorPos.BottomBorderTop;
@@ -937,7 +938,8 @@ namespace ConsolePL
             foreach (var option in options)
             {
                 CursorLeft = CursorPos.EndScreenMenuLeft;
-                WriteLine($" {option}        ");
+                WriteLine(option);
+                DrawEmptyLine();
             }
         }
 

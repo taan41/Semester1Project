@@ -23,7 +23,7 @@ namespace NetworkLL.DataTransferObjects
         }
 
         public override string ToString()
-            => $"{Nickname.PadLeft(NicknameMax)} - {ClearTime:hh\\:mm\\:ss\\.fff} - {UploadedTime:yyyy-MM-dd HH\\:mm\\:ss}";
+            => $"{Nickname.PadRight(NicknameMax)} - {ClearTime:hh\\:mm\\:ss\\.fff} - {UploadedTime:yyyy-MM-dd HH\\:mm\\:ss}";
 
         public string ToJson()
             => JsonSerializer.Serialize(this);

@@ -7,7 +7,7 @@ namespace DAL.DBHandlers
     {
         public static async Task<(bool success, string errorMessage)> Add(Score score)
         {
-            string query = "INSERT INTO Scores (UserID, ClearTime) VALUES (@userID, @clearTime)";
+            string query = "INSERT INTO Scores (UserID, ClearTime, UploadedTime) VALUES (@userID, @clearTime, @uploadedTime)";
 
             try
             {
@@ -17,6 +17,7 @@ namespace DAL.DBHandlers
                 using MySqlCommand cmd = new(query, conn);
                 cmd.Parameters.AddWithValue("@userID", score.UserID);
                 cmd.Parameters.AddWithValue("@clearTime", score.ClearTime);
+                cmd.Parameters.AddWithValue("@uploadedTime", score.UploadedTime);
 
                 await cmd.ExecuteNonQueryAsync();
 
@@ -57,11 +58,12 @@ namespace DAL.DBHandlers
 
                 using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
-                    scores.Add(new(
-                        userID, 
-                        reader.GetString("Nickname"), 
-                        reader.GetTimeSpan("ClearTime")
-                    ));
+                    scores.Add(new(){
+                        UserID = userID,
+                        Nickname = reader.GetString("Nickname"),
+                        ClearTime = reader.GetTimeSpan("ClearTime"),
+                        UploadedTime = reader.GetDateTime("UploadedTime")
+                    });
 
                 return (scores, "");
             }
@@ -100,11 +102,12 @@ namespace DAL.DBHandlers
 
                 using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
-                    scores.Add(new(
-                        null,
-                        reader.GetString("Nickname"), 
-                        reader.GetTimeSpan("ClearTime")
-                    ));
+                    scores.Add(new(){
+                        UserID = -1,
+                        Nickname = reader.GetString("Nickname"),
+                        ClearTime = reader.GetTimeSpan("ClearTime"),
+                        UploadedTime = reader.GetDateTime("UploadedTime")
+                    });
 
                 return (scores, "");
             }
@@ -140,11 +143,12 @@ namespace DAL.DBHandlers
 
                 using var reader = (MySqlDataReader) await cmd.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
-                    scores.Add(new(
-                        null,
-                        reader.GetString("Nickname"), 
-                        reader.GetTimeSpan("ClearTime")
-                    ));
+                    scores.Add(new(){
+                        UserID = -1,
+                        Nickname = reader.GetString("Nickname"),
+                        ClearTime = reader.GetTimeSpan("ClearTime"),
+                        UploadedTime = reader.GetDateTime("UploadedTime")
+                    });
 
                 return (scores, "");
             }
