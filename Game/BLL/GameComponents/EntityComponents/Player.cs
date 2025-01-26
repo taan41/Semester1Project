@@ -62,6 +62,9 @@ namespace BLL.GameComponents.EntityComponents
                 Equipped.Remove(oldEquipment);
                 EquipInventory.Add(oldEquipment);
             }
+
+            Equipped.Sort(new EquipmentComparer());
+            EquipInventory.Sort(new EquipmentComparer());
         }
 
         public void ChangeSkill(int index, Skill skillToChange)
@@ -72,6 +75,8 @@ namespace BLL.GameComponents.EntityComponents
             
             SkillInventory.Remove(skillToChange);
             SkillInventory.Add(removedSkill);
+
+            SkillInventory.Sort(new SkillComparer());
         }
 
         public void AddItem<T>(T item) where T : Item

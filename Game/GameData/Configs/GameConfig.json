@@ -29,7 +29,7 @@
   "EventPowerPerRoom": 100,
   "EventPowerPerFloorRatio": 50,
   "EventPowerElitePercentage": 200,
-  "EventPowerBossPercentage": 500,
+  "EventPowerBossPercentage": 400,
   "EventRoomCountTreasure": 10,
   "EventRoomCountCamp": 5,
   "EventRoomCountShop": 5,

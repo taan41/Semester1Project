@@ -433,15 +433,14 @@ namespace ConsolePL
         static void HandleEquipInventory(GameLoopHandler gameHandler)
         {
             List<Equipment> equipInv = gameHandler.Player.EquipInventory;
-            int displayCount = UIConstants.MainZoneHeight - 1;
 
             while (true)
             {
                 GenericGameScreen(gameHandler.Progress, gameHandler.Player);
-                PrintMainZone(equipInv, "Inventory:");
+                PrintMainZone([], "Inventory:");
                 PrintSubZone(gameHandler.Player.Equipped, "Currently Equipped:");
 
-                int? pickedEquipInd = Picker.Component(equipInv, CursorPos.MainZoneTop + 1, 0, displayCount);
+                int? pickedEquipInd = Picker.Component(equipInv, CursorPos.MainZoneTop + 1, 0, UIConstants.MainZoneHeight - 1);
                 if (pickedEquipInd == null)
                     return;
 
@@ -459,7 +458,7 @@ namespace ConsolePL
             while (true)
             {
                 GenericGameScreen(gameHandler.Progress, gameHandler.Player);
-                PrintMainZone(skillInv, "Inventory:");
+                PrintMainZone([], "Inventory:");
                 PrintSubZone(gameHandler.Player.Skills, "Currently Equipped:");
 
                 int? pickedSkillInd = Picker.Component(skillInv, CursorPos.MainZoneTop + 1, 0, displayCount);

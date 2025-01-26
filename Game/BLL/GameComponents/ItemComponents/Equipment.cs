@@ -41,12 +41,12 @@ namespace BLL.GameComponents.ItemComponents
             if (x == null && y == null) return 0;
             if (x == null) return 1;
             if (y == null) return -1;
-            
-            int rarityComparison = y.ItemRarity.CompareTo(x.ItemRarity);
-            if (rarityComparison != 0) return rarityComparison;
 
             int typeComparison = x.EquipType.CompareTo(y.EquipType);
             if (typeComparison != 0) return typeComparison;
+            
+            int rarityComparison = y.ItemRarity.CompareTo(x.ItemRarity);
+            if (rarityComparison != 0) return rarityComparison;
 
             int idComparison = x.ID.CompareTo(y.ID);
             if (idComparison != 0) return idComparison;

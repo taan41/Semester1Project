@@ -217,7 +217,7 @@ namespace ConsolePL
 
                 int index = 0;
                 int startIndex = 0;
-                int stopIndex = Math.Min(components.Count, zoneHeight);
+                int stopIndex = Math.Min(components.Count - 1, zoneHeight - 1);
                 int indexCursorTop = startCursorTop;
                 int? resultIndex;
                 bool refreshScreen = true;
@@ -229,26 +229,30 @@ namespace ConsolePL
                         lock (ConsoleLock)
                         {
                             CursorTop = startCursorTop;
-                            for (int i = startIndex; i < stopIndex; i++)
+
+                            for (int i = startIndex; i <= stopIndex; i++)
                             {
                                 CursorLeft = startCursorLeft;
 
-                                if (startIndex > 0 && i == startIndex)
+                                if (i == startIndex && startIndex > 0)
                                 {
                                     Write("▲".PadLeft(NameLen + 2));
+                                    DrawEmptyLine();
                                     continue;
                                 }
-                                else if (stopIndex < components.Count && i == stopIndex - 1)
+                                
+                                if (stopIndex < components.Count - 1 && i == stopIndex)
                                 {
                                     Write("▼".PadLeft(NameLen + 2));
+                                    DrawEmptyLine();
                                     continue;
                                 }
-                                else if (i == index)
+
+                                if (i == index)
                                 {
                                     indexCursorTop = CursorTop;
                                     Write(" ►");
                                 }
-
                                 Print(components[i]);
                             }
                         }
@@ -262,13 +266,12 @@ namespace ConsolePL
                             if (index > 0)
                             {
                                 index--;
-                                if (index == startIndex + 1 && startIndex > 0)
+                                if (index == startIndex && startIndex > 0)
                                 {
                                     startIndex--;
                                     stopIndex--;
                                 }
                                 refreshScreen = true;
-                                break;
                             }
                             continue;
 
@@ -276,13 +279,12 @@ namespace ConsolePL
                             if (index < components.Count - 1)
                             {
                                 index++;
-                                if (index == stopIndex - 2 && stopIndex < components.Count)
+                                if (index == stopIndex && stopIndex < components.Count - 1)
                                 {
                                     startIndex++;
                                     stopIndex++;
                                 }
                                 refreshScreen = true;
-                                break;
                             }
                             continue;
 
@@ -334,19 +336,22 @@ namespace ConsolePL
                                 if (startIndex > 0 && i == startIndex)
                                 {
                                     Write("▲".PadLeft(NameLen + 2));
+                                    DrawEmptyLine();
                                     continue;
                                 }
-                                else if (stopIndex < items.Count && i == stopIndex - 1)
+                                
+                                if (stopIndex < items.Count && i == stopIndex - 1)
                                 {
                                     Write("▼".PadLeft(NameLen + 2));
+                                    DrawEmptyLine();
                                     continue;
                                 }
-                                else if (i == index)
+                                
+                                if (i == index)
                                 {
                                     indexCursorTop = CursorTop;
                                     Write(" ►");
                                 }
-
                                 PrintPrice(items[i], buying);
                             }
                         }
@@ -374,7 +379,7 @@ namespace ConsolePL
                             if (index < items.Count - 1)
                             {
                                 index++;
-                                if (index == stopIndex - 2 && stopIndex < items.Count)
+                                if (index == stopIndex - 1 && stopIndex < items.Count)
                                 {
                                     startIndex++;
                                     stopIndex++;
@@ -433,13 +438,16 @@ namespace ConsolePL
                                     Write("▲".PadLeft(6));
                                 else if (stopIndex < actions.Count && i == stopIndex - 1)
                                     Write("▼".PadLeft(6));
-                                else if (i == index)
+                                else
                                 {
-                                    indexCursorTop = CursorTop;
-                                    Write("► ");
+                                    if (i == index)
+                                    {
+                                        indexCursorTop = CursorTop;
+                                        Write("► ");
+                                    }
+                                    Write(actions[i]);
                                 }
-
-                                Write(actions[i]);
+                                
                                 DrawEmptyLine(padLength);
                             }
                         }
@@ -467,7 +475,7 @@ namespace ConsolePL
                             if (index < actions.Count - 1)
                             {
                                 index++;
-                                if (index == stopIndex - 2 && stopIndex < actions.Count)
+                                if (index == stopIndex - 1 && stopIndex < actions.Count)
                                 {
                                     startIndex++;
                                     stopIndex++;

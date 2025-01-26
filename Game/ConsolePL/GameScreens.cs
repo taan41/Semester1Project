@@ -769,7 +769,7 @@ namespace ConsolePL
             CursorTop = CursorPos.MainZoneTop;
             if (msg != null)
                 WriteLine($" -- {msg}");
-            options.ForEach(option =>
+            options.Take(UIConstants.MainZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(option =>
             {
                 CursorLeft = optionCursorLeft;
                 WriteLine(option);
@@ -785,7 +785,7 @@ namespace ConsolePL
             CursorTop = CursorPos.MainZoneTop;
             if (msg != null)
                 WriteLine($" -- {msg}");
-            components.ForEach(Print);
+            components.Take(UIConstants.MainZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(Print);
         }
 
         public static void PrintSubZone(List<string> options, string? msg = null, int optionCursorLeft = 1)
@@ -797,7 +797,7 @@ namespace ConsolePL
             CursorTop = CursorPos.SubZoneTop;
             if (msg != null)
                 WriteLine($" -- {msg}");
-            options.ForEach(option =>
+            options.Take(UIConstants.SubZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(option =>
             {
                 CursorLeft = optionCursorLeft;
                 WriteLine(option);
@@ -813,7 +813,7 @@ namespace ConsolePL
             CursorTop = CursorPos.SubZoneTop;
             if (msg != null)
                 WriteLine($" -- {msg}");
-            components.ForEach(Print);
+            components.Take(UIConstants.SubZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(Print);
         }
 
         public static void ShopBanner()
