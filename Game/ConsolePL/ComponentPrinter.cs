@@ -146,6 +146,15 @@ namespace ConsolePL
 
             Write($"| {skill.SkillType, -6} |");
 
+            int rarityPercentage = skill.ItemRarity switch
+            {
+                Item.Rarity.Common => GameConfig.SkillRarityCommonPercentage,
+                Item.Rarity.Rare => GameConfig.SkillRarityRarePercentage,
+                Item.Rarity.Epic => GameConfig.SkillRarityEpicPercentage,
+                Item.Rarity.Legendary => GameConfig.SkillRarityLegendaryPercentage,
+                _ => 100
+            };
+
             if (skill.DamagePoint > 0)
             {
                 int typePercentage = skill.SkillType switch
@@ -157,17 +166,26 @@ namespace ConsolePL
                 };
 
                 ForegroundColor = ConsoleColor.DarkYellow;
-                Write($"[▲ {skill.DamagePoint * GameConfig.SkillPtDamagePercentage * typePercentage / 10000}]");
+                Write($"[▲ {skill.DamagePoint * GameConfig.SkillPtDmgPercentage * rarityPercentage * typePercentage / 1000000}]");
             }
 
             if (skill.HealPoint > 0)
             {
                 ForegroundColor = ConsoleColor.Green;
-                Write($"[+ {skill.HealPoint * GameConfig.SkillPtHealPercentage / 100}]");
+                Write($"[+{skill.HealPoint * GameConfig.SkillPtHealPercentage * rarityPercentage / 10000} HP]");
+            }
+            else if (skill.HealPoint < 0)
+            {
+                ForegroundColor = ConsoleColor.Red;
+                Write($"[-{-skill.HealPoint * GameConfig.SkillPtHealPercentage / 100}HP]");
             }
 
             ForegroundColor = ConsoleColor.Blue;
-            Write($" ({skill.MPCost} MP)");
+            if (skill.MPCost > 0)
+                Write($"[-{skill.MPCost}MP]");
+            else if (skill.MPCost < 0)
+                Write($"[+{-skill.MPCost * rarityPercentage / 100}MP]");
+            
             ResetColor();
             DrawEmptyLine();
         }

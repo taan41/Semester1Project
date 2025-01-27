@@ -32,6 +32,12 @@ namespace BLL
         public override string ToString()
             => mainUser?.ToString() ?? endPoint?.ToString() ?? "Null client";
 
+        public void Close()
+        {
+            stream.Close();
+            client.Close();
+        }
+
         public async Task HandlingClientAsync(CancellationToken token)
         {
             try
@@ -164,25 +170,28 @@ namespace BLL
                     }
                 }
             }
-            catch(OperationCanceledException) {}
-            catch(Exception ex)
+            catch (OperationCanceledException) {}
+            catch (IOException)
+            {
+                LogHandler.AddLog("Disconnected unexpectedly", this);
+            }
+            catch (Exception ex)
             {
                 LogHandler.AddLog($"Error while handling client: {ex}", this);
             }
             finally
             {
                 Server.RemoveClient(this);
-                stream.Close();
-                client.Close();
+                Close();
             }
         }
 
         private async Task<Command> CheckUsername(Command cmd)
         {
-            var (success, errorMessage) = await UserDB.CheckUsername(cmd.Payload);
+            var (success, error) = await UserDB.CheckUsername(cmd.Payload);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, errorMessage, false);
+                return Helper.ErrorCmd(this, cmd, error, false);
 
             return new(cmd.CommandType);
         }
@@ -194,10 +203,10 @@ namespace BLL
             if (registeredUser == null)
                 return Helper.ErrorCmd(this, cmd, "Invalid registering user");
 
-            var (success, errorMessage) = await UserDB.Add(registeredUser);
+            var (success, error) = await UserDB.Add(registeredUser);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             LogHandler.AddLog($"Registered with Username '{registeredUser.Username}'", this);
             return new(cmd.CommandType);
@@ -205,10 +214,10 @@ namespace BLL
 
         private async Task<(Command cmdToSend, User? requestedUser)> GetUserPwd(Command cmd)
         {
-            var (requestedUser, errorMessage) = await UserDB.Get(cmd.Payload);
+            var (requestedUser, error) = await UserDB.Get(cmd.Payload);
 
             if (requestedUser == null)
-                return (Helper.ErrorCmd(this, cmd, errorMessage, false), null);
+                return (Helper.ErrorCmd(this, cmd, error, false), null);
 
             if (requestedUser.PwdSet == null)
                 return (Helper.ErrorCmd(this, cmd, "No password found"), null);
@@ -219,7 +228,7 @@ namespace BLL
         private Command Login(Command cmd, User? tempUser)
         {
             if (mainUser != null || tempUser == null)
-                return Helper.ErrorCmd(this, cmd, "Invalid user/tempUser");
+                return Helper.ErrorCmd(this, cmd, "Invalid user");
 
             mainUser = tempUser;
             LogHandler.AddLog($"Logged in as {mainUser}", endPoint);
@@ -243,10 +252,10 @@ namespace BLL
             if (requestedUser == null)
                 return Helper.ErrorCmd(this, cmd, "Invalid user data", false);
 
-            var (dbUser, errorMessage) = await UserDB.Get(requestedUser.Username);
+            var (dbUser, error) = await UserDB.Get(requestedUser.Username);
 
             if (dbUser == null)
-                return Helper.ErrorCmd(this, cmd, errorMessage, false);
+                return Helper.ErrorCmd(this, cmd, error, false);
 
             if (dbUser.Email != requestedUser.Email)
                 return Helper.ErrorCmd(this, cmd, "Invalid email", false);
@@ -261,10 +270,10 @@ namespace BLL
             if (requestedUser == null)
                 return Helper.ErrorCmd(this, cmd, "Invalid user data", false);
 
-            var (success, updateErrorMessage) = await UserDB.Update(requestedUser.Username, null, null, requestedUser.PwdSet);
+            var (success, updateError) = await UserDB.Update(requestedUser.Username, null, null, requestedUser.PwdSet);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, updateErrorMessage);
+                return Helper.ErrorCmd(this, cmd, updateError);
 
             LogHandler.AddLog($"Reset password of {requestedUser}", this);
             return new(cmd.CommandType);
@@ -277,10 +286,10 @@ namespace BLL
 
             string newNickname = cmd.Payload;
 
-            var (success, errorMessage) = await UserDB.Update(mainUser.UserID, newNickname, null, null);
+            var (success, error) = await UserDB.Update(mainUser.UserID, newNickname, null, null);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
             
             LogHandler.AddLog($"Changed nickname of {mainUser} from '{mainUser.Nickname}' to '{newNickname}'", this);
             mainUser.Nickname = newNickname;
@@ -294,10 +303,10 @@ namespace BLL
 
             string newEmail = cmd.Payload;
 
-            var (success, errorMessage) = await UserDB.Update(mainUser.UserID, newEmail, null, null);
+            var (success, error) = await UserDB.Update(mainUser.UserID, newEmail, null, null);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
             
             LogHandler.AddLog($"Changed email of {mainUser} from '{mainUser.Email}' to '{newEmail}'", this);
             mainUser.Nickname = newEmail;
@@ -311,10 +320,10 @@ namespace BLL
 
             var newPwd = FromJson<PasswordSet>(cmd.Payload);
 
-            var (success, errorMessage) = await UserDB.Update(mainUser.UserID, null, null, newPwd);
+            var (success, error) = await UserDB.Update(mainUser.UserID, null, null, newPwd);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
             
             LogHandler.AddLog($"Changed password of {mainUser}", this);
             mainUser.PwdSet = newPwd;
@@ -326,10 +335,10 @@ namespace BLL
             if (mainUser == null || mainUser.UserID < 1)
                 return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-            var (success, errorMessage) = await UserDB.Delete(mainUser.UserID);
+            var (success, error) = await UserDB.Delete(mainUser.UserID);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             LogHandler.AddLog($"Deleted account of {mainUser}", this);
             mainUser = null;
@@ -338,30 +347,30 @@ namespace BLL
 
         private async Task<Command> UpdateEquip(Command cmd)
         {
-            var (equipments, errorMessage) = await EquipmentDB.GetAll();
+            var (equipments, error) = await EquipmentDB.GetAll();
 
             if (equipments == null)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             return new(cmd.CommandType, JsonSerializer.Serialize(equipments));
         }
 
         private async Task<Command> UpdateSkill(Command cmd)
         {
-            var (skills, errorMessage) = await SkillDB.GetAll();
+            var (skills, error) = await SkillDB.GetAll();
 
             if (skills == null)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             return new(cmd.CommandType, JsonSerializer.Serialize(skills));
         }
 
         private async Task<Command> UpdateMonster(Command cmd)
         {
-            var (monsters, errorMessage) = await MonsterDB.GetAll(ConfigManager.Instance.GameConfig.ProgressMaxFloor);
+            var (monsters, error) = await MonsterDB.GetAll(ConfigManager.Instance.GameConfig.ProgressMaxFloor);
 
             if (monsters == null)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             return new(cmd.CommandType, JsonSerializer.Serialize(monsters));
         }
@@ -371,10 +380,10 @@ namespace BLL
             if (mainUser == null || mainUser.UserID < 1)
                 return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-            var (success, errorMessage) = await GameSaveDB.Save(mainUser.UserID, cmd.Payload);
+            var (success, error) = await GameSaveDB.Save(mainUser.UserID, cmd.Payload);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             LogHandler.AddLog($"Uploaded save", this);
             return new(cmd.CommandType);
@@ -385,10 +394,10 @@ namespace BLL
             if (mainUser == null || mainUser.UserID < 1)
                 return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-            var (saveContent, errorMessage) = await GameSaveDB.Load(mainUser.UserID);
+            var (saveContent, error) = await GameSaveDB.Load(mainUser.UserID);
 
             if (saveContent == null)
-                return Helper.ErrorCmd(this, cmd, errorMessage, false);
+                return Helper.ErrorCmd(this, cmd, error, false);
 
             return new(cmd.CommandType, saveContent);
         }
@@ -403,10 +412,10 @@ namespace BLL
             if (score == null)
                 return Helper.ErrorCmd(this, cmd, "Invalid score");
 
-            var (success, errorMessage) = await ScoreDB.Add(score);
+            var (success, error) = await ScoreDB.Add(score);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             LogHandler.AddLog($"Uploaded score", this);
             return new(cmd.CommandType);
@@ -417,10 +426,10 @@ namespace BLL
             if (mainUser == null || mainUser.UserID < 1)
                 return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-            var (personal, errorMessage) = await ScoreDB.GetPersonal(mainUser.UserID);
+            var (personal, error) = await ScoreDB.GetPersonal(mainUser.UserID);
 
             if (personal == null)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             return new(cmd.CommandType, JsonSerializer.Serialize(personal));
         }
@@ -430,10 +439,10 @@ namespace BLL
             if (mainUser == null || mainUser.UserID < 1)
                 return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-            var (monthly, errorMessage) = await ScoreDB.GetMonthly();
+            var (monthly, error) = await ScoreDB.GetMonthly();
 
             if (monthly == null)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             return new(cmd.CommandType, JsonSerializer.Serialize(monthly));
         }
@@ -443,10 +452,10 @@ namespace BLL
             if (mainUser == null || mainUser.UserID < 1)
                 return Helper.ErrorCmd(this, cmd, "Invalid user");
 
-            var (alltime, errorMessage) = await ScoreDB.GetAllTime();
+            var (alltime, error) = await ScoreDB.GetAllTime();
 
             if (alltime == null)
-                return Helper.ErrorCmd(this, cmd, errorMessage);
+                return Helper.ErrorCmd(this, cmd, error);
 
             return new(cmd.CommandType, JsonSerializer.Serialize(alltime));
         }
@@ -461,7 +470,7 @@ namespace BLL
         private class Helper
         {
             /// <summary>
-            /// Set error command & log error based on 'errorMessage'
+            /// Set error command & log error based on 'error'
             /// </summary>
             public static Command ErrorCmd(ClientHandler client, Command sourceCmd, string errorDetail, bool addLog = true)
             {

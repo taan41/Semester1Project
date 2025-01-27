@@ -9,7 +9,7 @@ namespace BLL.GameHandlers
     public class GameLoopHandler
     {
         private readonly GameSave _save;
-        private readonly RunData _data;
+        private readonly RunData _runData;
 
         private int _prefightHP, _prefightMP;
         private List<Monster> _prefightMonsters = [];
@@ -21,28 +21,28 @@ namespace BLL.GameHandlers
         public GameLoopHandler(GameSave save)
         {
             _save = save;
-            _data = save.RunData;
+            _runData = save.RunData;
 
-            Events = new(_data);
-            Progress = _data.Progress;
-            Player = _data.Player;
+            Events = new(_runData);
+            Progress = _runData.Progress;
+            Player = _runData.Player;
         }
 
         public GameLoopHandler(string? seed)
         {
-            _data = new RunData(seed);
-            _save = new GameSave(_data);
+            _runData = new RunData(seed);
+            _save = new GameSave(_runData);
 
-            Events = new EventGenerator(_data);
-            Progress = _data.Progress;
-            Player = _data.Player;
+            Events = new EventGenerator(_runData);
+            Progress = _runData.Progress;
+            Player = _runData.Player;
         }
 
         public void Timer(bool start)
-            => _data.Timer(start);
+            => _runData.Timer(start);
 
         public TimeSpan GetElapsedTime()
-            => _data.GetElapsedTime();
+            => _runData.GetElapsedTime();
 
         public void SaveAs(string saveName, bool saveToCloud = false)
         {
@@ -81,7 +81,7 @@ namespace BLL.GameHandlers
         {
             Timer(false);
             if (ServerHandler.IsLoggedIn)
-                ServerHandler.UploadScore(GetElapsedTime(), out _);
+                ServerHandler.UploadScore(_runData.RunID, GetElapsedTime(), out _);
         }
     }
 }

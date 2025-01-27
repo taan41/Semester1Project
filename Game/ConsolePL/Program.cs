@@ -456,9 +456,9 @@ namespace ConsolePL
                                 break;
 
                             default:
-                                break;
+                                continue;
                         }
-                        break;
+                        goto case 1;
 
                     default:
                         if (HandlePause(gameHandler))
@@ -705,26 +705,40 @@ namespace ConsolePL
 
         static void HandleShop(GameLoopHandler gameHandler, ShopEvent shopEvent)
         {
-            List<string> shopActions = ["Buy", "Sell", "Inventory"];
+            List<string> options = ["Shopping", "Inventory", "Continue"];
+            List<string> shopActions = ["Buy", "Sell"];
             List<string> invActions = ["Change Equipment", "Change Skill"];
 
             while (true)
             {
                 GenericGameScreen(gameHandler.Progress, gameHandler.Player);
                 ShopBanner();
-                PrintSubZone(shopActions, "Actions:");
+                PrintSubZone(options, "Actions:");
                 
-                switch (Picker.String(shopActions, CursorPos.SubZoneTop + 1))
+                switch (Picker.String(options, CursorPos.SubZoneTop + 1))
                 {
                     case 0:
-                        HandleShopBuy(gameHandler, shopEvent);
-                        break;
+                        GenericGameScreen(gameHandler.Progress, gameHandler.Player);
+                        ShopBanner();
+                        PrintSubZone(shopActions, "Shopping:");
+                        
+                        int? pickedShopInd = Picker.String(shopActions, CursorPos.SubZoneTop + 1);
+                        switch (pickedShopInd)
+                        {
+                            case 0:
+                                HandleShopBuy(gameHandler, shopEvent);
+                                break;
+
+                            case 1:
+                                HandleShopSell(gameHandler);
+                                break;
+
+                            default:
+                                continue;
+                        }
+                        goto case 0;
 
                     case 1:
-                        HandleShopSell(gameHandler);
-                        break;
-
-                    case 2:
                         GenericGameScreen(gameHandler.Progress, gameHandler.Player);
                         ShopBanner();
                         PrintSubZone(invActions, "Inventory:");
@@ -741,9 +755,9 @@ namespace ConsolePL
                                 break;
 
                             default:
-                                break;
+                                continue;
                         }
-                        break;
+                        goto case 1;
 
                     default:
                         return;

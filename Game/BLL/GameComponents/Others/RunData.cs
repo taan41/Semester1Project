@@ -7,6 +7,7 @@ namespace BLL.GameComponents.Others
     [Serializable]
     public class RunData
     {
+        public int RunID { get; set; } = DateTime.Now.GetHashCode();
         public int Seed { get; set; } = 42;
         public Player Player { get; set; } = Player.DefaultPlayer();
         public RunProgress Progress { get; set; } = new();

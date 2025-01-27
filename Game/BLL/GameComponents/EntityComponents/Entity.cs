@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using BLL.GameComponents.ItemComponents;
 
 namespace BLL.GameComponents.EntityComponents
@@ -95,19 +96,43 @@ namespace BLL.GameComponents.EntityComponents
         {
             if (MP < skill.MPCost) return false;
 
-            int typePercentage = skill.SkillType switch
+            int rarityPercentage = skill.ItemRarity switch
             {
-                Skill.Type.Single => Config.SkillTypeSinglePercentage,
-                Skill.Type.Random => Config.SkillTypeRandomPercentage,
-                Skill.Type.All => Config.SkillTypeAllPercentage,
-                _ => 0
+                Item.Rarity.Common => Config.SkillRarityCommonPercentage,
+                Item.Rarity.Rare => Config.SkillRarityRarePercentage,
+                Item.Rarity.Epic => Config.SkillRarityEpicPercentage,
+                Item.Rarity.Legendary => Config.SkillRarityLegendaryPercentage,
+                _ => 100
             };
 
-            foreach (var target in targets)
-                target.HP -= Math.Max(skill.DamagePoint * Config.SkillPtDamagePercentage * typePercentage / 10000 - target.DEF, 1);
+            if (skill.DamagePoint > 0)
+            {
+                int typeDmgPercentage = skill.SkillType switch
+                {
+                    Skill.Type.Single => Config.SkillTypeSinglePercentage,
+                    Skill.Type.Random => Config.SkillTypeRandomPercentage,
+                    Skill.Type.All => Config.SkillTypeAllPercentage,
+                    _ => 100
+                };
 
-            HP += skill.HealPoint * Config.SkillPtHealPercentage / 100;
-            MP -= skill.MPCost;
+                foreach (var target in targets)
+                    target.HP -= Math.Max(
+                        skill.DamagePoint *
+                        Config.SkillPtDmgPercentage *
+                        rarityPercentage *
+                        typeDmgPercentage / 1000000 
+                        - target.DEF, 1);
+            }
+
+            if (skill.HealPoint != 0)
+            {
+                HP += skill.HealPoint * Config.SkillPtHealPercentage * (skill.HealPoint > 0 ? rarityPercentage : 100) / 10000;
+            }
+
+            if (skill.MPCost != 0)
+            {
+                MP -= skill.MPCost * (skill.MPCost < 0 ? rarityPercentage : 100) / 100;
+            }
 
             return true;
         }

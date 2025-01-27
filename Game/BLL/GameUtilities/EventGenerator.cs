@@ -235,7 +235,8 @@ namespace BLL.GameHelpers
             int[] cumulativeWeight = new int[4];
             int maxRoom = MaxRoom;
 
-            cumulativeWeight[0] = rarityWeights[0].weight / (roomIndex > maxRoom ? 2 * roomIndex / maxRoom : 1);
+            cumulativeWeight[0] = roomIndex > maxRoom ?
+                roomIndex > 2 * maxRoom ? 0 : rarityWeights[0].weight / 5 : rarityWeights[0].weight;
             cumulativeWeight[1] = cumulativeWeight[0] + rarityWeights[1].weight;
             cumulativeWeight[2] = cumulativeWeight[1] + Math.Max(0, rarityWeights[2].weight * (roomIndex - maxRoom) / maxRoom);
             cumulativeWeight[3] = cumulativeWeight[2] + Math.Max(0, rarityWeights[3].weight * 3 * (roomIndex - maxRoom * 15 / 10) / maxRoom);
