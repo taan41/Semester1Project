@@ -112,11 +112,11 @@ namespace BLL.GameHelpers
 
                         if (eventTypeRNG > 70 && roomIndex > 2 && maxRandomQuantity > 0)
                         {
-                            possibleEvents.Add(GenerateEliteFight(roomIndex, floorNumber, monsterPower));
+                            possibleEvents.Add(GenerateRandomEvent(roomIndex, floorNumber, monsterPower));
                             maxRandomQuantity--;
                         }
                         else if (eventTypeRNG > 50 && roomIndex > 4)
-                            possibleEvents.Add(GenerateRandomEvent(roomIndex, floorNumber, monsterPower));
+                            possibleEvents.Add(GenerateEliteFight(roomIndex, floorNumber, monsterPower));
                         else
                             possibleEvents.Add(GenerateNormalFight(roomIndex, floorNumber, monsterPower));
                     }
