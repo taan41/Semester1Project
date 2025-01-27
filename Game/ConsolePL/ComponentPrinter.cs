@@ -67,7 +67,7 @@ namespace ConsolePL
             DrawBar(player.HP, player.MaxHP, true, UIConstants.PlayerBarLen, ConsoleColor.Red);
             Write(" MP ");
             DrawBar(player.MP, player.MaxMP, true, UIConstants.PlayerBarLen, ConsoleColor.Blue);
-            Write($" Gold: {player.PlayerGold.Quantity}");
+            Write($" Gold: {player.Gold.Quantity}");
             DrawEmptyLine();
         }
         

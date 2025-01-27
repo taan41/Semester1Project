@@ -60,6 +60,12 @@ namespace BLL.GameHelpers
         public List<Event> GetEvents()
             => _allEvents.ElementAt(Math.Max(0, _gameData.Progress.Room - 1 + (_gameData.Progress.Floor - 1) * MaxRoom));
 
+        public void RerollShop(RunProgress progress, ShopEvent shop)
+        {
+            shop.SellingItems.Clear();
+            shop.SellingItems.AddRange(GenerateShopItems(progress.Room + (progress.Floor - 1) * MaxRoom));
+        }
+
         private List<List<Event>> GenerateAllEvents()
         {
             List<List<Event>> allEvents = [];
@@ -110,12 +116,12 @@ namespace BLL.GameHelpers
                     {
                         int eventTypeRNG = _rng.Next(1, 101);
 
-                        if (eventTypeRNG > 70 && roomIndex > 2 && maxRandomQuantity > 0)
+                        if (eventTypeRNG > 70 && roomIndex > 1 && maxRandomQuantity > 0)
                         {
                             roomEvents.Add(GenerateRandomEvent(roomIndex, floorNumber, monsterPower));
                             maxRandomQuantity--;
                         }
-                        else if (eventTypeRNG > 50 && roomIndex > 4)
+                        else if (eventTypeRNG > 40 && roomIndex > 2)
                             roomEvents.Add(GenerateEliteFight(roomIndex, floorNumber, monsterPower));
                         else
                             roomEvents.Add(GenerateNormalFight(roomIndex, floorNumber, monsterPower));
@@ -204,7 +210,7 @@ namespace BLL.GameHelpers
             return monsters;
         }
 
-        private ShopEvent GenerateShop(int roomIndex)
+        private List<Item> GenerateShopItems(int roomIndex)
         {
             List<Equipment> equipments = [];
             for (int i = 0; i < 6; i++)
@@ -226,8 +232,11 @@ namespace BLL.GameHelpers
             items.AddRange(equipments);
             items.AddRange(skills);
 
-            return new(items);
+            return items;
         }
+
+        private ShopEvent GenerateShop(int roomIndex)
+            => new(GenerateShopItems(roomIndex));
 
         // Weight-based RNG for item's rarity
         private Item.Rarity GenerateRarity(int roomIndex)

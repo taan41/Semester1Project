@@ -3,10 +3,11 @@ using BLL.GameComponents.EventComponents;
 using BLL.GameComponents.ItemComponents;
 using BLL.GameComponents.Others;
 using BLL.GameHelpers;
+using DAL.ConfigClasses;
 
 namespace BLL.GameHandlers
 {
-    public class GameLoopHandler
+    public class GameStateHandler
     {
         private readonly GameSave _save;
         private readonly RunData _runData;
@@ -18,7 +19,9 @@ namespace BLL.GameHandlers
         public readonly RunProgress Progress;
         public readonly Player Player;
 
-        public GameLoopHandler(GameSave save)
+        public int RerollCost => Progress.Floor * 100;
+
+        public GameStateHandler(GameSave save)
         {
             _save = save;
             _runData = save.RunData;
@@ -28,7 +31,7 @@ namespace BLL.GameHandlers
             Player = _runData.Player;
         }
 
-        public GameLoopHandler(string? seed)
+        public GameStateHandler(string? seed)
         {
             _runData = new RunData(seed);
             _save = new GameSave(_runData);
@@ -82,6 +85,12 @@ namespace BLL.GameHandlers
             Timer(false);
             if (ServerHandler.IsLoggedIn)
                 ServerHandler.UploadScore(_runData.RunID, GetElapsedTime(), out _);
+        }
+
+        public void RerollShop(ShopEvent shop)
+        {
+            Events.RerollShop(Progress, shop);
+            Player.Gold.Quantity -= RerollCost;
         }
     }
 }
