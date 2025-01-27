@@ -15,6 +15,8 @@ namespace BLL.GameHandlers
         public static bool IsConnected => NetworkHandler.IsConnected;
         public static bool IsLoggedIn => IsConnected && mainUser != null;
         public static string Username => mainUser?.Username ?? "Guest";
+        public static string Nickname => mainUser?.Nickname ?? "Guest";
+        public static string Email => mainUser?.Email ?? "Guest";
 
         private static NetworkHandler NetworkHandler => NetworkHandler.Instance;
         private static User? mainUser;
@@ -49,18 +51,6 @@ namespace BLL.GameHandlers
             {
                 FileManager.WriteJson(FileManager.FolderNames.Configs, FileManager.FileNames.GameConfig, gameConfig);
             }
-
-            // if (!NetworkHandler.Communicate(new(Command.Type.ServerConfig), out result))
-            // {
-            //     error = result;
-            //     return false;
-            // }
-
-            // var serverConfig = JsonSerializer.Deserialize<ServerConfig>(result);
-            // if (serverConfig != null)
-            // {
-            //     FileManager.WriteJson(FileManager.FolderNames.Configs, FileManager.FileNames.ServerConfig, serverConfig);
-            // }
 
             if (!NetworkHandler.Communicate(new(Command.Type.DatabaseConfig), out result))
             {
@@ -199,6 +189,87 @@ namespace BLL.GameHandlers
                 return false;
             }
 
+            error = "";
+            return true;
+        }
+
+        public static bool ValidatePassword(string oldPasswod)
+        {
+            return mainUser != null && mainUser.PwdSet != null && Utilities.Security.VerifyPassword(oldPasswod, mainUser.PwdSet);
+        }
+
+        public static bool ChangePassword(string newPassword, out string error)
+        {
+            if (mainUser == null)
+            {
+                error = "Not logged in";
+                return false;
+            }
+
+            PasswordSet newPwdSet = new(newPassword);
+            if (!NetworkHandler.Communicate(new(Command.Type.ChangePassword, newPwdSet.ToJson()), out string result))
+            {
+                error = result;
+                return false;
+            }
+
+            error = "";
+            return true;
+        }
+
+        public static bool ChangeNickname(string newNickname, out string error)
+        {
+            if (mainUser == null)
+            {
+                error = "Not logged in";
+                return false;
+            }
+
+            if (!NetworkHandler.Communicate(new(Command.Type.ChangeNickname, newNickname), out string result))
+            {
+                error = result;
+                return false;
+            }
+
+            mainUser.Nickname = newNickname;
+            error = "";
+            return true;
+        }
+
+        public static bool ChangeEmail(string newEmail, out string error)
+        {
+            if (mainUser == null)
+            {
+                error = "Not logged in";
+                return false;
+            }
+
+            if (!NetworkHandler.Communicate(new(Command.Type.ChangeEmail, newEmail), out string result))
+            {
+                error = result;
+                return false;
+            }
+
+            mainUser.Email = newEmail;
+            error = "";
+            return true;
+        }
+
+        public static bool DeleteAccount(out string error)
+        {
+            if (mainUser == null)
+            {
+                error = "Not logged in";
+                return false;
+            }
+
+            if (!NetworkHandler.Communicate(new(Command.Type.DeleteAccount), out string result))
+            {
+                error = result;
+                return false;
+            }
+
+            mainUser = null;
             error = "";
             return true;
         }

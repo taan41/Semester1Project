@@ -10,6 +10,7 @@ using DAL.ConfigClasses;
 using static System.Console;
 using static ConsolePL.ConsoleHelper;
 using static ConsolePL.ComponentPrinter;
+using NetworkLL.DataTransferObjects;
 
 namespace ConsolePL
 {
@@ -706,6 +707,316 @@ namespace ConsolePL
                 else
                 {
                     Popup("Login Successful!", PopupType.Success);
+                    return true;
+                }
+            }
+        }
+
+        public static void ViewAccountInfoScreen()
+        {
+            if (!ServerHandler.IsConnected)
+                return;
+
+            TitleScreenDrawBorders(false, true);
+            StartTitleAnim();
+
+            lock (ConsoleLock)
+            {
+                CursorTop = CursorPos.TitleScreenMenuTop;
+                WriteLine($" Username: {ServerHandler.Username}");
+                WriteLine($" Nickname: {ServerHandler.Nickname}");
+                WriteLine($" Email: {ServerHandler.Email}");
+                WriteLine();
+                WriteLine(" Press any key to return...");
+            }
+
+            ReadKey(true);
+        }
+
+        public static void ChangePasswordScreen()
+        {
+            string?
+                oldPassword = null,
+                newPassword = null,
+                confirmPassword = null;
+            int tempCursorLeft, tempCursorTop;
+
+            while (true)
+            {
+                if (!ServerHandler.IsConnected)
+                    return;
+
+                TitleScreenDrawBorders(false, true);
+                StartTitleAnim();
+
+                lock (ConsoleLock)
+                {
+                    CursorTop = CursorPos.TitleScreenMenuTop;
+                    WriteLine(" 'ESC' to return");
+                    Write(" Old Password: ");
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                    if (oldPassword != null)
+                        WriteLine(new string('*', oldPassword.Length));
+                }
+
+                if (oldPassword == null)
+                {
+                    oldPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
+
+                    if (oldPassword == null)
+                        return;
+
+                    if (string.IsNullOrWhiteSpace(oldPassword) || oldPassword.Length < DbConfig.PasswordMin)
+                    {
+                        Popup($"Must be {DbConfig.PasswordMin} ~ {DbConfig.PasswordMax} characters");
+                        oldPassword = null;
+                        continue;
+                    }
+
+                    if (!ServerHandler.ValidatePassword(oldPassword))
+                    {
+                        Popup("Incorrect password!");
+                        oldPassword = null;
+                        continue;
+                    }
+                }
+
+                lock (ConsoleLock)
+                {
+                    CursorTop = CursorPos.TitleScreenMenuTop + 2;
+                    Write(" New Password: ");
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                    if (newPassword != null)
+                        WriteLine(new string('*', newPassword.Length));
+                }
+
+                if (newPassword == null)
+                {
+                    newPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
+
+                    if (newPassword == null)
+                        return;
+
+                    if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < DbConfig.PasswordMin)
+                    {
+                        Popup($"Must be {DbConfig.PasswordMin} ~ {DbConfig.PasswordMax} characters");
+                        newPassword = null;
+                        continue;
+                    }
+                }
+
+                lock (ConsoleLock)
+                {
+                    CursorTop = CursorPos.TitleScreenMenuTop + 3;
+                    Write(" Confirm Password: ");
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                    if (confirmPassword != null)
+                        WriteLine(new string('*', confirmPassword.Length));
+                }
+
+                if (confirmPassword == null)
+                {
+                    confirmPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
+
+                    if (confirmPassword == null)
+                        return;
+
+                    if (newPassword != confirmPassword)
+                    {
+                        Popup("Passwords do not match!");
+                        newPassword = null;
+                        confirmPassword = null;
+                        continue;
+                    }
+                }
+
+                if (!ServerHandler.ChangePassword(newPassword, out string error))
+                {
+                    Popup(error);
+                    return;
+                }
+                else
+                {
+                    Popup("Changed password successfully!", PopupType.Success);
+                    return;
+                }
+            }
+        }
+
+        public static void ChangeNicknameScreen()
+        {
+            string? nickname = null;
+            int tempCursorLeft, tempCursorTop;
+
+            while (true)
+            {
+                if (!ServerHandler.IsConnected)
+                    return;
+
+                TitleScreenDrawBorders(false, true);
+                StartTitleAnim();
+
+                lock (ConsoleLock)
+                {
+                    CursorTop = CursorPos.TitleScreenMenuTop;
+                    WriteLine(" 'ESC' to return");
+                    Write(" New Nickname: ");
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                    if (nickname != null)
+                        WriteLine(nickname);
+                }
+
+                if (nickname == null)
+                {
+                    nickname = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.NicknameMax);
+
+                    if (nickname == null)
+                        return;
+
+                    if (string.IsNullOrWhiteSpace(nickname) || nickname.Length < DbConfig.NicknameMin)
+                    {
+                        Popup($"Must be {DbConfig.NicknameMin} ~ {DbConfig.NicknameMax} characters");
+                        nickname = null;
+                        continue;
+                    }
+
+                    if (!ServerHandler.ChangeNickname(nickname, out string error))
+                    {
+                        Popup(error);
+                        nickname = null;
+                        continue;
+                    }
+                    else
+                    {
+                        Popup("Changed nickname successfully!", PopupType.Success);
+                        return;
+                    }
+                }
+            }
+        }
+
+        public static void ChangeEmailScreen()
+        {
+            string? email = null;
+            int tempCursorLeft, tempCursorTop;
+
+            while (true)
+            {
+                if (!ServerHandler.IsConnected)
+                    return;
+
+                TitleScreenDrawBorders(false, true);
+                StartTitleAnim();
+
+                lock (ConsoleLock)
+                {
+                    CursorTop = CursorPos.TitleScreenMenuTop;
+                    WriteLine(" 'ESC' to return");
+                    Write(" New Email: ");
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                    if (email != null)
+                        WriteLine(email);
+                }
+
+                if (email == null)
+                {
+                    email = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.EmailMax);
+
+                    if (email == null)
+                        return;
+
+                    if (string.IsNullOrWhiteSpace(email) || email.Length < DbConfig.EmailMin)
+                    {
+                        Popup($"Invalid format");
+                        email = null;
+                        continue;
+                    }
+
+                    if (!ServerHandler.ChangeEmail(email, out string error))
+                    {
+                        Popup(error);
+                        email = null;
+                        continue;
+                    }
+                    else
+                    {
+                        Popup("Changed email successfully!", PopupType.Success);
+                        return;
+                    }
+                }
+            }
+        }
+
+        public static bool DeleteAccountScreen()
+        {
+            string? password = null;
+            int tempCursorLeft, tempCursorTop;
+
+            while (true)
+            {
+                if (!ServerHandler.IsConnected)
+                    return false;
+
+                TitleScreenDrawBorders(false, true);
+                StartTitleAnim();
+
+                lock (ConsoleLock)
+                {
+                    CursorTop = CursorPos.TitleScreenMenuTop;
+                    WriteLine(" 'ESC' to return");
+                    Write(" Password: ");
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                }
+
+                if (password == null)
+                {
+                    password = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
+
+                    if (password == null)
+                        return false;
+
+                    if (string.IsNullOrWhiteSpace(password) || password.Length < DbConfig.PasswordMin)
+                    {
+                        Popup($"Must be {DbConfig.PasswordMin} ~ {DbConfig.PasswordMax} characters");
+                        password = null;
+                        continue;
+                    }
+
+                    if (!ServerHandler.ValidatePassword(password))
+                    {
+                        Popup("Incorrect password!");
+                        password = null;
+                        continue;
+                    }
+                }
+
+                lock (ConsoleLock)
+                {
+                    CursorTop = CursorPos.TitleScreenMenuTop + 3;
+                    WriteLine(" This action is irreversible!");
+                    Write(" Type 'DELETE' to confirm: ");
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
+                }
+
+                string? confirm = ReadInput(tempCursorLeft, tempCursorTop, false, 6);
+
+                if (confirm == null)
+                    return false;
+
+                if (confirm != "DELETE")
+                {
+                    Popup("Invalid confirmation!");
+                    continue;
+                }
+
+                if (!ServerHandler.DeleteAccount(out string error))
+                {
+                    Popup(error);
+                    return false;
+                }
+                else
+                {
+                    Popup("Account deleted successfully!", PopupType.Success);
                     return true;
                 }
             }

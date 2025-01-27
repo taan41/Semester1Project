@@ -1,7 +1,10 @@
 using System.Reflection;
+using System.Threading.Tasks;
 using BLL;
 using DAL;
+using DAL.DBHandlers;
 using DAL.Persistence.ConfigClasses;
+using DAL.Persistence.DataTransferObjects;
 using static System.Console;
 using static ServerUIHelper;
 
@@ -9,7 +12,7 @@ static class ServerUI
 {
     public static string Header { get; } = "Server Control Center";
 
-    public static async Task<(bool success, bool exit)> FillDBInfoScreen()
+    public static async Task<(bool success, bool exit)> FillDBInfo()
     {
         Clear();
         DrawHeader(Header);
@@ -85,7 +88,7 @@ static class ServerUI
         }
     }
     
-    public static void MainMenuScreen(string? serverIP, int port, bool serverOnline)
+    public static void MainMenu(string? serverIP, int port, bool serverOnline)
     {
         Clear();
         DrawHeader(Header);
@@ -105,8 +108,8 @@ static class ServerUI
         else
         {
             WriteLine(" 1. View connected clients");
-            WriteLine(" 2. Manage assets");
-            WriteLine(" 3. Modify game config");
+            WriteLine(" 2. Manage player accounts");
+            WriteLine(" 3. Modify game data");
             WriteLine(" 4. View activity log");
             WriteLine(" 0. Shut down server");
         }
@@ -123,7 +126,7 @@ static class ServerUI
         {
             Clear();
             DrawHeader(Header);
-            WriteLine($" Connected clients (Page {curPage + 1}/{(clients.Count - 1) / 10 + 1})");
+            WriteLine($" -- Connected clients (Page {curPage + 1}/{(clients.Count - 1) / 10 + 1})");
             WriteLine(" 'Left/Right' to navigate pages");
             WriteLine(" 'ESC' to return");
             DrawLine('-');
@@ -152,6 +155,178 @@ static class ServerUI
                     return;
             }
         }
+    }
+
+    public static void ManageAccounts()
+    {
+        Clear();
+        DrawHeader(Header);
+        WriteLine(" -- Managing player accounts");
+        WriteLine(" 'ESC' to return");
+        DrawLine('-');
+
+        WriteLine(" 1. View all accounts");
+        WriteLine(" 2. Search for account");
+        DrawLine('-');
+
+        Write(" Enter choice: ");
+    }
+
+    public static async Task ViewAccounts()
+    {
+        var (accounts, error) = await UserDB.GetAll();
+        if (accounts == null)
+        {
+            WriteLine(" Error: " + error);
+            ReadKey(true);
+            return;
+        }
+
+        int curPage = 0;
+        while (true)
+        {
+            Clear();
+            DrawHeader(Header);
+            WriteLine($" -- Player accounts (Page {curPage + 1}/{(accounts.Count - 1) / 10 + 1})");
+            WriteLine(" 'Left/Right' to navigate pages");
+            WriteLine(" 'ESC' to return");
+            DrawLine('-');
+
+            foreach (var account in accounts.GetRange(curPage * 10, Math.Min(accounts.Count - curPage * 10, 10)))
+            {
+                WriteLine($" - ID: {account.UserID}, Username: {account.Username}");
+            }
+
+            DrawLine('=');
+
+            ConsoleKey key = ReadKey(true).Key;
+            switch (key)
+            {
+                case ConsoleKey.LeftArrow:
+                    if (curPage > 0)
+                        curPage--;
+                    break;
+
+                case ConsoleKey.RightArrow:
+                    if (curPage < (accounts.Count - 1) / 10)
+                        curPage++;
+                    break;
+
+                case ConsoleKey.Escape:
+                    return;
+            }
+        }
+    }
+
+    public static async Task SearchAccount()
+    {
+        while (true)
+        {
+            Clear();
+            DrawHeader(Header);
+            WriteLine(" -- Searching for account");
+            WriteLine(" 'ESC' to return");
+            DrawLine('-');
+
+            Write(" Enter ID: ");
+            string? input = ReadInput();
+            if (input == null)
+                return;
+            
+            if (!int.TryParse(input, out int id))
+            {
+                WriteLine(" Invalid input.");
+                ReadKey(true);
+                return;
+            }
+
+            var (account, error) = await UserDB.Get(id);
+
+            if (account == null)
+            {
+                WriteLine(" Error: " + error);
+                ReadKey(true);
+                return;
+            }
+
+            WriteLine(" Account found:");
+            WriteLine($" - ID: {account.UserID}");
+            WriteLine($" - Username: {account.Username}");
+            WriteLine($" - Nickname: {account.Nickname}");
+            WriteLine($" - Email: {account.Email}");
+
+            DrawLine('-');
+            WriteLine(" 'DEL' to delete account");
+            WriteLine(" 'ESC' to return");
+
+            ConsoleKey key = ReadKey(true).Key;
+            switch (key)
+            {
+                case ConsoleKey.Delete:
+                    var (delSuccess, delError) = await UserDB.Delete(account.UserID);
+                    if (delSuccess)
+                    {
+                        WriteLine(" Account deleted.");
+                        ReadKey(true);
+                        return;
+                    }
+                    else
+                    {
+                        WriteLine($" Error: {delError}");
+                        ReadKey(true);
+                        return;
+                    }
+
+                case ConsoleKey.Escape:
+                    return;
+            }
+        }
+    }
+
+    public static void GameDataMenu()
+    {
+        Clear();
+        DrawHeader(Header);
+        WriteLine(" -- Modifying game data");
+        WriteLine(" 'ESC' to return");
+        DrawLine('-');
+
+        WriteLine(" 1. Modify game assets");
+        WriteLine(" 2. View game config");
+        WriteLine(" 3. Modify game config");
+        DrawLine('-');
+
+        Write(" Enter choice: ");
+    }
+
+    public static void ViewGameConfig()
+    {
+        Clear();
+        DrawHeader(Header);
+        WriteLine(" -- Viewing game config");
+        DrawLine('-');
+
+        GameConfig config = ConfigManager.Instance.GameConfig;
+
+        if (config == null)
+        {
+            WriteLine(" Error: Game config not found.");
+            ReadKey(true);
+            return;
+        }
+
+        WriteLine(" Game config:");
+
+        string[] properties = [.. typeof(GameConfig).GetProperties(BindingFlags.Public | BindingFlags.Instance).Select(p => p.Name)];
+        foreach (var prop in properties)
+        {
+            PropertyInfo propInfo = typeof(GameConfig).GetProperty(prop)!;
+            WriteLine($" - {prop}: {propInfo.GetValue(config)}");
+        }
+
+        DrawLine('-');
+        WriteLine(" Press any key to continue...");
+        ReadKey(true);
     }
 
     public static async Task ModifyGameConfig()
@@ -262,7 +437,7 @@ static class ServerUI
         {
             Clear();
             DrawHeader(Header);
-            WriteLine(" Viewing activity log");
+            WriteLine(" -- Viewing activity log");
             WriteLine(" 'DEL' to clear log");
             WriteLine(" 'ESC' to return");
             DrawLine('-');

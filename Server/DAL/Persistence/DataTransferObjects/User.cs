@@ -24,6 +24,6 @@ namespace DAL.Persistence.DataTransferObjects
             => $"User({(UserID != -1 ? $"ID: {UserID}, " : "")}Username: {Username})";
 
         public string ToString(bool showFullInfo)
-            => showFullInfo ? $"User(ID: {UserID}, Username: {Username}, Nickname: {Nickname})" : ToString();
+            => showFullInfo ? $"User(ID: {UserID}, Username: {Username}, Nickname: {Nickname}, Email: {Email})" : ToString();
     }
 }

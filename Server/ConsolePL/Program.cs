@@ -13,7 +13,7 @@ namespace ConsolePL
         {
             while (true)
             {
-                var (success, exit) = await ServerUI.FillDBInfoScreen();
+                var (success, exit) = await ServerUI.FillDBInfo();
 
                 if (exit)
                     return;
@@ -42,7 +42,7 @@ namespace ConsolePL
         {
             while (true)
             {
-                ServerUI.MainMenuScreen(serverIP, port, false);
+                ServerUI.MainMenu(serverIP, port, false);
 
                 switch (ServerUIHelper.ReadInput())
                 {
@@ -96,7 +96,7 @@ namespace ConsolePL
         {
             while (true)
             {
-                ServerUI.MainMenuScreen(serverIP, port, true);
+                ServerUI.MainMenu(serverIP, port, true);
 
                 switch (ServerUIHelper.ReadInput())
                 {
@@ -105,12 +105,12 @@ namespace ConsolePL
                         continue;
 
                     case "2":
-                        await AssetManagerPL.Intance.Start();
+                        await ManageAccounts();
                         continue;
 
                     case "3":
-                        await ServerUI.ModifyGameConfig();
-                        break;
+                        await ManageGameData();
+                        continue;
 
                     case "4":
                         ServerUI.ViewLog();
@@ -119,6 +119,58 @@ namespace ConsolePL
                     case "0": case null:
                         WriteLine(" Shutting down server...");
                         ReadKey(true);
+                        return;
+
+                    default: continue;
+                }
+            }
+        }
+
+        static async Task ManageAccounts()
+        {
+            while (true)
+            {
+                ServerUI.ManageAccounts();
+
+                switch (ServerUIHelper.ReadInput())
+                {
+                    case "1":
+                        await ServerUI.ViewAccounts();
+                        continue;
+
+                    case "2":
+                        await ServerUI.SearchAccount();
+                        continue;
+
+                    case "0": case null:
+                        return;
+
+                    default: continue;
+                }
+            }
+        }
+
+        static async Task ManageGameData()
+        {
+            while (true)
+            {
+                ServerUI.GameDataMenu();
+
+                switch (ServerUIHelper.ReadInput())
+                {
+                    case "1":
+                        await AssetManagerPL.Intance.Start();
+                        continue;
+
+                    case "2":
+                        ServerUI.ViewGameConfig();
+                        continue;
+
+                    case "3":
+                        await ServerUI.ModifyGameConfig();
+                        continue;
+
+                    case "0": case null:
                         return;
 
                     default: continue;

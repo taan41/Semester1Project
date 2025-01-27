@@ -162,7 +162,7 @@ namespace ConsolePL
 
         static void OnlinePlay()
         {
-            List<string> options = ["NEW GAME", "LOAD GAME", "VIEW SCORE", "LOG OUT"];
+            List<string> options = ["NEW GAME", "LOAD GAME", "VIEW SCORE", "MANAGE ACCOUNT", "LOG OUT"];
 
             while (true)
             {
@@ -176,7 +176,7 @@ namespace ConsolePL
                 {
                     Console.CursorLeft = 1;
                     Console.CursorTop = CursorPos.BottomBorderTop - 1;
-                    Console.Write($"Welcome, {ServerHandler.Username}");
+                    Console.Write($"Welcome, {ServerHandler.Nickname}!");
                 }
 
                 switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
@@ -193,7 +193,13 @@ namespace ConsolePL
                         ViewScore();
                         break;
 
-                    case 3: case null:
+                    case 3:
+                        ManageAccount(out bool deletedAccount);
+                        if (deletedAccount)
+                            return;
+                        break;
+
+                    case 4: case null:
                         if (!ServerHandler.Logout(out string? error))
                             Popup(error);
                         return;
@@ -226,14 +232,67 @@ namespace ConsolePL
                         break;
 
                     case 1:
-                        ViewScoresScreen(monthly, "TOP MONTHLY SCORES");
+                        ViewScoresScreen(monthly, "MONTHLY LEADERBOARD");
                         break;
 
                     case 2:
-                        ViewScoresScreen(alltime, "TOP OF ALL TIME");
+                        ViewScoresScreen(alltime, "ALL TIME LEADERBOARD");
                         break;
 
                     case 3: case null:
+                        return;
+                }
+            }
+        }
+
+        static void ManageAccount(out bool deletedAccount)
+        {
+            List<string> options = ["VIEW ACCOUNT INFO", "CHANGE PASSWORD", "CHANGE NICKNAME", "CHANGE EMAIL", "DELETE ACCOUNT", "RETURN"];
+            
+            deletedAccount = false;
+
+            while (true)
+            {
+                if (!ServerHandler.IsConnected || !ServerHandler.IsLoggedIn)
+                    return;
+
+                TitleScreenDrawBorders(false, true);
+                StartTitleAnim();
+                
+                lock (ConsoleLock)
+                {
+                    Console.CursorLeft = 1;
+                    Console.CursorTop = CursorPos.BottomBorderTop - 1;
+                    Console.Write($"Welcome, {ServerHandler.Nickname}!");
+                }
+
+                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                {
+                    case 0:
+                        ViewAccountInfoScreen();
+                        break;
+
+                    case 1:
+                        ChangePasswordScreen();
+                        break;
+
+                    case 2:
+                        ChangeNicknameScreen();
+                        break;
+
+                    case 3:
+                        ChangeEmailScreen();
+                        break;
+
+                    case 4:
+                        if (DeleteAccountScreen())
+                        {
+                            deletedAccount = true;
+                            return;
+                        }
+                        break;
+
+                    case 5: case null:
                         return;
                 }
             }

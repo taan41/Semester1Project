@@ -245,5 +245,64 @@ namespace DAL.DBHandlers
                 return (false, ex.Message);
             }
         }
+
+        public static async Task<(bool success, string errorMessage)> Delete(int userID)
+        {
+            if (userID < 1)
+                return (false, "Invalid user ID");
+
+            string query = "DELETE FROM Users WHERE UserID = @userID";
+
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@userID", userID);
+
+                await cmd.ExecuteNonQueryAsync();
+
+                return (true, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public static async Task<(List<User>? users, string errorMessage)> GetAll()
+        {
+            string query = "SELECT UserID, Username, Nickname, Email FROM Users";
+
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+
+                using var reader = await cmd.ExecuteReaderAsync();
+
+                List<User> users = [];
+
+                while (await reader.ReadAsync())
+                {
+                    users.Add(new()
+                    {
+                        UserID = reader.GetInt32("UserID"),
+                        Username = reader.GetString("Username"),
+                        Nickname = reader.GetString("Nickname"),
+                        Email = reader.GetString("Email")
+                    });
+                }
+
+                return (users, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (null, ex.Message);
+            }
+        }
     }
 }

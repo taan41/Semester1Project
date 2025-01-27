@@ -10,7 +10,7 @@ namespace NetworkLL.DataTransferObjects
             Empty, Ping, Error, GetAES,
             CheckUsername, Register,
             GetUserPwd, Login, Logout, ValidateEmail, ResetPwd,
-            ChangeNickname, ChangeEmail, ChangePassword,
+            ChangeNickname, ChangeEmail, ChangePassword, DeleteAccount,
             GameConfig, ServerConfig, DatabaseConfig,
             UpdateEquip, UpdateSkill, UpdateMonster,
             UploadSave, DownloadSave,
