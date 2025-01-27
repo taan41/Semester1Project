@@ -78,7 +78,7 @@ namespace BLL.GameHelpers
                     continue;
                 }
                 
-                List<Event> possibleEvents = [];
+                List<Event> roomEvents = [];
 
                 int eventQuantity = _rng.Next(1, 101) > 50 ? 3 : 2;
                 bool addNormalEvent = true;
@@ -86,20 +86,20 @@ namespace BLL.GameHelpers
                 if (roomNumber % TreasureRoomCount == 0)
                 {
                     while (eventQuantity-- > 0)
-                        possibleEvents.Add(GenerateTreasure(floorNumber));
-                    allEvents.Add(possibleEvents);
+                        roomEvents.Add(GenerateTreasure(floorNumber));
+                    allEvents.Add(roomEvents);
                     continue;
                 }
 
                 if (roomNumber % ShopRoomCount == 0)
                 {
-                    possibleEvents.Add(GenerateShop(roomIndex));
+                    roomEvents.Add(GenerateShop(roomIndex));
                     addNormalEvent = false;
                 }
 
                 if (roomNumber % CampRoomCount == 0)
                 {
-                    possibleEvents.Add(new(Event.Type.Camp));
+                    roomEvents.Add(new(Event.Type.Camp));
                     addNormalEvent = false;
                 }
 
@@ -112,17 +112,17 @@ namespace BLL.GameHelpers
 
                         if (eventTypeRNG > 70 && roomIndex > 2 && maxRandomQuantity > 0)
                         {
-                            possibleEvents.Add(GenerateRandomEvent(roomIndex, floorNumber, monsterPower));
+                            roomEvents.Add(GenerateRandomEvent(roomIndex, floorNumber, monsterPower));
                             maxRandomQuantity--;
                         }
                         else if (eventTypeRNG > 50 && roomIndex > 4)
-                            possibleEvents.Add(GenerateEliteFight(roomIndex, floorNumber, monsterPower));
+                            roomEvents.Add(GenerateEliteFight(roomIndex, floorNumber, monsterPower));
                         else
-                            possibleEvents.Add(GenerateNormalFight(roomIndex, floorNumber, monsterPower));
+                            roomEvents.Add(GenerateNormalFight(roomIndex, floorNumber, monsterPower));
                     }
                 }
 
-                allEvents.Add(possibleEvents);
+                allEvents.Add(roomEvents);
             }
 
             return allEvents;
