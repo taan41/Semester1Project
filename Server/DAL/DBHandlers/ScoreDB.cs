@@ -5,14 +5,9 @@ namespace DAL.DBHandlers
 {
     public static class ScoreDB
     {
-        public static async Task<(bool success, string error)> Add(Score score)
+        public static async Task<(bool success, string errorMessage)> Add(Score score)
         {
-            string query = @"
-                INSERT INTO Scores (RunID, UserID, ClearTime, UploadedTime)
-                VALUES (@runID, @userID, @clearTime, @uploadedTime)
-                ON DUPLICATE KEY UPDATE
-                    ClearTime = IF(@clearTime < ClearTime, @clearTime, ClearTime),
-                    UploadedTime = IF(@clearTime < ClearTime, @uploadedTime, UploadedTime)";
+            string query = "INSERT INTO Scores (UserID, ClearTime, UploadedTime) VALUES (@userID, @clearTime, @uploadedTime)";
 
             try
             {
@@ -20,7 +15,6 @@ namespace DAL.DBHandlers
                 await conn.OpenAsync();
 
                 using MySqlCommand cmd = new(query, conn);
-                cmd.Parameters.AddWithValue("@runID", score.RunID);
                 cmd.Parameters.AddWithValue("@userID", score.UserID);
                 cmd.Parameters.AddWithValue("@clearTime", score.ClearTime);
                 cmd.Parameters.AddWithValue("@uploadedTime", score.UploadedTime);
@@ -35,7 +29,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(List<Score>? scores, string error)> GetPersonal(int userID)
+        public static async Task<(List<Score>? scores, string errorMessage)> GetPersonal(int userID)
         {
             string query = @"
                 SELECT
@@ -79,7 +73,7 @@ namespace DAL.DBHandlers
             }
         }
         
-        public static async Task<(List<Score>? scores, string error)> GetMonthly()
+        public static async Task<(List<Score>? scores, string errorMessage)> GetMonthly()
         {
             string query = @"
                 SELECT
@@ -123,7 +117,7 @@ namespace DAL.DBHandlers
             }
         }
         
-        public static async Task<(List<Score>? scores, string error)> GetAllTime()
+        public static async Task<(List<Score>? scores, string errorMessage)> GetAllTime()
         {
             string query = @"
                 SELECT

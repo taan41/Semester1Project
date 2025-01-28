@@ -17,13 +17,13 @@ namespace BLL.GameComponents.EntityComponents
         public List<Equipment> EquipInventory { get; set; } = [];
         public List<Skill> Skills { get; set; } = [];
         public List<Skill> SkillInventory { get; set; } = [];
-        public Gold Gold { get; set; } = new(0);
+        public Gold PlayerGold { get; set; } = new(0);
 
         public Player() {}
 
         public Player(string name, int atk, int def, int hp, int mp, int goldQuantity) : base(name, atk, def, hp, mp)
         {
-            Gold = new(goldQuantity);
+            PlayerGold = new(goldQuantity);
         }
 
         public static Player DefaultPlayer() 
@@ -92,7 +92,7 @@ namespace BLL.GameComponents.EntityComponents
                     break;
 
                 case Gold gold:
-                    Gold.Quantity += gold.Quantity;
+                    PlayerGold.Quantity += gold.Quantity;
                     break;
             }
         }
@@ -139,7 +139,7 @@ namespace BLL.GameComponents.EntityComponents
             HP = hp ?? HP;
             MaxMP = mMp ?? MaxMP;
             MP = mp ?? MP;
-            Gold.Quantity = gold ?? Gold.Quantity;
+            PlayerGold.Quantity = gold ?? PlayerGold.Quantity;
         }
 
         public void Regenerate(int mHpPercentage, int mMpPercentage)
@@ -156,19 +156,19 @@ namespace BLL.GameComponents.EntityComponents
             if (buying)
             {
                 AddItem(item);
-                Gold.Quantity -= item.Price;
+                PlayerGold.Quantity -= item.Price;
             }
             else
             {
                 if (item is Equipment equip)
                 {
                     if (EquipInventory.Remove(equip))
-                        Gold.Quantity += equip.Price * Config.ItemPriceSellingPercentage / 100;
+                        PlayerGold.Quantity += equip.Price * Config.ItemPriceSellingPercentage / 100;
                 }
                 else if (item is Skill skill)
                 {
                     if (SkillInventory.Remove(skill))
-                        Gold.Quantity += skill.Price * Config.ItemPriceSellingPercentage / 100;
+                        PlayerGold.Quantity += skill.Price * Config.ItemPriceSellingPercentage / 100;
 
                 }
             }
@@ -219,7 +219,7 @@ namespace BLL.GameComponents.EntityComponents
                             break;
 
                         case "PlayerGold":
-                            player.Gold = JsonSerializer.Deserialize<Gold>(ref reader, options) ?? new Gold(GameConfig.PlayerDefaultGold);
+                            player.PlayerGold = JsonSerializer.Deserialize<Gold>(ref reader, options) ?? new Gold(GameConfig.PlayerDefaultGold);
                             break;
 
                         case "HP":
@@ -264,7 +264,7 @@ namespace BLL.GameComponents.EntityComponents
             JsonSerializer.Serialize(writer, value.SkillInventory.Select(s => s.ID).ToList(), options);
 
             writer.WritePropertyName("PlayerGold");
-            JsonSerializer.Serialize(writer, value.Gold, options);
+            JsonSerializer.Serialize(writer, value.PlayerGold, options);
 
             writer.WritePropertyName("HP");
             JsonSerializer.Serialize(writer, value.HP, options);

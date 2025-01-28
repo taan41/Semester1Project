@@ -6,7 +6,7 @@ namespace DAL.DBHandlers
 {
     public static class EquipmentDB
     {
-        public static async Task<(bool success, string error)> Add(Equipment equipment)
+        public static async Task<(bool success, string errorMessage)> Add(Equipment equipment)
         {
             string query = @"
                 INSERT INTO Equipments (
@@ -67,7 +67,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(Equipment? requestedEquipment, string error)> Get(int equipID)
+        public static async Task<(Equipment? requestedEquipment, string errorMessage)> Get(int equipID)
         {
             string query = @"
                 SELECT 
@@ -118,7 +118,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(Dictionary<int, Equipment>? equipments, string error)> GetAll()
+        public static async Task<(Dictionary<int, Equipment>? equipments, string errorMessage)> GetAll()
         {
             string query = @"
                 SELECT 
@@ -169,7 +169,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> UpdateID(int oldID, int newID)
+        public static async Task<(bool success, string errorMessage)> UpdateID(int oldID, int newID)
         {
             string query = @"
                 UPDATE Equipments
@@ -197,7 +197,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Remove(int equipID)
+        public static async Task<(bool success, string errorMessage)> Remove(int equipID)
         {
             string query = @"
                 DELETE FROM Equipments

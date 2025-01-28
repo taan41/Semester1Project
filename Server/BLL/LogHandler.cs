@@ -11,11 +11,11 @@ namespace BLL
 
         public static async void Initialize()
         {
-            var (oldLog, error) = await LogDB.GetAll();
+            var (oldLog, errorMessage) = await LogDB.GetAll();
 
             if(oldLog == null)
             {
-                Console.WriteLine($" LogHandler error: {error}");
+                Console.WriteLine($" LogHandler error: {errorMessage}");
                 return;
             }
             
@@ -31,7 +31,7 @@ namespace BLL
             if(!initialized)
                 return;
 
-            var (success, error) = await LogDB.Add(sourceMethod ?? "null", logContent);
+            var (success, errorMessage) = await LogDB.Add(sourceMethod ?? "null", logContent);
 
             if(success)
             {
@@ -44,7 +44,7 @@ namespace BLL
                 }
             }
             else
-                Console.WriteLine($" LogHandler error: {error}");
+                Console.WriteLine($" LogHandler error: {errorMessage}");
         }
 
         public static async void ClearLog()
@@ -55,12 +55,12 @@ namespace BLL
             lock(logList)
                 logList.Clear();
 
-            var (success, error) = await LogDB.Clear();
+            var (success, errorMessage) = await LogDB.Clear();
 
             if(!success)
             {
-                Console.WriteLine($" LogHandler error: {error}");
-                AddLog(error);
+                Console.WriteLine($" LogHandler error: {errorMessage}");
+                AddLog(errorMessage);
             }
         }
 

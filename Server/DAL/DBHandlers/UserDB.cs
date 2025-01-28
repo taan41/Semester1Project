@@ -7,7 +7,7 @@ namespace DAL.DBHandlers
 {
     public static class UserDB
     {
-        public static async Task<(bool success, string error)> CheckUsername(string username)
+        public static async Task<(bool success, string errorMessage)> CheckUsername(string username)
         {
             string query = "SELECT * FROM Users WHERE Username = @username";
 
@@ -32,7 +32,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Add(User userToAdd)
+        public static async Task<(bool success, string errorMessage)> Add(User userToAdd)
         {
             string query = "INSERT INTO Users (Username, Nickname, Email, PasswordHash, Salt) VALUES (@username, @nickname, @email, @pwdHash, @salt)";
 
@@ -61,7 +61,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(User? requestedUser, string error)> Get(string username, bool getPwd = true)
+        public static async Task<(User? requestedUser, string errorMessage)> Get(string username, bool getPwd = true)
         {
             string query = getPwd ?
                 "SELECT UserID, Username, Nickname, PasswordHash, Salt, Email FROM Users WHERE Username = @username" :
@@ -108,7 +108,7 @@ namespace DAL.DBHandlers
             }
         }
         
-        public static async Task<(User? requestedUser, string error)> Get(int userID, bool getPwd = true)
+        public static async Task<(User? requestedUser, string errorMessage)> Get(int userID, bool getPwd = true)
         {
             string query = getPwd ?
                 "SELECT UserID, Username, Nickname, PasswordHash, Salt, Email FROM Users WHERE UserID = @userID" :
@@ -155,7 +155,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Update(int userID, string? newNickname, string? newEmail, PasswordSet? newPwd)
+        public static async Task<(bool success, string errorMessage)> Update(int userID, string? newNickname, string? newEmail, PasswordSet? newPwd)
         {
             if (newNickname == null && newEmail == null && newPwd == null)
                 return (false, "Invalid updated data");
@@ -202,7 +202,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Update(string username, string? newNickname, string? newEmail, PasswordSet? newPwd)
+        public static async Task<(bool success, string errorMessage)> Update(string username, string? newNickname, string? newEmail, PasswordSet? newPwd)
         {
             if (newNickname == null && newEmail == null && newPwd == null)
                 return (false, "Invalid updated data");
@@ -246,7 +246,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Delete(int userID)
+        public static async Task<(bool success, string errorMessage)> Delete(int userID)
         {
             if (userID < 1)
                 return (false, "Invalid user ID");
@@ -271,7 +271,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(List<User>? users, string error)> GetAll()
+        public static async Task<(List<User>? users, string errorMessage)> GetAll()
         {
             string query = "SELECT UserID, Username, Nickname, Email FROM Users";
 

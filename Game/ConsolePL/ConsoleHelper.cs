@@ -18,7 +18,7 @@ namespace ConsolePL
         public static class UIConstants
         {
             public const int
-                UIWidth = 70, UIHeight = 24,
+                UIWidth = 70,
                 PopupWidth = 40, PopupHeight = 11,
                 PausePopupWidth = 34, PausePopupHeight = 15,
                 MainZoneHeight = 6, SubZoneHeight = 4;

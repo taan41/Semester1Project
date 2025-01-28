@@ -10,6 +10,7 @@ using DAL.ConfigClasses;
 using static System.Console;
 using static ConsolePL.ConsoleHelper;
 using static ConsolePL.ComponentPrinter;
+using NetworkLL.DataTransferObjects;
 
 namespace ConsolePL
 {
@@ -45,37 +46,15 @@ namespace ConsolePL
                 ""
             ],
             [
-                "",
-                @"      ____ ___  _  __ ___ ___  __    ___    ",
+                @"      ____ ___  _  __ ___ ___  __   ____    ",
                 @"    / ___/ __ \/ |/ / __/ __ \/ /  / __/    ",
                 @"   / /__/ /_/ /    /\ \/ /_/ / /__/ _/      ",
-                @"   \___/\____/_/|_/___/\____/____/___/__    ",
+                @"   \___/\____/_/|_/___/\____/____/___/      ",
+                "",
+                @"      ____ ___  _  __ ___  __  __ ___ __    ",
                 @"    / ___/ __ \/ |/ / __ \/ / / / __/ _ \   ",
                 @"   / /__/ /_/ /    / /_/ / /_/ / _// , _/   ",
                 @"   \___/\____/_/|_/\___\_\____/___/_/|_|    ",
-                ""
-            ],
-            [
-                @"  _____ _____ _____ _____ _____ __    _____  ",
-                @" |     |     |   | |   __|     |  |  |   __| ",
-                @" |   --|  |  | | | |__   |  |  |  |__|   __| ",
-                @" |_____|_____|_|___|_____|_____|_____|_____| ",
-                @"  _____ _____ _____ _____ _____ _____ _____  ",
-                @" |     |     |   | |     |  |  |   __| __  | ",
-                @" |   --|  |  | | | |  |  |  |  |   __|    -| ",
-                @" |_____|_____|_|___|__  _|_____|_____|__|__| ",
-                @"                      |__|                   "
-            ],
-            [
-                "",
-                @"   __    ___   _      __   ___   _     ____  ",
-                @"  / /`  / / \ | |\ | ( (` / / \ | |   | |_   ",
-                @"  \_\_, \_\_/ |_| \| _)_) \_\_/ |_|__ |_|__  ",
-                "",
-                @"  __    ___   _      ___    _     ____  ___  ",
-                @" / /`  / / \ | |\ | / / \  | | | | |_  | |_) ",
-                @" \_\_, \_\_/ |_| \| \_\_\\ \_\_/ |_|__ |_| \ ",
-                ""
             ]
         ];
 
@@ -136,18 +115,12 @@ namespace ConsolePL
         {
             Clear();
             DrawLine();
-
-            int noticeTop = 0;
             for (int i = 1; i < CursorPos.BottomBorderTop; i++)
-            {
                 WriteLine($"| {i}");
-                if (i == 18)
-                    noticeTop = CursorTop;
-            }
             DrawLine();
 
             CursorLeft = 5;
-            CursorTop = noticeTop;
+            CursorTop -= 4;
             Write("-- Please resize the console window to fit the game screen");
             CursorLeft = 5;
             CursorTop++;
@@ -395,7 +368,7 @@ namespace ConsolePL
                 confirmPassword = null,
                 email = null,
                 error;
-            int tempLeft, tempTop;
+            int tempCursorLeft, tempCursorTop;
 
             while (true)
             {
@@ -410,14 +383,14 @@ namespace ConsolePL
                     CursorTop = CursorPos.TitleScreenMenuTop;
                     WriteLine(" 'ESC' to return");
                     Write(" Username: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (username != null)
                         WriteLine(username);
                 }
                 
                 if (username == null)
                 {
-                    username = ReadInput(tempLeft, tempTop, false, DbConfig.UsernameMax);
+                    username = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.UsernameMax);
 
                     if (username == null)
                         return;
@@ -441,14 +414,14 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 2;
                     Write(" Password: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (password != null)
                         WriteLine(new string('*', password.Length));
                 }
 
                 if (password == null)
                 {
-                    password = ReadInput(tempLeft, tempTop, true, DbConfig.PasswordMax);
+                    password = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
                     
                     if (password == null)
                         return;
@@ -465,15 +438,15 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 3;
                     Write(" Confirm Password: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (confirmPassword != null)
                         WriteLine(new string('*', confirmPassword.Length));
                 }
 
                 if (confirmPassword == null)
                 {
-                    CursorTop = tempTop;
-                    confirmPassword = ReadInput(tempLeft, tempTop, true, DbConfig.PasswordMax);
+                    CursorTop = tempCursorTop;
+                    confirmPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
                     
                     if (confirmPassword == null)
                         return;
@@ -491,14 +464,14 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 4;
                     Write(" Nickname: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (nickname != null)
                         WriteLine(nickname);
                 }
 
                 if (nickname == null)
                 {
-                    nickname = ReadInput(tempLeft, tempTop, false, DbConfig.NicknameMax);
+                    nickname = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.NicknameMax);
                     
                     if (nickname == null)
                         return;
@@ -515,14 +488,14 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 5;
                     Write(" Email: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (email != null)
                         WriteLine(email);
                 }
 
                 if (email == null)
                 {
-                    email = ReadInput(tempLeft, tempTop, false, DbConfig.EmailMax);
+                    email = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.EmailMax);
                     
                     if (email == null)
                         return;
@@ -556,7 +529,7 @@ namespace ConsolePL
                 email = null,
                 password = null,
                 confirmPassword = null;
-            int tempLeft, tempTop;
+            int tempCursorLeft, tempCursorTop;
 
             while (true)
             {
@@ -571,14 +544,14 @@ namespace ConsolePL
                     CursorTop = CursorPos.TitleScreenMenuTop;
                     WriteLine(" 'ESC' to return");
                     Write(" Username: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (username != null)
                         WriteLine(username);
                 }
 
                 if (username == null)
                 {
-                    username = ReadInput(tempLeft, tempTop, false, DbConfig.UsernameMax);
+                    username = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.UsernameMax);
 
                     if (username == null)
                         return;
@@ -595,14 +568,14 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 2;
                     Write(" Email: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (email != null)
                         WriteLine(email);
                 }
 
                 if (email == null)
                 {
-                    email = ReadInput(tempLeft, tempTop, false, DbConfig.EmailMax);
+                    email = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.EmailMax);
 
                     if (email == null)
                         return;
@@ -619,14 +592,14 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 3;
                     Write(" Password: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (password != null)
                         WriteLine(new string('*', password.Length));
                 }
 
                 if (password == null)
                 {
-                    password = ReadInput(tempLeft, tempTop, true, DbConfig.PasswordMax);
+                    password = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
 
                     if (password == null)
                         return;
@@ -643,14 +616,14 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 4;
                     Write(" Confirm Password: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (confirmPassword != null)
                         WriteLine(new string('*', confirmPassword.Length));
                 }
 
                 if (confirmPassword == null)
                 {
-                    confirmPassword = ReadInput(tempLeft, tempTop, true, DbConfig.PasswordMax);
+                    confirmPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
 
                     if (confirmPassword == null)
                         return;
@@ -679,7 +652,7 @@ namespace ConsolePL
 
         public static bool LoginScreen()
         {
-            int tempLeft, tempTop;
+            int tempCursorLeft, tempCursorTop;
 
             while (true)
             {
@@ -694,10 +667,10 @@ namespace ConsolePL
                     CursorTop = CursorPos.TitleScreenMenuTop;
                     WriteLine(" 'ESC' to return");
                     Write(" Username: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                 }
 
-                string? username = ReadInput(tempLeft, tempTop, false, DbConfig.UsernameMax);
+                string? username = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.UsernameMax);
 
                 if (username == null)
                     return false;
@@ -712,10 +685,10 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 2;
                     Write(" Password: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                 }
 
-                string? password = ReadInput(tempLeft, tempTop, true, DbConfig.PasswordMax);
+                string? password = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
 
                 if (password == null)
                     return false;
@@ -766,7 +739,7 @@ namespace ConsolePL
                 oldPassword = null,
                 newPassword = null,
                 confirmPassword = null;
-            int tempLeft, tempTop;
+            int tempCursorLeft, tempCursorTop;
 
             while (true)
             {
@@ -781,14 +754,14 @@ namespace ConsolePL
                     CursorTop = CursorPos.TitleScreenMenuTop;
                     WriteLine(" 'ESC' to return");
                     Write(" Old Password: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (oldPassword != null)
                         WriteLine(new string('*', oldPassword.Length));
                 }
 
                 if (oldPassword == null)
                 {
-                    oldPassword = ReadInput(tempLeft, tempTop, true, DbConfig.PasswordMax);
+                    oldPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
 
                     if (oldPassword == null)
                         return;
@@ -812,14 +785,14 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 2;
                     Write(" New Password: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (newPassword != null)
                         WriteLine(new string('*', newPassword.Length));
                 }
 
                 if (newPassword == null)
                 {
-                    newPassword = ReadInput(tempLeft, tempTop, true, DbConfig.PasswordMax);
+                    newPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
 
                     if (newPassword == null)
                         return;
@@ -836,14 +809,14 @@ namespace ConsolePL
                 {
                     CursorTop = CursorPos.TitleScreenMenuTop + 3;
                     Write(" Confirm Password: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (confirmPassword != null)
                         WriteLine(new string('*', confirmPassword.Length));
                 }
 
                 if (confirmPassword == null)
                 {
-                    confirmPassword = ReadInput(tempLeft, tempTop, true, DbConfig.PasswordMax);
+                    confirmPassword = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
 
                     if (confirmPassword == null)
                         return;
@@ -873,7 +846,7 @@ namespace ConsolePL
         public static void ChangeNicknameScreen()
         {
             string? nickname = null;
-            int tempLeft, tempTop;
+            int tempCursorLeft, tempCursorTop;
 
             while (true)
             {
@@ -888,14 +861,14 @@ namespace ConsolePL
                     CursorTop = CursorPos.TitleScreenMenuTop;
                     WriteLine(" 'ESC' to return");
                     Write(" New Nickname: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (nickname != null)
                         WriteLine(nickname);
                 }
 
                 if (nickname == null)
                 {
-                    nickname = ReadInput(tempLeft, tempTop, false, DbConfig.NicknameMax);
+                    nickname = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.NicknameMax);
 
                     if (nickname == null)
                         return;
@@ -925,7 +898,7 @@ namespace ConsolePL
         public static void ChangeEmailScreen()
         {
             string? email = null;
-            int tempLeft, tempTop;
+            int tempCursorLeft, tempCursorTop;
 
             while (true)
             {
@@ -940,14 +913,14 @@ namespace ConsolePL
                     CursorTop = CursorPos.TitleScreenMenuTop;
                     WriteLine(" 'ESC' to return");
                     Write(" New Email: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                     if (email != null)
                         WriteLine(email);
                 }
 
                 if (email == null)
                 {
-                    email = ReadInput(tempLeft, tempTop, false, DbConfig.EmailMax);
+                    email = ReadInput(tempCursorLeft, tempCursorTop, false, DbConfig.EmailMax);
 
                     if (email == null)
                         return;
@@ -977,7 +950,7 @@ namespace ConsolePL
         public static bool DeleteAccountScreen()
         {
             string? password = null;
-            int tempLeft, tempTop;
+            int tempCursorLeft, tempCursorTop;
 
             while (true)
             {
@@ -992,12 +965,12 @@ namespace ConsolePL
                     CursorTop = CursorPos.TitleScreenMenuTop;
                     WriteLine(" 'ESC' to return");
                     Write(" Password: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                 }
 
                 if (password == null)
                 {
-                    password = ReadInput(tempLeft, tempTop, true, DbConfig.PasswordMax);
+                    password = ReadInput(tempCursorLeft, tempCursorTop, true, DbConfig.PasswordMax);
 
                     if (password == null)
                         return false;
@@ -1022,10 +995,10 @@ namespace ConsolePL
                     CursorTop = CursorPos.TitleScreenMenuTop + 3;
                     WriteLine(" This action is irreversible!");
                     Write(" Type 'DELETE' to confirm: ");
-                    (tempLeft, tempTop) = GetCursorPosition();
+                    (tempCursorLeft, tempCursorTop) = GetCursorPosition();
                 }
 
-                string? confirm = ReadInput(tempLeft, tempTop, false, 6);
+                string? confirm = ReadInput(tempCursorLeft, tempCursorTop, false, 6);
 
                 if (confirm == null)
                     return false;
@@ -1051,16 +1024,16 @@ namespace ConsolePL
 
         public static string? EnterSeed()
         {
-            int tempTop;
+            int tempCursorTop;
 
             lock (ConsoleLock)
             {
                 SetCursorPosition(CursorPos.TitleScreenMenuLeft, CursorPos.TitleScreenMenuTop + 4);
                 WriteLine(" ENTER SEED: ");
-                tempTop = CursorTop;
+                tempCursorTop = CursorTop;
             }
 
-            return ReadInput(15, tempTop, false, 40);
+            return ReadInput(15, tempCursorTop, false, 40);
         }
 
         public static void ViewScoresScreen(List<string> scores, string listName)

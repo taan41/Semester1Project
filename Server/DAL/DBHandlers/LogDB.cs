@@ -6,7 +6,7 @@ namespace DAL.DBHandlers
 {
     public static class LogDB
     {
-        public static async Task<(bool success, string error)> Add(string? source, string logContent)
+        public static async Task<(bool success, string errorMessage)> Add(string? source, string logContent)
         {
             string query = @"
                 INSERT INTO ActivityLog (Source, Content) 
@@ -31,7 +31,7 @@ namespace DAL.DBHandlers
             }
         }
         
-        public static async Task<(List<Log>? requestedLogList, string error)> GetAll()
+        public static async Task<(List<Log>? requestedLogList, string errorMessage)> GetAll()
         {
             string query = "SELECT LogTime, Source, Content FROM ActivityLog ORDER BY LogTime";
 
@@ -58,7 +58,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Clear()
+        public static async Task<(bool success, string errorMessage)> Clear()
         {
             string query = @"
                 DELETE FROM ActivityLog;

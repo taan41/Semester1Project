@@ -6,7 +6,7 @@ namespace DAL.DBHandlers
 {
     public static class ConfigDB
     {
-        public static async Task<(bool success, string error)> Add(string configName, string configValue)
+        public static async Task<(bool success, string errorMessage)> Add(string configName, string configValue)
         {
             string query = @"
                 INSERT INTO Configs (ConfigName, ConfigValue)
@@ -33,7 +33,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(T? config, string error)> Get<T>(string configName)
+        public static async Task<(T? config, string errorMessage)> Get<T>(string configName)
         {
             string query = "SELECT ConfigValue FROM Configs WHERE ConfigName = @name";
 

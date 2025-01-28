@@ -16,7 +16,6 @@ namespace ConsolePL
         public static void Main()
         {
             Console.CursorVisible = false;
-            Console.SetWindowSize(UIConstants.UIWidth, UIConstants.UIHeight);
             ConsoleSizeNotice();
 
             while (true)
@@ -370,7 +369,7 @@ namespace ConsolePL
         {
             StopTitleAnim();
 
-            GameStateHandler gameHandler = new(seed);
+            GameLoopHandler gameHandler = new(seed);
 
             List<Equipment> startEquips =
             [
@@ -406,7 +405,7 @@ namespace ConsolePL
             GameLoop(gameHandler);
         }
 
-        static void GameLoop(GameStateHandler gameHandler)
+        static void GameLoop(GameLoopHandler gameHandler)
         {
             List<string> actions = ["Pick A Route", "Inventory"];
             List<string> invOptions = ["Change Equipment", "Change Skill"];
@@ -457,9 +456,9 @@ namespace ConsolePL
                                 break;
 
                             default:
-                                continue;
+                                break;
                         }
-                        goto case 1;
+                        break;
 
                     default:
                         if (HandlePause(gameHandler))
@@ -470,7 +469,7 @@ namespace ConsolePL
             }
         }
 
-        static bool HandlePause(GameStateHandler gameHandler)
+        static bool HandlePause(GameLoopHandler gameHandler)
         {
             List<string> pauseOptions = ["RESUME", "SAVE & EXIT"];
 
@@ -490,7 +489,7 @@ namespace ConsolePL
             }
         }
 
-        static void HandleEquipInventory(GameStateHandler gameHandler)
+        static void HandleEquipInventory(GameLoopHandler gameHandler)
         {
             List<Equipment> equipInv = gameHandler.Player.EquipInventory;
 
@@ -510,7 +509,7 @@ namespace ConsolePL
             }
         }
 
-        static void HandleSkillInventory(GameStateHandler gameHandler)
+        static void HandleSkillInventory(GameLoopHandler gameHandler)
         {
             List<Skill> skillInv = gameHandler.Player.SkillInventory;
             int displayCount = UIConstants.MainZoneHeight - 1;
@@ -542,7 +541,7 @@ namespace ConsolePL
             }
         }
 
-        static bool HandleEvent(GameStateHandler gameHandler, Event route)
+        static bool HandleEvent(GameLoopHandler gameHandler, Event route)
         {
             return route switch
             {
@@ -551,7 +550,7 @@ namespace ConsolePL
             };
         }
 
-        static bool HandleFightEvent(GameStateHandler gameHandler, FightEvent fightEvent)
+        static bool HandleFightEvent(GameLoopHandler gameHandler, FightEvent fightEvent)
         {
             List<string> fightActions = ["Attack", "Use Skill"];
             List<string> lostOptions = ["RETRY", "RETURN TO TITLE"];
@@ -648,7 +647,7 @@ namespace ConsolePL
             return HandleRewards(gameHandler, fightEvent.Rewards);
         }
 
-        static bool HandleNonfightEvent(GameStateHandler gameHandler, Event route)
+        static bool HandleNonfightEvent(GameLoopHandler gameHandler, Event route)
         {
             switch (route)
             {
@@ -681,7 +680,7 @@ namespace ConsolePL
             return true;
         }
 
-        static bool HandleRewards(GameStateHandler gameHandler, List<Item> rewards)
+        static bool HandleRewards(GameLoopHandler gameHandler, List<Item> rewards)
         {
             while (rewards.Count > 0)
             {
@@ -704,46 +703,28 @@ namespace ConsolePL
             return true;
         }
 
-        static void HandleShop(GameStateHandler gameHandler, ShopEvent shopEvent)
+        static void HandleShop(GameLoopHandler gameHandler, ShopEvent shopEvent)
         {
-            List<string> options = ["Shopping", "Inventory", "Continue"];
-            List<string> shopActions = ["Buy", "Sell", $"Reroll Shop ({gameHandler.RerollCost}G)"];
+            List<string> shopActions = ["Buy", "Sell", "Inventory"];
             List<string> invActions = ["Change Equipment", "Change Skill"];
 
             while (true)
             {
                 GenericGameScreen(gameHandler.Progress, gameHandler.Player);
                 ShopBanner();
-                PrintSubZone(options, "Actions:");
+                PrintSubZone(shopActions, "Actions:");
                 
-                switch (Picker.String(options, CursorPos.SubZoneTop + 1))
+                switch (Picker.String(shopActions, CursorPos.SubZoneTop + 1))
                 {
                     case 0:
-                        GenericGameScreen(gameHandler.Progress, gameHandler.Player);
-                        ShopBanner();
-                        PrintSubZone(shopActions, "Shopping:");
-                        
-                        int? pickedShopInd = Picker.String(shopActions, CursorPos.SubZoneTop + 1);
-                        switch (pickedShopInd)
-                        {
-                            case 0:
-                                HandleShopBuy(gameHandler, shopEvent);
-                                break;
-
-                            case 1:
-                                HandleShopSell(gameHandler);
-                                break;
-
-                            case 2:
-                                gameHandler.RerollShop(shopEvent);
-                                break;
-
-                            default:
-                                continue;
-                        }
-                        goto case 0;
+                        HandleShopBuy(gameHandler, shopEvent);
+                        break;
 
                     case 1:
+                        HandleShopSell(gameHandler);
+                        break;
+
+                    case 2:
                         GenericGameScreen(gameHandler.Progress, gameHandler.Player);
                         ShopBanner();
                         PrintSubZone(invActions, "Inventory:");
@@ -760,9 +741,9 @@ namespace ConsolePL
                                 break;
 
                             default:
-                                continue;
+                                break;
                         }
-                        goto case 1;
+                        break;
 
                     default:
                         return;
@@ -770,7 +751,7 @@ namespace ConsolePL
             }
         }
 
-        static void HandleShopBuy(GameStateHandler gameHandler, ShopEvent shopEvent)
+        static void HandleShopBuy(GameLoopHandler gameHandler, ShopEvent shopEvent)
         {
             List<Item> shopItems = shopEvent.SellingItems;
             int displayCount = UIConstants.MainZoneHeight + UIConstants.SubZoneHeight;
@@ -784,7 +765,7 @@ namespace ConsolePL
                     return;
 
                 Item pickedItem = shopItems[(int) pickedItemInd];
-                if (pickedItem.Price <= gameHandler.Player.Gold.Quantity)
+                if (pickedItem.Price <= gameHandler.Player.PlayerGold.Quantity)
                 {
                     gameHandler.Player.TradeItem(pickedItem, true);
                     shopItems.Remove(pickedItem);
@@ -794,7 +775,7 @@ namespace ConsolePL
             }
         }
 
-        static void HandleShopSell(GameStateHandler gameHandler)
+        static void HandleShopSell(GameLoopHandler gameHandler)
         {
             List<Item> playerInv = [];
             playerInv.AddRange(gameHandler.Player.EquipInventory);
@@ -816,7 +797,7 @@ namespace ConsolePL
             }
         }
 
-        static void HandleVictory(GameStateHandler gameHandler)
+        static void HandleVictory(GameLoopHandler gameHandler)
         {
             gameHandler.RunWin();
 

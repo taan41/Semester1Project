@@ -6,7 +6,7 @@ namespace DAL.DBHandlers
 {
     public static class MonsterDB
     {
-        public static async Task<(bool success, string error)> Add(Monster monster)
+        public static async Task<(bool success, string errorMessage)> Add(Monster monster)
         {
             string query = @"
                 INSERT INTO Monsters (
@@ -59,7 +59,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(Monster? requestedMonster, string error)> Get(int monsterID)
+        public static async Task<(Monster? requestedMonster, string errorMessage)> Get(int monsterID)
         {
             string query = @"
                 SELECT 
@@ -107,7 +107,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(Dictionary<int, Monster>? monsters, string error)> GetAll(int maxFloor)
+        public static async Task<(Dictionary<int, Monster>? monsters, string errorMessage)> GetAll(int maxFloor)
         {
             string query = @"
                 SELECT 
@@ -158,7 +158,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> UpdateID(int oldID, int newID)
+        public static async Task<(bool success, string errorMessage)> UpdateID(int oldID, int newID)
         {
             string query = @"
                 UPDATE Monsters
@@ -186,7 +186,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Remove(int monsterID)
+        public static async Task<(bool success, string errorMessage)> Remove(int monsterID)
         {
             string query = @"
                 DELETE FROM Monsters

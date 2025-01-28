@@ -6,7 +6,7 @@ namespace DAL.DBHandlers
 {
     public static class SkillDB
     {
-        public static async Task<(bool success, string error)> Add(Skill skill)
+        public static async Task<(bool success, string errorMessage)> Add(Skill skill)
         {
             string query = @"
                 INSERT INTO Skills (
@@ -63,7 +63,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(Skill? requestedSkill, string error)> Get(int skillID)
+        public static async Task<(Skill? requestedSkill, string errorMessage)> Get(int skillID)
         {
             string query = @"
                 SELECT 
@@ -112,7 +112,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Update(Skill skill, int dmgPoint, int healPoint)
+        public static async Task<(bool success, string errorMessage)> Update(Skill skill, int dmgPoint, int healPoint)
         {
             string query = @"
                 UPDATE Skills
@@ -152,7 +152,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> UpdateID(int oldID, int newID)
+        public static async Task<(bool success, string errorMessage)> UpdateID(int oldID, int newID)
         {
             string query = @"
                 UPDATE Skills
@@ -180,7 +180,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Remove(int skillID)
+        public static async Task<(bool success, string errorMessage)> Remove(int skillID)
         {
             string query = @"
                 DELETE FROM Skills
@@ -204,7 +204,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(Dictionary<int, Skill>? skills, string error)> GetAll()
+        public static async Task<(Dictionary<int, Skill>? skills, string errorMessage)> GetAll()
         {
             string query = @"
                 SELECT 
