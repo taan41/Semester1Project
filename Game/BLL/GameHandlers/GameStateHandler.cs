@@ -3,13 +3,14 @@ using BLL.GameComponents.EventComponents;
 using BLL.GameComponents.ItemComponents;
 using BLL.GameComponents.Others;
 using BLL.GameHelpers;
+using DAL.ConfigClasses;
 
 namespace BLL.GameHandlers
 {
-    public class GameLoopHandler
+    public class GameStateHandler
     {
         private readonly GameSave _save;
-        private readonly RunData _data;
+        private readonly RunData _runData;
 
         private int _prefightHP, _prefightMP;
         private List<Monster> _prefightMonsters = [];
@@ -18,31 +19,33 @@ namespace BLL.GameHandlers
         public readonly RunProgress Progress;
         public readonly Player Player;
 
-        public GameLoopHandler(GameSave save)
+        public int RerollCost => Progress.Floor * 100;
+
+        public GameStateHandler(GameSave save)
         {
             _save = save;
-            _data = save.RunData;
+            _runData = save.RunData;
 
-            Events = new(_data);
-            Progress = _data.Progress;
-            Player = _data.Player;
+            Events = new(_runData);
+            Progress = _runData.Progress;
+            Player = _runData.Player;
         }
 
-        public GameLoopHandler(string? seed)
+        public GameStateHandler(string? seed)
         {
-            _data = new RunData(seed);
-            _save = new GameSave(_data);
+            _runData = new RunData(seed);
+            _save = new GameSave(_runData);
 
-            Events = new EventGenerator(_data);
-            Progress = _data.Progress;
-            Player = _data.Player;
+            Events = new EventGenerator(_runData);
+            Progress = _runData.Progress;
+            Player = _runData.Player;
         }
 
         public void Timer(bool start)
-            => _data.Timer(start);
+            => _runData.Timer(start);
 
         public TimeSpan GetElapsedTime()
-            => _data.GetElapsedTime();
+            => _runData.GetElapsedTime();
 
         public void SaveAs(string saveName, bool saveToCloud = false)
         {
@@ -81,7 +84,13 @@ namespace BLL.GameHandlers
         {
             Timer(false);
             if (ServerHandler.IsLoggedIn)
-                ServerHandler.UploadScore(GetElapsedTime(), out _);
+                ServerHandler.UploadScore(_runData.RunID, GetElapsedTime(), out _);
+        }
+
+        public void RerollShop(ShopEvent shop)
+        {
+            Events.RerollShop(Progress, shop);
+            Player.Gold.Quantity -= RerollCost;
         }
     }
 }

@@ -32,7 +32,7 @@
   "101": {
     "SkillType": 0,
     "DamagePoint": 0,
-    "HealPoint": 10,
+    "HealPoint": 5,
     "MPCost": 5,
     "ID": 101,
     "ItemRarity": 1,
@@ -41,7 +41,7 @@
   },
   "102": {
     "SkillType": 0,
-    "DamagePoint": 10,
+    "DamagePoint": 5,
     "HealPoint": 0,
     "MPCost": 5,
     "ID": 102,
@@ -51,7 +51,7 @@
   },
   "103": {
     "SkillType": 2,
-    "DamagePoint": 10,
+    "DamagePoint": 5,
     "HealPoint": 0,
     "MPCost": 5,
     "ID": 103,
@@ -61,7 +61,7 @@
   },
   "104": {
     "SkillType": 2,
-    "DamagePoint": 20,
+    "DamagePoint": 10,
     "HealPoint": 0,
     "MPCost": 10,
     "ID": 104,
@@ -72,7 +72,7 @@
   "201": {
     "SkillType": 0,
     "DamagePoint": 0,
-    "HealPoint": 30,
+    "HealPoint": 10,
     "MPCost": 10,
     "ID": 201,
     "ItemRarity": 2,
@@ -81,7 +81,7 @@
   },
   "202": {
     "SkillType": 0,
-    "DamagePoint": 15,
+    "DamagePoint": 5,
     "HealPoint": 0,
     "MPCost": 5,
     "ID": 202,
@@ -91,7 +91,7 @@
   },
   "203": {
     "SkillType": 2,
-    "DamagePoint": 15,
+    "DamagePoint": 5,
     "HealPoint": 0,
     "MPCost": 5,
     "ID": 203,
@@ -101,7 +101,7 @@
   },
   "204": {
     "SkillType": 2,
-    "DamagePoint": 45,
+    "DamagePoint": 15,
     "HealPoint": 0,
     "MPCost": 15,
     "ID": 204,
@@ -112,7 +112,7 @@
   "301": {
     "SkillType": 0,
     "DamagePoint": 0,
-    "HealPoint": 50,
+    "HealPoint": 10,
     "MPCost": 10,
     "ID": 301,
     "ItemRarity": 3,
@@ -121,7 +121,7 @@
   },
   "302": {
     "SkillType": 0,
-    "DamagePoint": 25,
+    "DamagePoint": 5,
     "HealPoint": 0,
     "MPCost": 5,
     "ID": 302,
@@ -131,7 +131,7 @@
   },
   "303": {
     "SkillType": 2,
-    "DamagePoint": 25,
+    "DamagePoint": 5,
     "HealPoint": 0,
     "MPCost": 5,
     "ID": 303,
@@ -141,7 +141,7 @@
   },
   "304": {
     "SkillType": 2,
-    "DamagePoint": 100,
+    "DamagePoint": 20,
     "HealPoint": 0,
     "MPCost": 20,
     "ID": 304,

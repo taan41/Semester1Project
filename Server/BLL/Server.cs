@@ -13,7 +13,7 @@ namespace BLL
         private static TcpListener? listener;
         private static CancellationTokenSource? serverStopToken;
 
-        public static readonly List<ClientHandler> clientList = [];
+        public static readonly List<ClientHandler> ClientList = [];
 
         public static async Task<(bool success, string error)> InitializeDB(string server, string db, string uid, string password)
         {
@@ -28,7 +28,7 @@ namespace BLL
             return (true, "");
         }
 
-        public static async Task StartServer(string? serverIP, int port)
+        public static async Task Start(string? serverIP, int port)
         {
             listener = serverIP == null ? new(IPAddress.Any, port) : new(IPAddress.Parse(serverIP), port);
             listener.Start();
@@ -42,7 +42,7 @@ namespace BLL
             _ = Task.Run(() => AcceptClientsAsync(listener, serverStopToken.Token));
         }
 
-        public static void StopServer()
+        public static void Stop()
         {
             serverStopToken?.Cancel();
             listener?.Stop();
@@ -63,8 +63,8 @@ namespace BLL
 
                     ClientHandler clientHandler = new(client);
 
-                    lock(clientList)
-                        clientList.Add(clientHandler);
+                    lock(ClientList)
+                        ClientList.Add(clientHandler);
 
                     _ = Task.Run(() => clientHandler.HandlingClientAsync(serverStopToken), CancellationToken.None);
                 }
@@ -82,9 +82,9 @@ namespace BLL
 
         public static void RemoveClient(ClientHandler client)
         {
-            lock(clientList)
+            lock(ClientList)
             {
-                clientList.Remove(client);
+                ClientList.Remove(client);
             }
         }
     }

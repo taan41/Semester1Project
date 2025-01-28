@@ -94,7 +94,7 @@ namespace DAL.DBHandlers
 
             using (MySqlCommand createScores = new(@$"
                 CREATE TABLE {Tables.Scores} (
-                    ScoreID INT AUTO_INCREMENT PRIMARY KEY,
+                    RunID INT PRIMARY KEY,
                     UserID INT NOT NULL,
                     ClearTime TIME(3) NOT NULL,
                     UploadedTime DATETIME DEFAULT CURRENT_TIMESTAMP,

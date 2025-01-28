@@ -5,7 +5,7 @@ namespace DAL.DBHandlers
 {
     public static class GameSaveDB
     {
-        public static async Task<(bool success, string errorMessage)> Save(int userID, string saveContent)
+        public static async Task<(bool success, string error)> Save(int userID, string saveContent)
         {
             string query = @"
                 INSERT INTO GameSaves (UserID, SaveContent)
@@ -31,7 +31,7 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(string? saveContent, string errorMessage)> Load(int userID)
+        public static async Task<(string? saveContent, string error)> Load(int userID)
         {
             string query = @"
                 SELECT SaveContent
