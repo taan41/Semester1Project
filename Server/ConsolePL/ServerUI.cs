@@ -17,40 +17,6 @@ static class ServerUI
         Clear();
         DrawHeader(Header);
 
-        // WriteLine(" -- Filling MySql database info:");
-        // WriteLine(" 'ESC' to return");
-        // WriteLine(" Leave blank for default values");
-        // DrawLine('-');
-
-        // string? server, db, uid, password;
-
-        // Write(" Server (default '26.244.97.115'): ");
-        // if ((server = ReadInput()) == null)
-        //     return (false, true);
-        // if (string.IsNullOrWhiteSpace(server))
-        //     server = "26.244.97.115";
-
-        // Write(" Database (default 'consoleconquer'): ");
-        // if ((db = ReadInput()) == null)
-        //     return (false, true);
-        // if (string.IsNullOrWhiteSpace(db))
-        //     db = "consoleconquer";
-
-        // Write(" UID (default 'root'): ");
-        // if ((uid = ReadInput()) == null)
-        //     return (false, true);
-        // if (string.IsNullOrWhiteSpace(uid))
-        //     uid = "root";
-
-        // Write(" Password (default empty): ");
-        // if ((password = ReadInput(true)) == null)
-        //     return (false, true);
-        // password = "";
-
-        // DrawLine('-');
-
-        // if (await Server.InitializeDB(server, db, uid, password))
-
         WriteLine(" -- Connecting to MySql database");
         WriteLine(" 'ESC' to return");
         WriteLine(" Leave blank for default values");
@@ -61,17 +27,37 @@ static class ServerUI
         WriteLine(" - Localhost: 127.0.0.1");
         WriteLine(" Radmin VPN network: consoleconquer (password: 000000)");
         WriteLine(@" MySql dump file for local db is located at: MySql Files\Dump\");
-        WriteLine(" Username & password for local db should be 'root' & empty");
         DrawLine('-');
+
+        string? dbIP, db, uid, password;
         
-        Write(" Enter database IP (default localhost): ");
-        string? dbIP = ReadInput();
-        if (dbIP == null)
+        Write(" Database IP (default localhost): ");
+        if ((dbIP = ReadInput()) == null)
             return (false, true);
         if (string.IsNullOrWhiteSpace(dbIP))
             dbIP = "127.0.0.1";
 
-        var (success, error) = await Server.InitializeDB(dbIP, "consoleconquer", "root", "");
+        Write(" Database name (default 'consoleconquer'): ");
+        if ((db = ReadInput()) == null)
+            return (false, true);
+        if (string.IsNullOrWhiteSpace(db))
+            db = "consoleconquer";
+
+        Write(" UID (default 'root'): ");
+        if ((uid = ReadInput()) == null)
+            return (false, true);
+        if (string.IsNullOrWhiteSpace(uid))
+            uid = "root";
+
+        Write(" Password (default empty): ");
+        if ((password = ReadInput(true)) == null)
+            return (false, true);
+        if (string.IsNullOrWhiteSpace(password))
+            password = "";
+
+        DrawLine('-');
+
+        var (success, error) = await Server.InitializeDB(dbIP, db, uid, password);
         if (success)
         {
             WriteLine(" Database connection successful!");
@@ -94,7 +80,10 @@ static class ServerUI
         DrawHeader(Header);
         WriteLine($" Server's IP: {serverIP ?? "Any"}");
         WriteLine($" Server's port: {port}");
-        WriteLine($" Server's status: {(serverOnline ? "Online" : "Offline")}");
+        Write(" Server's status: ");
+        ForegroundColor = serverOnline ? ConsoleColor.Green : ConsoleColor.Red;
+        WriteLine(serverOnline ? "Online" : "Offline");
+        ResetColor();
         DrawLine('-');
 
         if (!serverOnline)
