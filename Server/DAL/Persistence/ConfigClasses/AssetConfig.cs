@@ -11,8 +11,6 @@ namespace DAL.Persistence.ConfigClasses
                 [2, 4, 7, 10], // Armor
                 [1, 2, 3, 5], // Relic
             ];
-            
-        public int[] SkillPtPerMPPerRarity { get; set; } = [1, 2, 3, 5];
 
         public AssetConfig() {}
 

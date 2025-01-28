@@ -294,7 +294,7 @@ namespace BLL.GameHandlers
             return true;
         }
 
-        public static bool UploadScore(TimeSpan clearTime, out string error)
+        public static bool UploadScore(int runID, TimeSpan clearTime, out string error)
         {
             if (!IsLoggedIn)
             {
@@ -302,7 +302,12 @@ namespace BLL.GameHandlers
                 return false;
             }
 
-            Score score = new(mainUser!.UserID, mainUser.Nickname, clearTime);
+            Score score = new(){
+                RunID = runID,
+                UserID = mainUser!.UserID,
+                Nickname = mainUser.Nickname,
+                ClearTime = clearTime
+            };
             if (!NetworkHandler.Communicate(new(Command.Type.UploadScore, score.ToJson()), out string result))
             {
                 error = result;

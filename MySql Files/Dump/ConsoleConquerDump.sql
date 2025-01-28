@@ -62,7 +62,7 @@ CREATE TABLE `configs` (
 
 LOCK TABLES `configs` WRITE;
 /*!40000 ALTER TABLE `configs` DISABLE KEYS */;
-INSERT INTO `configs` VALUES ('AssetConfig','{\"EquipPtPerRarityPerType\":[[3,6,10,15],[2,4,7,10],[1,2,3,5]],\"SkillPtPerMPPerRarity\":[1,2,3,5]}'),('DatabaseConfig','{\"UsernameMin\":4,\"UsernameMax\":50,\"PasswordMin\":6,\"PasswordMax\":50,\"NicknameMin\":1,\"NicknameMax\":25,\"EmailMin\":1,\"EmailMax\":254}'),('GameConfig','{\"EntityMPRegenPercentage\":20,\"PlayerDefaultATK\":3,\"PlayerDefaultDEF\":0,\"PlayerDefaultHP\":25,\"PlayerDefaultMP\":10,\"PlayerDefaultGold\":100,\"PlayerMaxSkillCount\":3,\"MonsterDefaultATK\":1,\"MonsterDefaultHP\":10,\"MonsterPowerATKPercentage\":400,\"MonsterPowerHPPercentage\":100,\"ItemPriceBase\":100,\"ItemPriceRarityBonusPercentage\":75,\"ItemPriceEquipBonusPercentage\":30,\"ItemPriceSkillBonusPercentage\":10,\"ItemPriceSellingPercentage\":60,\"EquipPtATKPercentage\":200,\"EquipPtDEFPercentage\":100,\"EquipPtHPPercentage\":800,\"EquipPtMPPercentage\":400,\"SkillPtDamagePercentage\":150,\"SkillPtHealPercentage\":100,\"SkillTypeSinglePercentage\":100,\"SkillTypeRandomPercentage\":120,\"SkillTypeAllPercentage\":70,\"ProgressMaxFloor\":3,\"ProgressMaxRoom\":16,\"EventPowerPerRoom\":100,\"EventPowerPerFloorRatio\":50,\"EventPowerElitePercentage\":200,\"EventPowerBossPercentage\":500,\"EventRoomCountTreasure\":10,\"EventRoomCountCamp\":5,\"EventRoomCountShop\":5,\"EventGoldBase\":100,\"EventGoldPerNormal\":10,\"EventGoldPerElite\":25,\"EventGoldPerBoss\":100,\"EventGoldFloorPercentage\":50,\"EventGoldTreasure\":200,\"EventGoldTreasurePerFloorPercentage\":80}'),('ServerConfig','{\"ServerIP\":\"26.244.97.115\",\"Port\":6969}');
+INSERT INTO `configs` VALUES ('AssetConfig','{\"EquipPtPerRarityPerType\":[[3,6,10,15],[2,4,7,10],[1,2,3,5]]}'),('DatabaseConfig','{\"UsernameMin\":4,\"UsernameMax\":50,\"PasswordMin\":6,\"PasswordMax\":50,\"NicknameMin\":1,\"NicknameMax\":25,\"EmailMin\":1,\"EmailMax\":254}'),('GameConfig','{\"EntityMPRegenPercentage\":15,\"PlayerDefaultATK\":3,\"PlayerDefaultDEF\":0,\"PlayerDefaultHP\":25,\"PlayerDefaultMP\":10,\"PlayerDefaultGold\":100,\"PlayerMaxSkillCount\":3,\"MonsterDefaultATK\":1,\"MonsterDefaultHP\":10,\"MonsterPowerATKPercentage\":400,\"MonsterPowerHPPercentage\":100,\"ItemPriceBase\":200,\"ItemPriceRarityBonusPercentage\":100,\"ItemPriceEquipBonusPercentage\":30,\"ItemPriceSkillBonusPercentage\":15,\"ItemPriceSellingPercentage\":15,\"EquipPtATKPercentage\":200,\"EquipPtDEFPercentage\":100,\"EquipPtHPPercentage\":800,\"EquipPtMPPercentage\":400,\"SkillPtDmgPercentage\":150,\"SkillPtHealPercentage\":100,\"SkillRarityNormalPercentage\":100,\"SkillRarityRarePercentage\":150,\"SkillRarityEpicPercentage\":250,\"SkillRarityLegendaryPercentage\":400,\"SkillTypeSinglePercentage\":100,\"SkillTypeRandomPercentage\":120,\"SkillTypeAllPercentage\":50,\"ProgressMaxFloor\":3,\"ProgressMaxRoom\":16,\"EventPowerPerRoom\":100,\"EventPowerPerFloorRatio\":50,\"EventPowerElitePercentage\":200,\"EventPowerBossPercentage\":400,\"EventRoomCountTreasure\":10,\"EventRoomCountCamp\":5,\"EventRoomCountShop\":5,\"EventGoldBase\":75,\"EventGoldPerNormal\":5,\"EventGoldPerElite\":15,\"EventGoldPerBoss\":50,\"EventGoldFloorPercentage\":25,\"EventGoldTreasure\":150,\"EventGoldTreasurePerFloorPercentage\":50}'),('ServerConfig','{\"ServerIP\":\"26.244.97.115\",\"Port\":6969}');
 /*!40000 ALTER TABLE `configs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -114,7 +114,7 @@ CREATE TABLE `gamesaves` (
   UNIQUE KEY `UserID` (`UserID`),
   KEY `idx_userID` (`UserID`),
   CONSTRAINT `gamesaves_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -152,7 +152,7 @@ CREATE TABLE `monsters` (
 
 LOCK TABLES `monsters` WRITE;
 /*!40000 ALTER TABLE `monsters` DISABLE KEYS */;
-INSERT INTO `monsters` VALUES (1,'Slime',0,1,10,0,100),(2,'Rat',0,1,15,0,100),(101,'Mother Slime',1,1,15,0,100),(201,'King Slime',2,1,10,1,100),(1001,'Goldfish',0,2,10,1,100),(1101,'Shark',1,2,10,1,100),(1201,'Ocean God Neptune',2,2,10,2,100),(2001,'Skeleton',0,3,10,2,100),(2101,'Grave Digger',1,3,10,2,100),(2201,'Supreme Necromancer',2,3,10,3,100);
+INSERT INTO `monsters` VALUES (1,'Slime',0,1,10,0,100),(2,'Rat',0,1,15,0,100),(101,'Mother Slime',1,1,15,1,100),(201,'King Slime',2,1,10,3,100),(1001,'Goldfish',0,2,10,1,100),(1101,'Shark',1,2,10,3,100),(1201,'Ocean God Neptune',2,2,10,6,100),(2001,'Skeleton',0,3,10,2,100),(2101,'Grave Digger',1,3,10,5,100),(2201,'Supreme Necromancer',2,3,10,9,100);
 /*!40000 ALTER TABLE `monsters` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -164,11 +164,11 @@ DROP TABLE IF EXISTS `scores`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `scores` (
-  `ScoreID` int NOT NULL AUTO_INCREMENT,
+  `RunID` int NOT NULL,
   `UserID` int NOT NULL,
   `ClearTime` time(3) NOT NULL,
   `UploadedTime` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`ScoreID`),
+  PRIMARY KEY (`RunID`),
   KEY `idx_userID` (`UserID`),
   CONSTRAINT `scores_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `users` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -180,6 +180,7 @@ CREATE TABLE `scores` (
 
 LOCK TABLES `scores` WRITE;
 /*!40000 ALTER TABLE `scores` DISABLE KEYS */;
+INSERT INTO `scores` VALUES (-41292310,5,'00:11:44.145','2025-01-28 01:02:37');
 /*!40000 ALTER TABLE `scores` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -210,7 +211,7 @@ CREATE TABLE `skills` (
 
 LOCK TABLES `skills` WRITE;
 /*!40000 ALTER TABLE `skills` DISABLE KEYS */;
-INSERT INTO `skills` VALUES (1,'Bandage',0,-1,0,0,5,5),(2,'Weak Stab',0,-1,0,5,0,5),(3,'Careless Slash',0,-1,2,5,0,5),(101,'Cure',1,-1,0,0,10,5),(102,'Piercing Strike',1,-1,0,10,0,5),(103,'Shattering Blow',1,-1,2,10,0,5),(104,'Flameburst',1,-1,2,20,0,10),(201,'Revitalize',2,-1,0,0,30,10),(202,'Precision Thrust',2,-1,0,15,0,5),(203,'Whirlwind Slash',2,-1,2,15,0,5),(204,'Frost Nova',2,-1,2,45,0,15),(301,'Re-life',3,-1,0,0,50,10),(302,'Godslayer Strike',3,-1,0,25,0,5),(303,'Earthshatter',3,-1,2,25,0,5),(304,'Meteor Storm',3,-1,2,100,0,20);
+INSERT INTO `skills` VALUES (1,'Bandage',0,-1,0,0,5,5),(2,'Weak Stab',0,-1,0,5,0,5),(3,'Careless Slash',0,-1,2,5,0,5),(101,'Cure',1,-1,0,0,5,5),(102,'Piercing Strike',1,-1,0,5,0,5),(103,'Shattering Blow',1,-1,2,5,0,5),(104,'Flameburst',1,-1,2,10,0,10),(201,'Revitalize',2,-1,0,0,10,10),(202,'Precision Thrust',2,-1,0,5,0,5),(203,'Whirlwind Slash',2,-1,2,5,0,5),(204,'Frost Nova',2,-1,2,15,0,15),(301,'Re-life',3,-1,0,0,10,10),(302,'Godslayer Strike',3,-1,0,5,0,5),(303,'Earthshatter',3,-1,2,5,0,5),(304,'Meteor Storm',3,-1,2,20,0,20);
 /*!40000 ALTER TABLE `skills` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -232,7 +233,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `Username` (`Username`),
   KEY `idx_userID` (`UserID`),
   KEY `idx_username` (`Username`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -241,7 +242,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'username','nickname','email',_binary '-\'};-\‡¥`£Å{x\›XCz\Óºx\∆ıP\œ˝/6S,ò',_binary '\»\Á8ßù\ÂKó:\0E*=<$±'),(2,'huhu','catre','hung12@gmail.com',_binary '7≤HR\‰ZnS\„ìvb\Ô	Fé\È˜J\ÊC¢h_,\\z\ﬁU\Ã',_binary '\ÌØ.ù\“mrA\0é\"¥3t'),(3,'vutien1406','BlueMoon','anhkhongdoiqua@gmail.com',_binary '.˚G∫…Ω{ë\\6ı≥à|Aù\∆Ú\‚ü\Í\ÊS¯Aç',_binary '°ù\Ã\È\›sæ®Kjıf\“\ÔX');
+INSERT INTO `users` VALUES (2,'huhu','catre','hung12@gmail.com',_binary '7ÔøΩHR\ÔøΩZnS\ÔøΩvb\ÔøΩ	FÔøΩ\ÔøΩÔøΩJ\ÔøΩCÔøΩh_,\\z\ÔøΩU\ÔøΩ',_binary '\ÔøΩÔøΩ.ÔøΩ\ÔøΩmrA\0ÔøΩ\"ÔøΩ3t'),(3,'vutien1406','BlueMoon','anhkhongdoiqua@gmail.com',_binary '.ÔøΩGÔøΩ…Ω{ÔøΩ\\6ÔøΩÔøΩÔøΩ|AÔøΩ\ÔøΩÔøΩ\ÔøΩ\ÔøΩ\ÔøΩSÔøΩAÔøΩ',_binary 'ÔøΩÔøΩ\ÔøΩ\ÔøΩ\ÔøΩsÔøΩÔøΩKjÔøΩf\ÔøΩ\ÔøΩX'),(4,'taan41','taan','consoleconquer@erm.vn',_binary 'MdÔøΩÔøΩ=ÔøΩ\ÔøΩ,ﬁ∏⁄ΩM\ÔøΩ\ÔøΩ<k\ÔøΩ-ÔøΩx√≠ÔøΩ',_binary '2:ÔøΩ\ÔøΩc\ÔøΩ &2ÔøΩ\ÔøΩC√µÔøΩ'),(5,'taan','taan','taan',_binary '\ÔøΩ\ÔøΩÔøΩQÔøΩ\ÔøΩÔøΩDÔøΩ\ÔøΩVÔøΩ\"\ÔøΩÔøΩÔøΩÔøΩd]ÔøΩ\ÔøΩ\ÔøΩ\rÔøΩf>ÔøΩÔøΩ',_binary 'gFÔøΩÔøΩÔøΩ\ÔøΩ\ÔøΩDdÔøΩÔøΩB'),(6,'player00001','Player01','player01@gmail.com',_binary 'ÔøΩÔøΩÔøΩÔøΩ!w\r\ÔøΩTÔøΩÔøΩÔøΩ\r[jO{\ÔøΩJ\ÔøΩ\Z\Z8ÔøΩÔøΩ\ÔøΩ\ÔøΩ',_binary 'D\ÔøΩ(\ÔøΩ\n$Hœ≥ÔøΩUÔøΩ\ÔøΩr');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -254,4 +255,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-01-25 10:43:24
+-- Dump completed on 2025-01-28  2:02:56

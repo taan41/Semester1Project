@@ -209,6 +209,8 @@ static class ServerUI
 
     public static async Task SearchAccount()
     {
+        User? account = null;
+
         while (true)
         {
             Clear();
@@ -218,24 +220,29 @@ static class ServerUI
             DrawLine('-');
 
             Write(" Enter ID: ");
-            string? input = ReadInput();
-            if (input == null)
-                return;
-            
-            if (!int.TryParse(input, out int id))
+            if (account != null)
+                WriteLine(account.UserID);
+            else
             {
-                WriteLine(" Invalid input.");
-                ReadKey(true);
-                return;
-            }
+                string? input = ReadInput();
+                if (input == null)
+                    return;
 
-            var (account, error) = await UserDB.Get(id);
+                if (!int.TryParse(input, out int id))
+                {
+                    WriteLine(" Invalid input.");
+                    ReadKey(true);
+                    continue;
+                }
 
-            if (account == null)
-            {
-                WriteLine(" Error: " + error);
-                ReadKey(true);
-                return;
+                (account, string error) = await UserDB.Get(id);
+
+                if (account == null)
+                {
+                    WriteLine(" Error: " + error);
+                    ReadKey(true);
+                    continue;
+                }
             }
 
             WriteLine(" Account found:");
@@ -246,28 +253,43 @@ static class ServerUI
 
             DrawLine('-');
             WriteLine(" 'DEL' to delete account");
-            WriteLine(" 'ESC' to return");
 
             ConsoleKey key = ReadKey(true).Key;
             switch (key)
             {
                 case ConsoleKey.Delete:
+                    WriteLine(" Deleting account...");
+                    WriteLine(" Press 'ENTER' to confirm");
+
+                    if (ReadKey(true).Key != ConsoleKey.Enter)
+                        continue;
+                    
                     var (delSuccess, delError) = await UserDB.Delete(account.UserID);
+
                     if (delSuccess)
                     {
                         WriteLine(" Account deleted.");
-                        ReadKey(true);
-                        return;
+
+                        foreach (var client in Server.ClientList)
+                        {
+                            if (client.User?.UserID == account.UserID)
+                            {
+                                client.Close();
+                            }
+                        }
                     }
                     else
-                    {
                         WriteLine($" Error: {delError}");
-                        ReadKey(true);
-                        return;
-                    }
+
+                    ReadKey(true);
+                    account = null;
+                    continue;
 
                 case ConsoleKey.Escape:
                     return;
+
+                default:
+                    continue;
             }
         }
     }

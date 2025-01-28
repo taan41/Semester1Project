@@ -426,14 +426,11 @@ class AssetManagerPL
             Clear();
             DrawHeader(Header);
             WriteLine(" -- Skills");
-            WriteLine(" - Stat Point Per MP Per Rarity:");
-            for (int i = 0; i < Enum.GetValues(typeof(Item.Rarity)).Length; i++)
-            {
-                Write($" {(Item.Rarity) i}: {AssetConfig.SkillPtPerMPPerRarity[i]} |");
-            }
-            WriteLine();
             WriteLine(" - Stat Point Percentage:");
-            WriteLine($" Damage: {GameConfig.SkillPtDamagePercentage}% | Heal: {GameConfig.SkillPtHealPercentage}%");
+            WriteLine($" Damage: {GameConfig.SkillPtDmgPercentage}% | Heal: {GameConfig.SkillPtHealPercentage}%");
+            WriteLine(" - Stat Point Percentage Per Rarity:");
+            WriteLine($" Common: {GameConfig.SkillRarityNormalPercentage}% | Rare: {GameConfig.SkillRarityRarePercentage}% | Epic: {GameConfig.SkillRarityEpicPercentage}% | Legendary: {GameConfig.SkillRarityLegendaryPercentage}%");
+            WriteLine();
             WriteLine(" - Skill Type Damage Multiplier:");
             WriteLine($" Single: {GameConfig.SkillTypeSinglePercentage}% | Random: {GameConfig.SkillTypeRandomPercentage}% | All: {GameConfig.SkillTypeAllPercentage}%");
             DrawLine('-');
@@ -610,24 +607,11 @@ class AssetManagerPL
                         WriteLine(" -- Update Config");
                         DrawLine('-');
 
-                        int[] newPtPerMPPerRarity = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
-                        WriteLine(" - Stat point per MP per Rarity:");
-
-                        for (int i = 0; i < Enum.GetValues(typeof(Item.Rarity)).Length; i++)
-                        {
-                            Write($" {(Item.Rarity) i} (old: {AssetConfig.SkillPtPerMPPerRarity[i]}): ");
-                            intInput = EnterInt(AssetConfig.SkillPtPerMPPerRarity[i]);
-                            if (intInput == null) break;
-                            
-                                newPtPerMPPerRarity[i] = intInput.Value;
-                        }
-                        if (intInput == null) continue;
-
                         int[] newStatPtPercentage = new int[2];
                         WriteLine(" - Stat point percentage (%) (100% -> 1 stat per point):");
 
-                        Write($" Damage (old: {GameConfig.SkillPtDamagePercentage}): ");
-                        intInput = EnterInt(GameConfig.SkillPtDamagePercentage);
+                        Write($" Damage (old: {GameConfig.SkillPtDmgPercentage}): ");
+                        intInput = EnterInt(GameConfig.SkillPtDmgPercentage);
                         if (intInput == null) continue;
                         newStatPtPercentage[0] = intInput.Value;
 
@@ -635,6 +619,29 @@ class AssetManagerPL
                         intInput = EnterInt(GameConfig.SkillPtHealPercentage);
                         if (intInput == null) continue;
                         newStatPtPercentage[1] = intInput.Value;
+
+                        int[] newRarityPercentage = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
+                        WriteLine(" - Stat point percentage per rarity (%) (200% -> 2 stats per point):");
+                        
+                        Write($" Common (old: {GameConfig.SkillRarityNormalPercentage}): ");
+                        intInput = EnterInt(GameConfig.SkillRarityNormalPercentage);
+                        if (intInput == null) continue;
+                        newRarityPercentage[0] = intInput.Value;
+
+                        Write($" Rare (old: {GameConfig.SkillRarityRarePercentage}): ");
+                        intInput = EnterInt(GameConfig.SkillRarityRarePercentage);
+                        if (intInput == null) continue;
+                        newRarityPercentage[1] = intInput.Value;
+
+                        Write($" Epic (old: {GameConfig.SkillRarityEpicPercentage}): ");
+                        intInput = EnterInt(GameConfig.SkillRarityEpicPercentage);
+                        if (intInput == null) continue;
+                        newRarityPercentage[2] = intInput.Value;
+
+                        Write($" Legendary (old: {GameConfig.SkillRarityLegendaryPercentage}): ");
+                        intInput = EnterInt(GameConfig.SkillRarityLegendaryPercentage);
+                        if (intInput == null) continue;
+                        newRarityPercentage[3] = intInput.Value;
 
                         int[] newTypeDmgMultiplier = new int[Enum.GetValues(typeof(Skill.Type)).Length];
                         WriteLine(" - Skill type damage multiplier (%):");
@@ -654,11 +661,13 @@ class AssetManagerPL
                         if (intInput == null) continue;
                         newTypeDmgMultiplier[2] = intInput.Value;
 
-                        AssetConfig.SkillPtPerMPPerRarity = newPtPerMPPerRarity;
-                        await AssetConfig.Save();
-
-                        GameConfig.SkillPtDamagePercentage = newStatPtPercentage[0];
+                        GameConfig.SkillPtDmgPercentage = newStatPtPercentage[0];
                         GameConfig.SkillPtHealPercentage = newStatPtPercentage[1];
+
+                        GameConfig.SkillRarityNormalPercentage = newRarityPercentage[0];
+                        GameConfig.SkillRarityRarePercentage = newRarityPercentage[1];
+                        GameConfig.SkillRarityEpicPercentage = newRarityPercentage[2];
+                        GameConfig.SkillRarityLegendaryPercentage = newRarityPercentage[3];
 
                         GameConfig.SkillTypeSinglePercentage = newTypeDmgMultiplier[0];
                         GameConfig.SkillTypeRandomPercentage = newTypeDmgMultiplier[1];
@@ -704,7 +713,7 @@ class AssetManagerPL
             _ => 0
         };
 
-        Write($" {skill.DamagePoint * GameConfig.SkillPtDamagePercentage * typePercentage / 10000, -3} |");
+        Write($" {skill.DamagePoint * GameConfig.SkillPtDmgPercentage * typePercentage / 10000, -3} |");
         Write($" {skill.HealPoint * GameConfig.SkillPtHealPercentage / 100, -4} |");
         WriteLine($" {skill.Price} G");
     }
@@ -754,12 +763,12 @@ class AssetManagerPL
         if (mpCost == null)
             return null;
 
-        Write($" Damage Point ({GameConfig.SkillPtDamagePercentage}%) ({mpCost * AssetConfig.SkillPtPerMPPerRarity[(int) rarity]} Pt Left): ");
+        Write($" Damage Point ({GameConfig.SkillPtDmgPercentage}%) ({mpCost} Pt Left): ");
         int? dmgPt = EnterInt(oldSkill?.DamagePoint);
         if (dmgPt == null)
             return null;
 
-        Write($" Heal Point ({GameConfig.SkillPtHealPercentage}%) ({mpCost * AssetConfig.SkillPtPerMPPerRarity[(int) rarity] - dmgPt.Value} Pt Left): ");
+        Write($" Heal Point ({GameConfig.SkillPtHealPercentage}%) ({mpCost - dmgPt.Value} Pt Left): ");
         int? healPt = EnterInt(oldSkill?.HealPoint);
         if (healPt == null)
             return null;

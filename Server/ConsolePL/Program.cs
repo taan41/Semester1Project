@@ -13,12 +13,12 @@ namespace ConsolePL
         {
             while (true)
             {
-                var (success, exit) = await ServerUI.FillDBInfo();
+                var (dbSuccess, dbExit) = await ServerUI.FillDBInfo();
 
-                if (exit)
+                if (dbExit)
                     return;
 
-                if (success)
+                if (dbSuccess)
                     break;
             }
 
@@ -30,11 +30,11 @@ namespace ConsolePL
                 if (!InitServer(ref serverIP, ref port))
                     return;
 
-                await Server.StartServer(serverIP, port);
+                await Server.Start(serverIP, port);
 
-                await ServerOverview(serverIP, port);
+                await ServerMenu(serverIP, port);
 
-                Server.StopServer();
+                Server.Stop();
             }
         }
 
@@ -53,7 +53,7 @@ namespace ConsolePL
                         Write(" Enter IP: ");
                         serverIP = ReadLine();
 
-                        if (serverIP == null || !CheckIPv4(serverIP))
+                        if (serverIP == null || !Helper.CheckIPv4(serverIP))
                         {
                             serverIP = null;
                             WriteLine(" Invalid IP.");
@@ -92,7 +92,7 @@ namespace ConsolePL
             }
         }
 
-        static async Task ServerOverview(string? serverIP, int port)
+        static async Task ServerMenu(string? serverIP, int port)
         {
             while (true)
             {
@@ -101,7 +101,7 @@ namespace ConsolePL
                 switch (ServerUIHelper.ReadInput())
                 {
                     case "1":
-                        ServerUI.ViewConnectedClients(Server.clientList);
+                        ServerUI.ViewConnectedClients(Server.ClientList);
                         continue;
 
                     case "2":
@@ -177,28 +177,31 @@ namespace ConsolePL
                 }
             }
         }
-
-        private static bool CheckIPv4(string? ipAddress)
+        
+        private static class Helper
         {
-            if (!IPAddress.TryParse(ipAddress, out _))
-                return false;
-
-            string[] parts = ipAddress.Split('.');
-            if (parts.Length != 4) return false;
-
-            foreach(string part in parts)
+            public static bool CheckIPv4(string? ipAddress)
             {
-                if (!int.TryParse(part, out int number))
+                if (!IPAddress.TryParse(ipAddress, out _))
                     return false;
 
-                if (number < 0 || number > 255)
-                    return false;
+                string[] parts = ipAddress.Split('.');
+                if (parts.Length != 4) return false;
 
-                if (part.Length > 1 && part[0] == '0')
-                    return false;
+                foreach(string part in parts)
+                {
+                    if (!int.TryParse(part, out int number))
+                        return false;
+
+                    if (number < 0 || number > 255)
+                        return false;
+
+                    if (part.Length > 1 && part[0] == '0')
+                        return false;
+                }
+
+                return true;
             }
-
-            return true;
         }
     }
 }
