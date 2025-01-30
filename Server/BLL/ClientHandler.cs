@@ -1,11 +1,12 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text.Json;
 using DAL;
 using DAL.DBHandlers;
 using DAL.Persistence.DataTransferObjects;
 
-using static BLL.ServerHelper;
+using static BLL.ServerUtilities;
 
 namespace BLL
 {
@@ -14,6 +15,7 @@ namespace BLL
         readonly TcpClient client;
         readonly NetworkStream stream;
         readonly EndPoint endPoint;
+        readonly Aes aes;
 
         User? mainUser = null;
 
@@ -26,6 +28,8 @@ namespace BLL
             stream = _client.GetStream();
             endPoint = _client.Client.RemoteEndPoint!;
 
+            Security.InitAESServer(stream, out aes);
+
             LogHandler.AddLog($"Connected to server", this);
         }
 
@@ -34,6 +38,7 @@ namespace BLL
 
         public void Close()
         {
+            aes.Dispose();
             stream.Close();
             client.Close();
         }
@@ -45,6 +50,7 @@ namespace BLL
                 byte[] buffer = new byte[2048];
                 Memory<byte> memory = new(buffer, 0, buffer.Length);
                 int bytesRead;
+                bool disconnect = false;
 
                 Command? receivedCmd;
                 Command cmdToSend = new();
@@ -53,7 +59,7 @@ namespace BLL
 
                 while((bytesRead = await stream.ReadAsync(memory, token)) > 0)
                 {
-                    receivedCmd = FromJson<Command>(Encode.ToString(buffer, 0, bytesRead));
+                    receivedCmd = FromJson<Command>(Security.DecryptString(buffer[..bytesRead], aes));
 
                     switch (receivedCmd?.CommandType)
                     {
@@ -155,7 +161,7 @@ namespace BLL
 
                         case Command.Type.Disconnect:
                             cmdToSend = Disconnect(receivedCmd);
-                            await stream.WriteAsync(Encode.ToBytes(ToJson(cmdToSend)), token);
+                            disconnect = true;
                             return;
 
                         default:
@@ -165,8 +171,11 @@ namespace BLL
 
                     if (cmdToSend.CommandType != Command.Type.Empty)
                     {
-                        await stream.WriteAsync(Encode.ToBytes(ToJson(cmdToSend)), token);
+                        await stream.WriteAsync(Security.EncryptString(ToJson(cmdToSend), aes), token);
                         cmdToSend.Set(Command.Type.Empty, null);
+
+                        if (disconnect)
+                            return;
                     }
                 }
             }
@@ -470,7 +479,7 @@ namespace BLL
         private class Helper
         {
             /// <summary>
-            /// Set error command & log error based on 'error'
+            /// Set error command & log errorDetail
             /// </summary>
             public static Command ErrorCmd(ClientHandler client, Command sourceCmd, string errorDetail, bool addLog = true)
             {

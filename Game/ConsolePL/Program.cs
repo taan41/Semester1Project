@@ -30,6 +30,8 @@ namespace ConsolePL
                 }
                 catch (Exception ex)
                 {
+                    StopTitleAnim();
+                    
                     Console.Clear();
                     Console.WriteLine($"Game crashed: {ex}");
                     Console.ReadKey(true);

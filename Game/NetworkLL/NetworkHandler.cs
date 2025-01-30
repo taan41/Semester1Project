@@ -1,10 +1,11 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using DAL;
 using DAL.ConfigClasses;
 using NetworkLL.DataTransferObjects;
 
-using static NetworkLL.Utilities;
+using static NetworkLL.NetworkUtilities;
 
 namespace NetworkLL
 {
@@ -14,6 +15,8 @@ namespace NetworkLL
 
         private TcpClient? client;
         private NetworkStream? stream;
+        private Aes? aes;
+
         private byte[] buffer = new byte[2048];
 
         public static NetworkHandler Instance { get; private set; } = new();
@@ -32,6 +35,9 @@ namespace NetworkLL
                 string ip = CheckIPv4(ServerConfig.ServerIP) ? ServerConfig.ServerIP : "127.0.0.1";
                 client = new TcpClient(ip, ServerConfig.Port);
                 stream = client.GetStream();
+
+                Security.InitAESClient(stream, out aes);
+
                 return true;
             }
             catch (Exception ex) when (ex is SocketException or IOException)
@@ -45,7 +51,7 @@ namespace NetworkLL
         {
             if (IsConnected)
             {
-                Communicate(new(Command.Type.Disconnect), out _);
+                Communicate(new(Command.Type.Disconnect), out _, false);
             }
             stream?.Close();
             client?.Close();
@@ -53,7 +59,7 @@ namespace NetworkLL
             client = null;
         }
 
-        public bool Communicate(Command cmdToSend, out string result)
+        public bool Communicate(Command cmdToSend, out string result, bool getResponse = true)
         {
             if (!IsConnected)
             {
@@ -61,10 +67,18 @@ namespace NetworkLL
                 return false;
             }
 
+            if (aes == null)
+            {
+                result = "AES key is not set";
+                return false;
+            }
+
             int bytesRead, totalRead = 0;
+            Array.Clear(buffer);
+
             try
             {
-                stream!.Write(Encode.GetBytes(cmdToSend.ToJson()));
+                stream!.Write(Security.EncryptString(cmdToSend.ToJson(), aes));
 
                 while((bytesRead = stream.Read(buffer, totalRead, 1024)) > 0)
                 {
@@ -82,9 +96,14 @@ namespace NetworkLL
                 result = $"Can't connect to server";
                 return false;
             }
+
+            if (!getResponse)
+            {
+                result = string.Empty;
+                return true;
+            }
             
-            Command? tempCmd = Command.FromJson(Encode.GetString(buffer, 0, totalRead));
-            Array.Clear(buffer);
+            Command? tempCmd = Command.FromJson(Security.DecryptString(buffer[..totalRead], aes));
 
             switch(tempCmd?.CommandType)
             {

@@ -5,14 +5,14 @@ namespace NetworkLL.DataTransferObjects
     [Serializable]
     public class PasswordSet
     {
-        public byte[] PwdHash { get; set; } = new byte[Utilities.Security.PwdHashLen];
-        public byte[] PwdSalt { get; set; } = new byte[Utilities.Security.PwdSaltLen];
+        public byte[] PwdHash { get; set; } = new byte[NetworkUtilities.Security.PwdHashLen];
+        public byte[] PwdSalt { get; set; } = new byte[NetworkUtilities.Security.PwdSaltLen];
 
         public PasswordSet() {}
 
         public PasswordSet(string password)
         {
-            (PwdHash, PwdSalt) = Utilities.Security.HashPassword(password);
+            (PwdHash, PwdSalt) = NetworkUtilities.Security.HashPassword(password);
         }
 
         public PasswordSet(byte[] pwdHash, byte[] pwdSalt)

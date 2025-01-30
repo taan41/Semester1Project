@@ -170,7 +170,7 @@ namespace BLL.GameHandlers
             }
 
             PasswordSet? pwdSet = PasswordSet.FromJson(result);
-            if (pwdSet == null || !Utilities.Security.VerifyPassword(password, pwdSet))
+            if (pwdSet == null || !NetworkUtilities.Security.VerifyPassword(password, pwdSet))
             {
                 error = "Invalid password";
                 return false;
@@ -195,7 +195,7 @@ namespace BLL.GameHandlers
 
         public static bool ValidatePassword(string oldPasswod)
         {
-            return mainUser != null && mainUser.PwdSet != null && Utilities.Security.VerifyPassword(oldPasswod, mainUser.PwdSet);
+            return mainUser != null && mainUser.PwdSet != null && NetworkUtilities.Security.VerifyPassword(oldPasswod, mainUser.PwdSet);
         }
 
         public static bool ChangePassword(string newPassword, out string error)
