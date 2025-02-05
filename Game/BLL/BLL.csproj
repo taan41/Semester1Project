@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DAL\DAL.csproj" />
-    <ProjectReference Include="..\NetworkLL\NetworkLL.csproj" />
   </ItemGroup>
 
 </Project>

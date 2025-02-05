@@ -180,7 +180,7 @@ CREATE TABLE `scores` (
 
 LOCK TABLES `scores` WRITE;
 /*!40000 ALTER TABLE `scores` DISABLE KEYS */;
-INSERT INTO `scores` VALUES (-41292310,5,'00:11:44.145','2025-01-28 01:02:37');
+INSERT INTO `scores` VALUES (-41292310,1,'00:11:44.145','2025-01-28 01:02:37');
 /*!40000 ALTER TABLE `scores` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -233,7 +233,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `Username` (`Username`),
   KEY `idx_userID` (`UserID`),
   KEY `idx_username` (`Username`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -242,7 +242,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (2,'huhu','catre','hung12@gmail.com',_binary '7�HR\�ZnS\�vb\�	F�\��J\�C�h_,\\z\�U\�',_binary '\��.�\�mrA\0�\"�3t'),(3,'vutien1406','BlueMoon','anhkhongdoiqua@gmail.com',_binary '.�G�ɽ{�\\6���|A�\��\�\�\�S�A�',_binary '��\�\�\�s��Kj�f\�\�X'),(4,'taan41','taan','consoleconquer@erm.vn',_binary 'Md��=�\�,޸ڽM\�\�<k\�-�xí�',_binary '2:�\�c\� &2�\�Cõ�'),(5,'taan','taan','taan',_binary '\�\��Q�\��D�\�V�\"\����d]�\�\�\r�f>��',_binary 'gF���\�\�Dd��B'),(6,'player00001','Player01','player01@gmail.com',_binary '����!w\r\�T���\r[jO{\�J\�\Z\Z8��\�\�',_binary 'D\�(\�\n$Hϳ�U�\�r');
+INSERT INTO `users` VALUES (1,'taan','taan','taan',_binary '\�\��Q�\��D�\�V�\"\����d]�\�\�\r�f>��',_binary 'gF���\�\�Dd��B');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

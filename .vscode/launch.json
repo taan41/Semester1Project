@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Game Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet build game",
+            "program": "${workspaceFolder}/Game/ConsolePL/bin/Debug/net8.0/ConsolePL.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Game/ConsolePL",
+            "stopAtEntry": true,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": ".NET Server Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet build server",
+            "program": "${workspaceFolder}/Server/ConsolePL/bin/Debug/net8.0/ConsolePL.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Server/ConsolePL",
+            "stopAtEntry": true,
+            "console": "integratedTerminal",
+        },
+    ]
+}

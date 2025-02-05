@@ -1,46 +1,47 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
-using System.Text.Json;
 using DAL;
 using DAL.DBHandlers;
-using DAL.Persistence.DataTransferObjects;
+using DAL.Persistence.DataModels;
 
+using static BLL.DataPacket;
+using static BLL.GenericUtilities;
 using static BLL.ServerUtilities;
 
 namespace BLL
 {
     public class ClientHandler
     {
-        readonly TcpClient client;
-        readonly NetworkStream stream;
-        readonly EndPoint endPoint;
+        readonly TcpClient _client;
+        readonly NetworkStream _stream;
+        readonly EndPoint _endPoint;
         readonly Aes aes;
 
-        User? mainUser = null;
+        User? _mainUser = null;
 
-        public EndPoint EndPoint => endPoint;
-        public User? User => mainUser;
+        public EndPoint EndPoint => _endPoint;
+        public User? User => _mainUser;
 
-        public ClientHandler(TcpClient _client)
+        public ClientHandler(TcpClient client)
         {
-            client = _client;
-            stream = _client.GetStream();
-            endPoint = _client.Client.RemoteEndPoint!;
+            _client = client;
+            _stream = client.GetStream();
+            _endPoint = client.Client.RemoteEndPoint!;
 
-            Security.InitAESServer(stream, out aes);
+            Security.InitAESServer(_stream, out aes);
 
             LogHandler.AddLog($"Connected to server", this);
         }
 
         public override string ToString()
-            => mainUser?.ToString() ?? endPoint?.ToString() ?? "Null client";
+            => _mainUser?.ToString() ?? _endPoint?.ToString() ?? "Null client";
 
         public void Close()
         {
             aes.Dispose();
-            stream.Close();
-            client.Close();
+            _stream.Close();
+            _client.Close();
         }
 
         public async Task HandlingClientAsync(CancellationToken token)
@@ -48,136 +49,51 @@ namespace BLL
             try
             {
                 byte[] buffer = new byte[2048];
-                Memory<byte> memory = new(buffer, 0, buffer.Length);
-                int bytesRead;
+                int bytesRead, totalRead;
                 bool disconnect = false;
 
-                Command? receivedCmd;
-                Command cmdToSend = new();
+                DataPacket? clientPacket;
 
-                User? tempUser = null;
-
-                while((bytesRead = await stream.ReadAsync(memory, token)) > 0)
+                while (!token.IsCancellationRequested)
                 {
-                    receivedCmd = FromJson<Command>(Security.DecryptString(buffer[..bytesRead], aes));
+                    Array.Clear(buffer, 0, buffer.Length);
+                    totalRead = 0;
 
-                    switch (receivedCmd?.CommandType)
+                    while((bytesRead = await _stream.ReadAsync(buffer, totalRead, 1024, token)) > 0)
                     {
-                        case Command.Type.Ping:
-                            cmdToSend = new(Command.Type.Ping, null);
+                        totalRead += bytesRead;
+
+                        if (bytesRead < 1024)
                             break;
 
-                        case Command.Type.CheckUsername:
-                            cmdToSend = await CheckUsername(receivedCmd);
-                            break;
+                        if (totalRead + 1024 > buffer.Length)
+                            Array.Resize(ref buffer, buffer.Length * 2);
+                    }
+                    
+                    clientPacket = FromJson<DataPacket>(Security.DecryptString(buffer[..totalRead], aes));
 
-                        case Command.Type.Register:
-                            cmdToSend = await Register(receivedCmd);
-                            break;
-                        
-                        case Command.Type.GetUserPwd:
-                            (cmdToSend, tempUser) = await GetUserPwd(receivedCmd);
-                            break;
-
-                        case Command.Type.Login:
-                            cmdToSend = Login(receivedCmd, tempUser);
-                            break;
-
-                        case Command.Type.Logout:
-                            cmdToSend = Logout(receivedCmd);
-                            break;
-
-                        case Command.Type.ValidateEmail:
-                            cmdToSend = await ValidateEmail(receivedCmd);
-                            break;
-
-                        case Command.Type.ResetPwd:
-                            cmdToSend = await ResetPwd(receivedCmd);
-                            break;
-
-                        case Command.Type.ChangeNickname:
-                            cmdToSend = await ChangeNickname(receivedCmd);
-                            break;
-
-                        case Command.Type.ChangeEmail:
-                            cmdToSend = await ChangeEmail(receivedCmd);
-                            break;
-
-                        case Command.Type.ChangePassword:
-                            cmdToSend = await ChangePassword(receivedCmd);
-                            break;
-
-                        case Command.Type.DeleteAccount:
-                            cmdToSend = await DeleteAccount(receivedCmd);
-                            break;
-
-                        case Command.Type.GameConfig:
-                            cmdToSend = new(Command.Type.GameConfig, ToJson(ConfigManager.Instance.GameConfig));
-                            break;
-
-                        case Command.Type.ServerConfig:
-                            cmdToSend = new(Command.Type.ServerConfig, ToJson(ConfigManager.Instance.ServerConfig));
-                            break;
-
-                        case Command.Type.DatabaseConfig:
-                            cmdToSend = new(Command.Type.DatabaseConfig, ToJson(ConfigManager.Instance.DatabaseConfig));
-                            break;
-
-                        case Command.Type.UpdateEquip:
-                            cmdToSend = await UpdateEquip(receivedCmd);
-                            break;
-
-                        case Command.Type.UpdateSkill:
-                            cmdToSend = await UpdateSkill(receivedCmd);
-                            break;
-
-                        case Command.Type.UpdateMonster:
-                            cmdToSend = await UpdateMonster(receivedCmd);
-                            break;
-
-                        case Command.Type.UploadSave:    
-                            cmdToSend = await UploadSave(receivedCmd);
-                            break;
-
-                        case Command.Type.DownloadSave:
-                            cmdToSend = await DownloadSave(receivedCmd);
-                            break;
-
-                        case Command.Type.UploadScore:
-                            cmdToSend = await UploadScore(receivedCmd);
-                            break;
-
-                        case Command.Type.PersonalScores:
-                            cmdToSend = await GetUserScores(receivedCmd);
-                            break;
-
-                        case Command.Type.MonthlyScores:
-                            cmdToSend = await GetMonthlyScores(receivedCmd);
-                            break;
-
-                        case Command.Type.AllTimeScores:
-                            cmdToSend = await GetAllTimeScores(receivedCmd);
-                            break;
-
-                        case Command.Type.Disconnect:
-                            cmdToSend = Disconnect(receivedCmd);
-                            disconnect = true;
-                            return;
-
-                        default:
-                            cmdToSend = Helper.ErrorCmd(this, new(Command.Type.Error, null), "Received invalid cmd");
-                            break;
+                    if (clientPacket == null)
+                    {
+                        LogHandler.AddLog("Invalid packet received", this);
+                        continue;
                     }
 
-                    if (cmdToSend.CommandType != Command.Type.Empty)
+                    DataPacket responsePacket = (PacketType) clientPacket.Type switch
                     {
-                        await stream.WriteAsync(Security.EncryptString(ToJson(cmdToSend), aes), token);
-                        cmdToSend.Set(Command.Type.Empty, null);
+                        PacketType.Generic => HandleGenericPacket(clientPacket, ref disconnect),
+                        PacketType.Database => await HandleDatabasePacket(clientPacket),
+                        PacketType.User => await HandleUserPacket(clientPacket),
+                        PacketType.Game => await HandleGamePacket(clientPacket),
+                        _ => LogErrorPacket(this, clientPacket, "Invalid packet type"),
+                    };
 
-                        if (disconnect)
-                            return;
-                    }
+                    if (disconnect)
+                        break;
+
+                    byte[] responseBytes = Security.EncryptString(ToJson(responsePacket), aes);
+                    await _stream.WriteAsync(responseBytes, 0, responseBytes.Length, token);
                 }
+
             }
             catch (OperationCanceledException) {}
             catch (IOException)
@@ -195,299 +111,152 @@ namespace BLL
             }
         }
 
-        private async Task<Command> CheckUsername(Command cmd)
+        /// <summary>
+        /// Return error packet & log errorDetail
+        /// </summary>
+        private static DataPacket LogErrorPacket(ClientHandler client, DataPacket sourcePacket, string errorDetail, bool addLog = true)
         {
-            var (success, error) = await UserDB.CheckUsername(cmd.Payload);
+            string logContent = $"Error: (Cmd:{sourcePacket.Type},{sourcePacket.Request}) (Detail:{errorDetail})";
 
-            if (!success)
-                return Helper.ErrorCmd(this, cmd, error, false);
-
-            return new(cmd.CommandType);
+            if (addLog) LogHandler.AddLog(logContent, client);
+            return new((int) PacketType.Generic, (int) GenericRequest.Error, errorDetail);
         }
 
-        private async Task<Command> Register(Command cmd)
+        private DataPacket HandleGenericPacket(DataPacket clientPacket, ref bool disconnect)
         {
-            User? registeredUser = FromJson<User>(cmd.Payload);
+            if (typeof(GenericRequest).IsEnumDefined(clientPacket.Request))
+            {
+                disconnect = clientPacket.Request == (int) GenericRequest.Disconnect;
+                return new(clientPacket);
+            }
+            else
+            {
+                return LogErrorPacket(this, clientPacket, "Invalid generic request");
+            }
+        }
+
+        private async Task<DataPacket> HandleDatabasePacket(DataPacket clientPacket)
+            => (DatabaseRequest) clientPacket.Request switch
+                {
+                    DatabaseRequest.ConfigGame => new(clientPacket, ToJson(ConfigManager.Instance.GameConfig)),
+                    DatabaseRequest.ConfigServer => new(clientPacket, ToJson(ConfigManager.Instance.ServerConfig)),
+                    DatabaseRequest.ConfigDatabase => new(clientPacket, ToJson(ConfigManager.Instance.DatabaseConfig)),
+                    DatabaseRequest.UpdateEquip => await DBResult(clientPacket, EquipmentDB.GetAll()),
+                    DatabaseRequest.UpdateSkill => await DBResult(clientPacket, SkillDB.GetAll()),
+                    DatabaseRequest.UpdateMonster => await DBResult(clientPacket, MonsterDB.GetAll(ConfigManager.Instance.GameConfig.ProgressMaxFloor)),
+                    _ => LogErrorPacket(this, clientPacket, "Invalid database request"),
+                };
+
+        private async Task<DataPacket> HandleUserPacket(DataPacket clientPacket)
+            => (UserRequest) clientPacket.Request switch
+                {
+                    UserRequest.UsernameAvailable => await DBResult(clientPacket, UserDB.CheckUsername(clientPacket.Payload)),
+                    UserRequest.UserRegister => await Register(clientPacket),
+                    UserRequest.UserGet => await DBResult(clientPacket, UserDB.Get(clientPacket.Payload)),
+                    UserRequest.UserUpdate => await UserUpdate(clientPacket),
+                    UserRequest.UserDelete => await Delete(clientPacket),
+                    UserRequest.Login => Login(clientPacket),
+                    UserRequest.Logout => Logout(clientPacket),
+                    _ => LogErrorPacket(this, clientPacket, "Invalid user request"),
+                };
+
+        private async Task<DataPacket> HandleGamePacket(DataPacket clientPacket)
+            => (GameRequest) clientPacket.Request switch
+                {
+                    GameRequest.UploadSave => await PersonalDBResult(clientPacket, GameSaveDB.Save(_mainUser!.UserID, clientPacket.Payload)),
+                    GameRequest.DownloadSave => await PersonalDBResult(clientPacket, GameSaveDB.Load(_mainUser!.UserID)),
+                    GameRequest.UploadScore => await PersonalDBResult(clientPacket, ScoreDB.Add(FromJson<Score>(clientPacket.Payload))),
+                    GameRequest.PersonalScores => await PersonalDBResult(clientPacket, ScoreDB.GetPersonal(_mainUser!.UserID)),
+                    GameRequest.MonthlyScores => await DBResult(clientPacket, ScoreDB.GetMonthly()),
+                    GameRequest.AllTimeScores => await DBResult(clientPacket, ScoreDB.GetAllTime()),
+                    _ => LogErrorPacket(this, clientPacket, "Invalid game request"),
+                };
+
+        private async Task<DataPacket> DBResult<T>(DataPacket clientPacket, Task<(T?, string)> dbTask, bool logError = true)
+        {
+            var (result, error) = await dbTask;
+
+            if (result == null || error != "")
+                return LogErrorPacket(this, clientPacket, error, logError);
+
+            return new(clientPacket, ToJson(result));
+        }
+
+        private async Task<DataPacket> PersonalDBResult<T>(DataPacket clientPacket, Task<(T?, string)> dbTask, bool logError = true)
+        {
+            if (_mainUser == null || _mainUser.UserID < 1)
+                return LogErrorPacket(this, clientPacket, "Invalid logged-in user", logError);
+
+            return await DBResult(clientPacket, dbTask, logError);
+        }
+
+        private async Task<DataPacket> Register(DataPacket clientPacket)
+        {
+            User? registeredUser = FromJson<User>(clientPacket.Payload);
 
             if (registeredUser == null)
-                return Helper.ErrorCmd(this, cmd, "Invalid registering user");
+                return LogErrorPacket(this, clientPacket, "Invalid registering user");
 
             var (success, error) = await UserDB.Add(registeredUser);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, error);
+                return LogErrorPacket(this, clientPacket, error);
 
             LogHandler.AddLog($"Registered with Username '{registeredUser.Username}'", this);
-            return new(cmd.CommandType);
+            return new(clientPacket);
         }
 
-        private async Task<(Command cmdToSend, User? requestedUser)> GetUserPwd(Command cmd)
+        private DataPacket Login(DataPacket clientPacket)
         {
-            var (requestedUser, error) = await UserDB.Get(cmd.Payload);
+            User? requestedUser = FromJson<User>(clientPacket.Payload);
 
-            if (requestedUser == null)
-                return (Helper.ErrorCmd(this, cmd, error, false), null);
+            if (_mainUser != null || requestedUser == null || requestedUser.UserID < 1)
+                return LogErrorPacket(this, clientPacket, "Invalid login");
 
-            if (requestedUser.PwdSet == null)
-                return (Helper.ErrorCmd(this, cmd, "No password found"), null);
-
-            return (new(cmd.CommandType, ToJson(requestedUser.PwdSet)), requestedUser);
+            _mainUser = requestedUser;
+            LogHandler.AddLog($"Logged in as {_mainUser}", _endPoint);
+            return new(clientPacket);
         }
 
-        private Command Login(Command cmd, User? tempUser)
+        private DataPacket Logout(DataPacket clientPacket)
         {
-            if (mainUser != null || tempUser == null)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
+            if (_mainUser == null)
+                return LogErrorPacket(this, clientPacket, "Invalid logout");
 
-            mainUser = tempUser;
-            LogHandler.AddLog($"Logged in as {mainUser}", endPoint);
-            return new(cmd.CommandType, ToJson(mainUser));
+            LogHandler.AddLog($"Logged out from {_mainUser}", _endPoint);
+            _mainUser = null;
+            return new(clientPacket);
         }
 
-        private Command Logout(Command cmd)
+        private async Task<DataPacket> Delete(DataPacket clientPacket)
         {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
+            if (_mainUser == null || _mainUser.UserID < 1)
+                return LogErrorPacket(this, clientPacket, "Invalid user");
 
-            LogHandler.AddLog($"Logged out from {mainUser}", endPoint);
-            mainUser = null;
-            return new(cmd.CommandType);
-        }
-
-        private async Task<Command> ValidateEmail(Command cmd)
-        {
-            User? requestedUser = FromJson<User>(cmd.Payload);
-
-            if (requestedUser == null)
-                return Helper.ErrorCmd(this, cmd, "Invalid user data", false);
-
-            var (dbUser, error) = await UserDB.Get(requestedUser.Username);
-
-            if (dbUser == null)
-                return Helper.ErrorCmd(this, cmd, error, false);
-
-            if (dbUser.Email != requestedUser.Email)
-                return Helper.ErrorCmd(this, cmd, "Invalid email", false);
-
-            return new(cmd.CommandType);
-        }
-
-        private async Task<Command> ResetPwd(Command cmd)
-        {
-            User? requestedUser = FromJson<User>(cmd.Payload);
-
-            if (requestedUser == null)
-                return Helper.ErrorCmd(this, cmd, "Invalid user data", false);
-
-            var (success, updateError) = await UserDB.Update(requestedUser.Username, null, null, requestedUser.PwdSet);
+            var (success, error) = await UserDB.Delete(_mainUser.UserID);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, updateError);
+                return LogErrorPacket(this, clientPacket, error);
 
-            LogHandler.AddLog($"Reset password of {requestedUser}", this);
-            return new(cmd.CommandType);
+            LogHandler.AddLog($"Deleted account of {_mainUser}", this);
+            _mainUser = null;
+            return new(clientPacket);
         }
 
-        private async Task<Command> ChangeNickname(Command cmd)
+        private async Task<DataPacket> UserUpdate(DataPacket clientPacket, bool logError = true)
         {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
+            var updatingUser = FromJson<User>(clientPacket.Payload);
 
-            string newNickname = cmd.Payload;
+            if (updatingUser == null || updatingUser.UserID < 1)
+                return LogErrorPacket(this, clientPacket, "Invalid updating user", logError);
 
-            var (success, error) = await UserDB.Update(mainUser.UserID, newNickname, null, null);
+            var (success, error) = await UserDB.Update(updatingUser);
 
             if (!success)
-                return Helper.ErrorCmd(this, cmd, error);
-            
-            LogHandler.AddLog($"Changed nickname of {mainUser} from '{mainUser.Nickname}' to '{newNickname}'", this);
-            mainUser.Nickname = newNickname;
-            return new(cmd.CommandType);
-        }
+                return LogErrorPacket(this, clientPacket, error, logError);
 
-        private async Task<Command> ChangeEmail(Command cmd)
-        {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            string newEmail = cmd.Payload;
-
-            var (success, error) = await UserDB.Update(mainUser.UserID, newEmail, null, null);
-
-            if (!success)
-                return Helper.ErrorCmd(this, cmd, error);
-            
-            LogHandler.AddLog($"Changed email of {mainUser} from '{mainUser.Email}' to '{newEmail}'", this);
-            mainUser.Nickname = newEmail;
-            return new(cmd.CommandType);
-        }
-
-        private async Task<Command> ChangePassword(Command cmd)
-        {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            var newPwd = FromJson<PasswordSet>(cmd.Payload);
-
-            var (success, error) = await UserDB.Update(mainUser.UserID, null, null, newPwd);
-
-            if (!success)
-                return Helper.ErrorCmd(this, cmd, error);
-            
-            LogHandler.AddLog($"Changed password of {mainUser}", this);
-            mainUser.PwdSet = newPwd;
-            return new(cmd.CommandType);
-        }
-
-        private async Task<Command> DeleteAccount(Command cmd)
-        {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            var (success, error) = await UserDB.Delete(mainUser.UserID);
-
-            if (!success)
-                return Helper.ErrorCmd(this, cmd, error);
-
-            LogHandler.AddLog($"Deleted account of {mainUser}", this);
-            mainUser = null;
-            return new(cmd.CommandType);
-        }
-
-        private async Task<Command> UpdateEquip(Command cmd)
-        {
-            var (equipments, error) = await EquipmentDB.GetAll();
-
-            if (equipments == null)
-                return Helper.ErrorCmd(this, cmd, error);
-
-            return new(cmd.CommandType, JsonSerializer.Serialize(equipments));
-        }
-
-        private async Task<Command> UpdateSkill(Command cmd)
-        {
-            var (skills, error) = await SkillDB.GetAll();
-
-            if (skills == null)
-                return Helper.ErrorCmd(this, cmd, error);
-
-            return new(cmd.CommandType, JsonSerializer.Serialize(skills));
-        }
-
-        private async Task<Command> UpdateMonster(Command cmd)
-        {
-            var (monsters, error) = await MonsterDB.GetAll(ConfigManager.Instance.GameConfig.ProgressMaxFloor);
-
-            if (monsters == null)
-                return Helper.ErrorCmd(this, cmd, error);
-
-            return new(cmd.CommandType, JsonSerializer.Serialize(monsters));
-        }
-
-        private async Task<Command> UploadSave(Command cmd)
-        {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            var (success, error) = await GameSaveDB.Save(mainUser.UserID, cmd.Payload);
-
-            if (!success)
-                return Helper.ErrorCmd(this, cmd, error);
-
-            LogHandler.AddLog($"Uploaded save", this);
-            return new(cmd.CommandType);
-        }
-
-        private async Task<Command> DownloadSave(Command cmd)
-        {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            var (saveContent, error) = await GameSaveDB.Load(mainUser.UserID);
-
-            if (saveContent == null)
-                return Helper.ErrorCmd(this, cmd, error, false);
-
-            return new(cmd.CommandType, saveContent);
-        }
-
-        private async Task<Command> UploadScore(Command cmd)
-        {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            Score? score = FromJson<Score>(cmd.Payload);
-
-            if (score == null)
-                return Helper.ErrorCmd(this, cmd, "Invalid score");
-
-            var (success, error) = await ScoreDB.Add(score);
-
-            if (!success)
-                return Helper.ErrorCmd(this, cmd, error);
-
-            LogHandler.AddLog($"Uploaded score", this);
-            return new(cmd.CommandType);
-        }
-
-        private async Task<Command> GetUserScores(Command cmd)
-        {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            var (personal, error) = await ScoreDB.GetPersonal(mainUser.UserID);
-
-            if (personal == null)
-                return Helper.ErrorCmd(this, cmd, error);
-
-            return new(cmd.CommandType, JsonSerializer.Serialize(personal));
-        }
-
-        private async Task<Command> GetMonthlyScores(Command cmd)
-        {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            var (monthly, error) = await ScoreDB.GetMonthly();
-
-            if (monthly == null)
-                return Helper.ErrorCmd(this, cmd, error);
-
-            return new(cmd.CommandType, JsonSerializer.Serialize(monthly));
-        }
-
-        private async Task<Command> GetAllTimeScores(Command cmd)
-        {
-            if (mainUser == null || mainUser.UserID < 1)
-                return Helper.ErrorCmd(this, cmd, "Invalid user");
-
-            var (alltime, error) = await ScoreDB.GetAllTime();
-
-            if (alltime == null)
-                return Helper.ErrorCmd(this, cmd, error);
-
-            return new(cmd.CommandType, JsonSerializer.Serialize(alltime));
-        }
-
-        private Command Disconnect(Command cmd)
-        {
-            LogHandler.AddLog($"Disconnected", this);
-            mainUser = null;
-            return new(cmd.CommandType);
-        }
-
-        private class Helper
-        {
-            /// <summary>
-            /// Set error command & log errorDetail
-            /// </summary>
-            public static Command ErrorCmd(ClientHandler client, Command sourceCmd, string errorDetail, bool addLog = true)
-            {
-                string logContent = $"Error: (Cmd: {sourceCmd.Name()}) (Detail: {errorDetail})";
-
-                if (addLog) LogHandler.AddLog(logContent, client);
-                return new(Command.Type.Error, errorDetail);
-            }
+            LogHandler.AddLog($"Updated info of {updatingUser.ToString(true)}", this);
+            return new(clientPacket);
         }
     }
 }

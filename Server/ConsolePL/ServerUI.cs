@@ -1,12 +1,12 @@
 using System.Reflection;
-using System.Threading.Tasks;
 using BLL;
 using DAL;
 using DAL.DBHandlers;
 using DAL.Persistence.ConfigClasses;
-using DAL.Persistence.DataTransferObjects;
+using DAL.Persistence.DataModels;
+
 using static System.Console;
-using static ServerUIHelper;
+using static ConsoleUtilities;
 
 static class ServerUI
 {
@@ -24,9 +24,9 @@ static class ServerUI
 
         WriteLine(" Current available database IP:");
         WriteLine(" - Radmin VPN: 26.244.97.115");
+        WriteLine(" -- Radmin VPN network: consoleconquer (password: 000000)");
         WriteLine(" - Localhost: 127.0.0.1");
-        WriteLine(" Radmin VPN network: consoleconquer (password: 000000)");
-        WriteLine(@" MySql dump file for local db is located at: MySql Files\Dump\");
+        WriteLine(@" -- MySql dump file for local db is located at: MySql Files\Dump\");
         DrawLine('-');
 
         string? dbIP, db, uid, password;

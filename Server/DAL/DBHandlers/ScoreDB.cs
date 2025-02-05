@@ -1,12 +1,15 @@
-using DAL.Persistence.DataTransferObjects;
+using DAL.Persistence.DataModels;
 using MySql.Data.MySqlClient;
 
 namespace DAL.DBHandlers
 {
     public static class ScoreDB
     {
-        public static async Task<(bool success, string error)> Add(Score score)
+        public static async Task<(bool success, string error)> Add(Score? score)
         {
+            if (score == null)
+                return (false, "Invalid adding score data");
+                
             string query = @"
                 INSERT INTO Scores (RunID, UserID, ClearTime, UploadedTime)
                 VALUES (@runID, @userID, @clearTime, @uploadedTime)

@@ -1,25 +1,137 @@
 using System.Security.Cryptography;
-using BLL.GameComponents;
-using BLL.GameComponents.ItemComponents;
-using BLL.GameComponents.EntityComponents;
-using BLL.GameComponents.Others;
-using BLL.GameHandlers;
-using DAL;
-using DAL.ConfigClasses;
+using BLL.Game.Components;
+using BLL.Game.Components.Item;
+using BLL.Game.Components.Entity;
+using BLL.Game.Components.Others;
+using BLL.Server;
+using BLL.Config;
 
 using static System.Console;
-using static ConsolePL.ConsoleHelper;
-using static ConsolePL.ComponentPrinter;
+using static ConsolePL.ConsoleUtilities;
+using static ConsolePL.ComponentRenderer;
 
 namespace ConsolePL
 {
     public static class GameScreens
     {
+        #region Constants
         public const string GameTitle = "CONSOLE CONQUER";
 
+        private static ServerHandler ServerHandler => ServerHandler.Instance;
         private static DatabaseConfig DbConfig => ConfigManager.Instance.DatabaseConfig;
         private static CancellationTokenSource? titleAnimTokenSource = null;
+        #endregion
 
+        #region Misc
+        public static void ConsoleSizeNotice()
+        {
+            Clear();
+            DrawLine();
+
+            int noticeTop = 0;
+            for (int i = 1; i < CursorPos.BottomBorderTop; i++)
+            {
+                WriteLine($"| {i}");
+                if (i == 18)
+                    noticeTop = CursorTop;
+            }
+            DrawLine();
+
+            CursorLeft = 5;
+            CursorTop = noticeTop;
+            Write("-- Please resize the console window to fit the game screen");
+            CursorLeft = 5;
+            CursorTop++;
+            Write("-- All lines must be straight and fully visible");
+            CursorLeft = 5;
+            CursorTop++;
+            Write("-- Press any key to continue...");
+            ReadKey(true);
+        }
+
+        public static void DrawHeader(bool setCursor = false)
+        {
+            if (setCursor)
+                SetCursorPosition(0, 0);
+
+            DrawLine('=');
+            ForegroundColor = ConsoleColor.Cyan;
+            WriteCenter(GameTitle);
+            ResetColor();
+            DrawLine('=');
+        }
+        #endregion
+
+        #region Popup
+        public enum PopupType
+        {
+            Warning,
+            Success
+        }
+
+        public static void Popup(string msg, PopupType popupType = PopupType.Warning)
+        {
+            string[] msgLines = msg.Split('\n');
+
+            StopTitleAnim();
+            CursorTop = CursorPos.PopupTop;
+            WriteCenter($"╔{new string('═', UIConstants.PopupWidth)}╗");
+            for (int i = 0; i < UIConstants.PopupHeight + msgLines.Length - 3; i++)
+            {
+                WriteCenter($"║{new string(' ', UIConstants.PopupWidth)}║");
+            }
+            WriteCenter($"╚{new string('═', UIConstants.PopupWidth)}╝");
+
+            CursorTop = CursorPos.PopupTop + 2;
+            if (popupType == PopupType.Warning)
+            {
+                WriteCenter(@"   .   ");
+                WriteCenter(@"  / \  ");
+                WriteCenter(@" / | \ ");
+                WriteCenter(@"/  .  \");
+                WriteCenter(@"-------");
+            }
+            else if (popupType == PopupType.Success)
+            {
+                WriteCenter(@"┌            ┐");
+                WriteCenter(@"│        /   │");
+                WriteCenter(@"│    \  /    │");
+                WriteCenter(@"│     \/     │");
+                WriteCenter(@"└            ┘");
+            }
+
+            CursorTop++;
+            foreach (var line in msgLines)
+                WriteCenter(line);
+            ReadKey(true);
+            Clear();
+        }
+
+        public static void PausePopup(List<string> pauseOptions, TimeSpan? elapsedTime = null)
+        {
+            CursorTop = CursorPos.PausePopupTop;
+            WriteCenter($"╔{new string('═', UIConstants.PausePopupWidth)}╗");
+            for (int i = 0; i < UIConstants.PausePopupHeight - 2; i++)
+                WriteCenter($"║{new string(' ', UIConstants.PausePopupWidth)}║");
+            WriteCenter($"╚{new string('═', UIConstants.PausePopupWidth)}╝");
+
+            CursorTop = CursorPos.PauseMenuTop;
+            foreach(var option in pauseOptions)
+            {
+                CursorLeft = CursorPos.PauseMenuLeft;
+                WriteLine(option);
+            }
+
+            if (elapsedTime != null)
+            {
+                CursorTop = CursorPos.PauseElapsedTimeTop;
+                WriteCenter("Run Time:");
+                WriteCenter($"{elapsedTime:hh\\:mm\\:ss\\.fff}");
+            }
+        }
+        #endregion
+
+        #region Title Animation
         private static readonly string[] background = [
             "₁       ₀₀₁₁     ₁₁ ₁₁         ₀₁  ₁ ₀₀₁  ₁   ₁₀₀₁₁    ₀₀₁          ₁₀",
             "₀₁₀₀      ₀₁   ₀₁     ₁    ₀₁    ₁   ₀₁₁₁         ₀₀₁   ₁₀ ₁₁       ₀₀",
@@ -131,112 +243,9 @@ namespace ConsolePL
             titleAnimTokenSource.Cancel();
             titleAnimTokenSource = null;
         }
+        #endregion
 
-        public static void ConsoleSizeNotice()
-        {
-            Clear();
-            DrawLine();
-
-            int noticeTop = 0;
-            for (int i = 1; i < CursorPos.BottomBorderTop; i++)
-            {
-                WriteLine($"| {i}");
-                if (i == 18)
-                    noticeTop = CursorTop;
-            }
-            DrawLine();
-
-            CursorLeft = 5;
-            CursorTop = noticeTop;
-            Write("-- Please resize the console window to fit the game screen");
-            CursorLeft = 5;
-            CursorTop++;
-            Write("-- All lines must be straight and fully visible");
-            CursorLeft = 5;
-            CursorTop++;
-            Write("-- Press any key to continue...");
-            ReadKey(true);
-        }
-
-        public static void DrawHeader(bool setCursor = false)
-        {
-            if (setCursor)
-                SetCursorPosition(0, 0);
-
-            DrawLine('=');
-            ForegroundColor = ConsoleColor.Cyan;
-            WriteCenter(GameTitle);
-            ResetColor();
-            DrawLine('=');
-        }
-
-        public enum PopupType
-        {
-            Warning,
-            Success
-        }
-
-        public static void Popup(string msg, PopupType popupType = PopupType.Warning)
-        {
-            string[] msgLines = msg.Split('\n');
-
-            StopTitleAnim();
-            CursorTop = CursorPos.PopupTop;
-            WriteCenter($"╔{new string('═', UIConstants.PopupWidth)}╗");
-            for (int i = 0; i < UIConstants.PopupHeight + msgLines.Length - 3; i++)
-            {
-                WriteCenter($"║{new string(' ', UIConstants.PopupWidth)}║");
-            }
-            WriteCenter($"╚{new string('═', UIConstants.PopupWidth)}╝");
-
-            CursorTop = CursorPos.PopupTop + 2;
-            if (popupType == PopupType.Warning)
-            {
-                WriteCenter(@"   .   ");
-                WriteCenter(@"  / \  ");
-                WriteCenter(@" / | \ ");
-                WriteCenter(@"/  .  \");
-                WriteCenter(@"-------");
-            }
-            else if (popupType == PopupType.Success)
-            {
-                WriteCenter(@"┌            ┐");
-                WriteCenter(@"│        /   │");
-                WriteCenter(@"│    \  /    │");
-                WriteCenter(@"│     \/     │");
-                WriteCenter(@"└            ┘");
-            }
-
-            CursorTop++;
-            foreach (var line in msgLines)
-                WriteCenter(line);
-            ReadKey(true);
-            Clear();
-        }
-
-        public static void PausePopup(List<string> pauseOptions, TimeSpan? elapsedTime = null)
-        {
-            CursorTop = CursorPos.PausePopupTop;
-            WriteCenter($"╔{new string('═', UIConstants.PausePopupWidth)}╗");
-            for (int i = 0; i < UIConstants.PausePopupHeight - 2; i++)
-                WriteCenter($"║{new string(' ', UIConstants.PausePopupWidth)}║");
-            WriteCenter($"╚{new string('═', UIConstants.PausePopupWidth)}╝");
-
-            CursorTop = CursorPos.PauseMenuTop;
-            foreach(var option in pauseOptions)
-            {
-                CursorLeft = CursorPos.PauseMenuLeft;
-                WriteLine(option);
-            }
-
-            if (elapsedTime != null)
-            {
-                CursorTop = CursorPos.PauseElapsedTimeTop;
-                WriteCenter("Run Time:");
-                WriteCenter($"{elapsedTime:hh\\:mm\\:ss\\.fff}");
-            }
-        }
-
+        #region Title Screen
         public static void TitleScreenDrawBorders(bool clear = true, bool clearOptionsZone = false)
         {
             lock (ConsoleLock)
@@ -272,8 +281,11 @@ namespace ConsolePL
                 WriteLine($" {option,-(UIConstants.UIWidth - CursorPos.TitleScreenMenuLeft - 1)}");
             }
         }
+        #endregion
 
-        public static void ManualNavigatingUI()
+        #region Guide Screens
+
+        public static void GuideForNavigatingUI()
         {
             TitleScreenDrawBorders(false, true);
 
@@ -281,16 +293,15 @@ namespace ConsolePL
             {
                 CursorTop = CursorPos.TitleScreenMenuTop;
                 WriteLine(" -- Navigating the UI:");
-                WriteLine(" Use 'W', 'S' or 'Up' & 'Down' Arrow Keys to navigate");
-                WriteLine(" Press 'Enter', 'Space', 'D' or 'Right' Arrow Key to select");
-                WriteLine(" Press 'ESC', 'A' or 'Left' Arrow Key to return");
-                WriteLine(" (Press any key to return)");
+                WriteLine(" Use 'W' & 'S' or 'Up' & 'Down' to navigate.");
+                WriteLine(" Press 'Enter', 'Space', 'D' or 'Right' to select.");
+                WriteLine(" Press 'ESC', 'A' or 'Left' to return.");
+                WriteLine(" (Press any key to continue...)");
             }
 
             ReadKey(true);
         }
-
-        public static void ManualGameplay()
+        public static void GuideForGameplay()
         {
             TitleScreenDrawBorders(false, true);
 
@@ -298,20 +309,20 @@ namespace ConsolePL
             {
                 CursorTop = CursorPos.TitleScreenMenuTop;
                 WriteLine(" -- Gameplay:");
-                WriteLine(" Beat the game by progressing through all the rooms and floors");
-                WriteLine(" Each room offers various events with the last being the floor's boss");
-                WriteLine(" During battle, you can either attack directly or use skills");
-                WriteLine(" + When attacking, both parties will deal damage to each other");
-                WriteLine(" ++ The damage is based on the attacker's ATK and the defender's DEF");
-                WriteLine(" + When using skills, you won't take damage but will consume MP");
-                WriteLine(" ++ MP will be restored slowly after each direct attack");
-                WriteLine(" (Press any key to return)");
+                WriteLine(" Beat the game by progressing through all the rooms and floors.");
+                WriteLine(" Each room offers various events with the last being the floor's boss.");
+                WriteLine(" During battle, you can either attack directly or use skills:");
+                WriteLine(" + When attacking, both parties will deal damage to each other.");
+                WriteLine(" ++ The damage is based on the attacker's ATK and the defender's DEF.");
+                WriteLine(" + When using skills, you won't take damage but will consume MP.");
+                WriteLine(" ++ MP will be restored slowly after each direct attack.");
+                WriteLine(" (Press any key to continue...)");
             }
 
             ReadKey(true);
         }
 
-        public static void ManualAboutOnlineMode()
+        public static void GuideForOnlineMode()
         {
             TitleScreenDrawBorders(false, true);
 
@@ -319,18 +330,20 @@ namespace ConsolePL
             {
                 CursorTop = CursorPos.TitleScreenMenuTop;
                 WriteLine(" -- About Online Mode:");
-                WriteLine(" The game's data is automatically updated and saved locally");
-                WriteLine(" You need an account to access other online features");
-                WriteLine(" You can reset your password using registered email");
+                WriteLine(" Game data will be updated when connected to the server.");
+                WriteLine(" You need an account to access other online features.");
+                WriteLine(" You can reset your password using registered email.");
                 WriteLine(" Online mode allows you to:");
-                WriteLine(" + Upload your progress to access from anywhere");
-                WriteLine(" + Compete with other players in the leaderboard");
-                WriteLine(" (Press any key to return)");
+                WriteLine(" + Upload your progress to access from anywhere.");
+                WriteLine(" + Compete with other players in the leaderboard.");
+                WriteLine(" (Press any key to continue...)");
             }
 
             ReadKey(true);
         }
+        #endregion
 
+        #region Server Connect
         public static void ServerConnectScreen()
         {
             TitleScreenDrawBorders(false, true);
@@ -385,7 +398,9 @@ namespace ConsolePL
 
             ReadKey(true);
         }
+        #endregion
 
+        #region Account Management
         public static void RegisterScreen()
         {
             string?
@@ -1048,7 +1063,68 @@ namespace ConsolePL
                 }
             }
         }
+        #endregion
 
+        #region Game UI Helpers
+
+        public static void PrintMainZone(List<string> options, string? msg = null, int optionCursorLeft = 1)
+        {
+            CursorTop = CursorPos.MainZoneTop;
+            for (int i = 0; i < UIConstants.MainZoneHeight; i++)
+                DrawEmptyLine();
+
+            CursorTop = CursorPos.MainZoneTop;
+            if (msg != null)
+                WriteLine($" -- {msg}");
+            options.Take(UIConstants.MainZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(option =>
+            {
+                CursorLeft = optionCursorLeft;
+                WriteLine(option);
+            });
+        }
+
+        public static void PrintMainZone<T>(List<T> components, string? msg = null) where T : GameComponent
+        {
+            CursorTop = CursorPos.MainZoneTop;
+            for (int i = 0; i < UIConstants.MainZoneHeight; i++)
+                DrawEmptyLine();
+
+            CursorTop = CursorPos.MainZoneTop;
+            if (msg != null)
+                WriteLine($" -- {msg}");
+            components.Take(UIConstants.MainZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(Render);
+        }
+
+        public static void PrintSubZone(List<string> options, string? msg = null, int optionCursorLeft = 1)
+        {
+            CursorTop = CursorPos.SubZoneTop;
+            for (int i = 0; i < UIConstants.SubZoneHeight; i++)
+                DrawEmptyLine();
+
+            CursorTop = CursorPos.SubZoneTop;
+            if (msg != null)
+                WriteLine($" -- {msg}");
+            options.Take(UIConstants.SubZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(option =>
+            {
+                CursorLeft = optionCursorLeft;
+                WriteLine(option);
+            });
+        }
+
+        public static void PrintSubZone<T>(List<T> components, string? msg = null) where T : GameComponent
+        {
+            CursorTop = CursorPos.SubZoneTop;
+            for (int i = 0; i < UIConstants.SubZoneHeight; i++)
+                DrawEmptyLine();
+                
+            CursorTop = CursorPos.SubZoneTop;
+            if (msg != null)
+                WriteLine($" -- {msg}");
+            components.Take(UIConstants.SubZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(Render);
+        }
+        #endregion
+
+        #region Game Screens
         public static string? EnterSeed()
         {
             int tempTop;
@@ -1095,64 +1171,8 @@ namespace ConsolePL
             DrawLine();
             CursorTop = CursorPos.PlayerZoneTop - 1;
             DrawLine();
-            PrintComponent(player);
+            RenderComponent(player);
             DrawLine();
-        }
-
-        public static void PrintMainZone(List<string> options, string? msg = null, int optionCursorLeft = 1)
-        {
-            CursorTop = CursorPos.MainZoneTop;
-            for (int i = 0; i < UIConstants.MainZoneHeight; i++)
-                DrawEmptyLine();
-
-            CursorTop = CursorPos.MainZoneTop;
-            if (msg != null)
-                WriteLine($" -- {msg}");
-            options.Take(UIConstants.MainZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(option =>
-            {
-                CursorLeft = optionCursorLeft;
-                WriteLine(option);
-            });
-        }
-
-        public static void PrintMainZone<T>(List<T> components, string? msg = null) where T : ComponentAbstract
-        {
-            CursorTop = CursorPos.MainZoneTop;
-            for (int i = 0; i < UIConstants.MainZoneHeight; i++)
-                DrawEmptyLine();
-
-            CursorTop = CursorPos.MainZoneTop;
-            if (msg != null)
-                WriteLine($" -- {msg}");
-            components.Take(UIConstants.MainZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(Print);
-        }
-
-        public static void PrintSubZone(List<string> options, string? msg = null, int optionCursorLeft = 1)
-        {
-            CursorTop = CursorPos.SubZoneTop;
-            for (int i = 0; i < UIConstants.SubZoneHeight; i++)
-                DrawEmptyLine();
-
-            CursorTop = CursorPos.SubZoneTop;
-            if (msg != null)
-                WriteLine($" -- {msg}");
-            options.Take(UIConstants.SubZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(option =>
-            {
-                CursorLeft = optionCursorLeft;
-                WriteLine(option);
-            });
-        }
-
-        public static void PrintSubZone<T>(List<T> components, string? msg = null) where T : ComponentAbstract
-        {
-            CursorTop = CursorPos.SubZoneTop;
-            for (int i = 0; i < UIConstants.SubZoneHeight; i++)
-                DrawEmptyLine();
-                
-            CursorTop = CursorPos.SubZoneTop;
-            if (msg != null)
-                WriteLine($" -- {msg}");
-            components.Take(UIConstants.SubZoneHeight - (msg != null ? 1 : 0)).ToList().ForEach(Print);
         }
 
         public static void ShopBanner()
@@ -1166,17 +1186,17 @@ namespace ConsolePL
             WriteCenter(@"  \_____________________________/            ;  = ┴ =  ;    ");
         }
 
-        public static void ShopTradingScreen<T>(RunProgress progress, Player player, List<T> items, bool buying) where T : Item
+        public static void ShopTradingScreen<T>(RunProgress progress, Player player, List<T> items, bool buying) where T : GameItem
         {
             Clear();
             DrawHeader();
             progress.Print();
             DrawLine();
             WriteLine($" -- {(buying ? "Buying:" : "Selling:")}");
-            items.ForEach(item => PrintPrice(item, buying));
+            items.ForEach(item => RenderItemPrice(item, buying));
             CursorTop = CursorPos.PlayerZoneTop - 1;
             DrawLine();
-            PrintComponent(player);
+            RenderComponent(player);
             DrawLine();
         }
 
@@ -1289,7 +1309,7 @@ namespace ConsolePL
             DrawLine();
             CursorTop = CursorPos.PlayerZoneTop - 1;
             DrawLine();
-            PrintComponent(player);
+            RenderComponent(player);
             DrawLine();
 
             CancellationTokenSource animTokenSource = new();
@@ -1524,5 +1544,6 @@ namespace ConsolePL
                 await Task.Delay(300, CancellationToken.None);
             }
         }
+        #endregion
     }
 }

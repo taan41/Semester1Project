@@ -1,5 +1,5 @@
 using System.Data;
-using DAL.Persistence.GameComponents.ItemComponents;
+using DAL.Persistence.GameComponents.Item;
 using MySql.Data.MySqlClient;
 
 namespace DAL.DBHandlers
@@ -98,7 +98,7 @@ namespace DAL.DBHandlers
                 {
                     ID = reader.GetInt32("SkillID"),
                     Name = reader.GetString("Name"),
-                    ItemRarity = (Item.Rarity) reader.GetInt32("Rarity"),
+                    ItemRarity = (GameItem.Rarity) reader.GetInt32("Rarity"),
                     Price = reader.GetInt32("Price"),
                     SkillType = (Skill.Type) reader.GetInt32("Type"),
                     DamagePoint = reader.GetInt32("DmgPoint"),
@@ -238,7 +238,7 @@ namespace DAL.DBHandlers
                     {
                         ID = reader.GetInt32("SkillID"),
                         Name = reader.GetString("Name"),
-                        ItemRarity = (Item.Rarity) reader.GetInt32("Rarity"),
+                        ItemRarity = (GameItem.Rarity) reader.GetInt32("Rarity"),
                         Price = reader.GetInt32("Price"),
                         SkillType = (Skill.Type) reader.GetInt32("Type"),
                         DamagePoint = reader.GetInt32("DmgPoint"),

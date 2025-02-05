@@ -1,6 +1,6 @@
 using System.Data;
 using System.Text;
-using DAL.Persistence.DataTransferObjects;
+using DAL.Persistence.DataModels;
 using MySql.Data.MySqlClient;
 
 namespace DAL.DBHandlers
@@ -32,12 +32,12 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Add(User userToAdd)
+        public static async Task<(bool success, string error)> Add(User? userToAdd)
         {
             string query = "INSERT INTO Users (Username, Nickname, Email, PasswordHash, Salt) VALUES (@username, @nickname, @email, @pwdHash, @salt)";
 
-            if (userToAdd.PwdSet == null)
-                return (false, "Null user password");
+            if (userToAdd == null || userToAdd.PwdSet == null)
+                return (false, "Invalid adding user data");
 
             try
             {
@@ -155,18 +155,15 @@ namespace DAL.DBHandlers
             }
         }
 
-        public static async Task<(bool success, string error)> Update(int userID, string? newNickname, string? newEmail, PasswordSet? newPwd)
+        public static async Task<(bool success, string error)> Update(User? updatingUser)
         {
-            if (newNickname == null && newEmail == null && newPwd == null)
-                return (false, "Invalid updated data");
-                
-            if (userID < 1)
-                return (false, "Invalid user ID");
+            if (updatingUser == null || updatingUser.UserID < 1)
+                return (false, "Invalid updating user");
 
             List<string> querySets = [];
-            if (newNickname != null) querySets.Add(" Nickname = @newNickname");
-            if (newEmail != null) querySets.Add(" Email = @newEmail");
-            if (newPwd != null) querySets.Add(" PasswordHash = @newPwdHash, Salt = @newSalt");
+            if (updatingUser.Nickname != null) querySets.Add(" Nickname = @newNickname");
+            if (updatingUser.Email != null) querySets.Add(" Email = @newEmail");
+            if (updatingUser.PwdSet != null) querySets.Add(" PasswordHash = @newPwdHash, Salt = @newSalt");
 
             StringBuilder query = new("UPDATE Users SET");
             query.AppendJoin(',', querySets);
@@ -178,62 +175,18 @@ namespace DAL.DBHandlers
                 await conn.OpenAsync();
 
                 using MySqlCommand cmd = new(query.ToString(), conn);
-                cmd.Parameters.AddWithValue("@userID", userID);
+                cmd.Parameters.AddWithValue("@userID", updatingUser.UserID);
 
-                if (newNickname != null)
-                    cmd.Parameters.AddWithValue("@newNickname", newNickname);
+                if (updatingUser.Nickname != null)
+                    cmd.Parameters.AddWithValue("@newNickname", updatingUser.Nickname);
                 
-                if (newEmail != null)
-                    cmd.Parameters.AddWithValue("@newEmail", newEmail);
+                if (updatingUser.Email != null)
+                    cmd.Parameters.AddWithValue("@newEmail", updatingUser.Email);
 
-                if (newPwd != null)
+                if (updatingUser.PwdSet != null)
                 {
-                    cmd.Parameters.AddWithValue("@newPwdHash", newPwd.PwdHash);
-                    cmd.Parameters.AddWithValue("@newSalt", newPwd.PwdSalt);
-                }
-
-                await cmd.ExecuteNonQueryAsync();
-
-                return (true, "");
-            }
-            catch (MySqlException ex)
-            {
-                return (false, ex.Message);
-            }
-        }
-
-        public static async Task<(bool success, string error)> Update(string username, string? newNickname, string? newEmail, PasswordSet? newPwd)
-        {
-            if (newNickname == null && newEmail == null && newPwd == null)
-                return (false, "Invalid updated data");
-
-            List<string> querySets = [];
-            if (newNickname != null) querySets.Add(" Nickname = @newNickname");
-            if (newEmail != null) querySets.Add(" Email = @newEmail");
-            if (newPwd != null) querySets.Add(" PasswordHash = @newPwdHash, Salt = @newSalt");
-
-            StringBuilder query = new("UPDATE Users SET");
-            query.AppendJoin(',', querySets);
-            query.Append(" WHERE Username = @username");
-
-            try
-            {
-                using MySqlConnection conn = new(DBManager.ConnectionString);
-                await conn.OpenAsync();
-
-                using MySqlCommand cmd = new(query.ToString(), conn);
-                cmd.Parameters.AddWithValue("@username", username);
-
-                if (newNickname != null)
-                    cmd.Parameters.AddWithValue("@newNickname", newNickname);
-                
-                if (newEmail != null)
-                    cmd.Parameters.AddWithValue("@newEmail", newEmail);
-
-                if (newPwd != null)
-                {
-                    cmd.Parameters.AddWithValue("@newPwdHash", newPwd.PwdHash);
-                    cmd.Parameters.AddWithValue("@newSalt", newPwd.PwdSalt);
+                    cmd.Parameters.AddWithValue("@newPwdHash", updatingUser.PwdSet.PwdHash);
+                    cmd.Parameters.AddWithValue("@newSalt", updatingUser.PwdSet.PwdSalt);
                 }
 
                 await cmd.ExecuteNonQueryAsync();

@@ -1,7 +1,7 @@
 using DAL;
 using DAL.DBHandlers;
-using DAL.Persistence.GameComponents.EntityComponents;
-using DAL.Persistence.GameComponents.ItemComponents;
+using DAL.Persistence.GameComponents.Entity;
+using DAL.Persistence.GameComponents.Item;
 
 namespace BLL
 {
@@ -15,8 +15,8 @@ namespace BLL
         public Dictionary<int, Skill> Skills  = [];
         public Dictionary<int, Monster> Monsters = [];
 
-        public int[] EquipIDs = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
-        public int[] SkillIDs = new int[Enum.GetValues(typeof(Item.Rarity)).Length];
+        public int[] EquipIDs = new int[Enum.GetValues(typeof(GameItem.Rarity)).Length];
+        public int[] SkillIDs = new int[Enum.GetValues(typeof(GameItem.Rarity)).Length];
         public int[][] MonsterIDs = new int[Config.GameConfig.ProgressMaxFloor][];
 
         private AssetManager(bool load = false)

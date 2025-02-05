@@ -2,15 +2,15 @@ using DAL.Persistence.ConfigClasses;
 
 namespace DAL.Persistence.GameComponents
 {
-    public abstract class ComponentAbstract
+    public abstract class GameComponent
     {
         protected static GameConfig Config => ConfigManager.Instance.GameConfig;
 
         public virtual string Name { get; set; } = "Temp name";
 
-        public ComponentAbstract() {}
+        public GameComponent() {}
 
-        public ComponentAbstract(string name)
+        public GameComponent(string name)
         {
             Name = name;
         }

@@ -28,9 +28,14 @@ namespace DAL
 
         public static readonly string DirPath = RemoveUnwantedParts(Directory.GetCurrentDirectory());
         
-        private static readonly JsonSerializerOptions _toJsonOption = new()
+        private static readonly JsonSerializerOptions ToJsonOption = new()
         {
             WriteIndented = true
+        };
+
+        private static readonly JsonSerializerOptions FromJsonOption = new()
+        {
+            PropertyNameCaseInsensitive = true
         };
 
         private static string RemoveUnwantedParts(string path)
@@ -50,7 +55,7 @@ namespace DAL
         {
             string dirPath = Path.Combine(DirPath, folderName);
             Directory.CreateDirectory(dirPath);
-            File.WriteAllText(Path.Combine(dirPath, fileName + ".json"), JsonSerializer.Serialize(obj, _toJsonOption));
+            File.WriteAllText(Path.Combine(dirPath, fileName + ".json"), JsonSerializer.Serialize(obj, ToJsonOption));
         }
 
         public static string? ReadJson(string folderName, string fileName)
@@ -69,7 +74,7 @@ namespace DAL
         public static T? ReadJson<T>(string folderName, string fileName)
         {
             string? data = ReadJson(folderName, fileName);
-            return data != null ? JsonSerializer.Deserialize<T>(data) : default;
+            return data != null ? JsonSerializer.Deserialize<T>(data, FromJsonOption) : default;
         }
 
         public static IEnumerable<string> ReadAllJson(string folderName)

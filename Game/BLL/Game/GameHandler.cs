@@ -1,0 +1,97 @@
+using BLL.Game.Components.Entity;
+using BLL.Game.Components.Event;
+using BLL.Game.Components.Item;
+using BLL.Game.Components.Others;
+using BLL.Server;
+
+namespace BLL.Game
+{
+    public class GameHandler
+    {
+        private static ServerHandler ServerHandler => ServerHandler.Instance;
+        
+        private readonly GameSave _save;
+        private readonly RunData _runData;
+
+        private int _prefightHP, _prefightMP;
+        private readonly List<Monster> _prefightMonsters = [];
+
+        public readonly EventGenerator Events;
+        public readonly RunProgress Progress;
+        public readonly Player Player;
+
+        public int RerollCost => Progress.Floor * 100;
+
+        public GameHandler(GameSave save)
+        {
+            _save = save;
+            _runData = save.RunData;
+
+            Events = new(_runData);
+            Progress = _runData.Progress;
+            Player = _runData.Player;
+        }
+
+        public GameHandler(string? seed)
+        {
+            _runData = new RunData(seed);
+            _save = new GameSave(_runData);
+
+            Events = new EventGenerator(_runData);
+            Progress = _runData.Progress;
+            Player = _runData.Player;
+        }
+
+        public void Timer(bool start)
+            => _runData.Timer(start);
+
+        public TimeSpan GetElapsedTime()
+            => _runData.GetElapsedTime();
+
+        public void SaveAs(string saveName, bool saveToCloud = false)
+        {
+            _save.SaveAs(saveName);
+
+            if (ServerHandler.IsConnected && saveToCloud)
+            {
+                _save.Name = "CloudSave";
+                ServerHandler.UploadSave(_save, out _);
+            }
+        }
+
+        public void AddStarters(Equipment equip, Skill skill)
+        {
+            Player.AddItem(equip);
+            Player.AddItem(skill);
+        }
+
+        public void SavePrefightState(FightEvent fightEvent)
+        {
+            _prefightHP = Player.HP;
+            _prefightMP = Player.MP;
+            foreach (var monster in fightEvent.Monsters)
+                _prefightMonsters.Add(new(monster));
+        }
+
+        public void LoadPrefightState(FightEvent fightEvent)
+        {
+            Player.SetStats(null, null, null, _prefightHP, null, _prefightMP, null);
+            fightEvent.Monsters.Clear();
+            fightEvent.Monsters.AddRange(_prefightMonsters);
+            _prefightMonsters.Clear();
+        }
+
+        public void RunWin()
+        {
+            Timer(false);
+            if (ServerHandler.IsLoggedIn)
+                ServerHandler.UploadScore(_runData.RunID, GetElapsedTime(), out _);
+        }
+
+        public void RerollShop(ShopEvent shop)
+        {
+            Events.RerollShop(Progress, shop);
+            Player.Gold.Quantity -= RerollCost;
+        }
+    }
+}

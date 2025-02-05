@@ -1,18 +1,20 @@
 ﻿using System.Security.Cryptography;
-using BLL.GameComponents.Others;
-using BLL.GameComponents.ItemComponents;
-using BLL.GameComponents.EventComponents;
-using BLL.GameComponents.EntityComponents;
-using BLL.GameHandlers;
-using BLL.GameHelpers;
+using BLL.Game;
+using BLL.Game.Components.Others;
+using BLL.Game.Components.Item;
+using BLL.Game.Components.Event;
+using BLL.Game.Components.Entity;
+using BLL.Server;
 
 using static ConsolePL.GameScreens;
-using static ConsolePL.ConsoleHelper;
+using static ConsolePL.ConsoleUtilities;
 
 namespace ConsolePL
 {
     class Program
     {
+        private static ServerHandler ServerHandler => ServerHandler.Instance;
+
         public static void Main()
         {
             Console.CursorVisible = false;
@@ -46,17 +48,17 @@ namespace ConsolePL
         
         static bool ModeSelection()
         {
-            List<string> options = ["MANUAL", "PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
+            List<string> options = ["GUIDE", "PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
 
             while (true)
             {
                 TitleScreenDrawBorders(false, true);
                 StartTitleAnim();
 
-                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                switch (OptionPicker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
                 {
                     case 0:
-                        Manual();
+                        Guide();
                         break;
                     
                     case 1:
@@ -73,7 +75,7 @@ namespace ConsolePL
             }
         }
 
-        static void Manual()
+        static void Guide()
         {
             List<string> options = ["NAVIGATING UI", "GAMEPLAY", "ABOUT ONLINE MODE", "RETURN"];
 
@@ -82,18 +84,18 @@ namespace ConsolePL
                 TitleScreenDrawBorders(false, true);
                 StartTitleAnim();
 
-                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                switch (OptionPicker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
                 {
                     case 0:
-                        ManualNavigatingUI();
+                        GuideForNavigatingUI();
                         break;
 
                     case 1:
-                        ManualGameplay();
+                        GuideForGameplay();
                         break;
 
                     case 2:
-                        ManualAboutOnlineMode();
+                        GuideForOnlineMode();
                         break;
 
                     case 3: case null:
@@ -111,7 +113,7 @@ namespace ConsolePL
                 TitleScreenDrawBorders(false, true);
                 StartTitleAnim();
 
-                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                switch (OptionPicker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
                 {
                     case 0:
                         NewGame();
@@ -141,7 +143,7 @@ namespace ConsolePL
                 TitleScreenDrawBorders(false, true);
                 StartTitleAnim();
                 
-                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                switch (OptionPicker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
                 {
                     case 0:
                         RegisterScreen();
@@ -182,7 +184,7 @@ namespace ConsolePL
                     Console.Write($"Welcome, {ServerHandler.Nickname}!");
                 }
 
-                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                switch (OptionPicker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
                 {
                     case 0:
                         NewGame();
@@ -219,7 +221,7 @@ namespace ConsolePL
                 if (!ServerHandler.IsConnected || !ServerHandler.IsLoggedIn)
                     return;
 
-                if (!ServerHandler.GetScores(out List<string> personal, out List<string> monthly, out List<string> alltime, out string error))
+                if (!ServerHandler.GetAllScores(out List<string> personal, out List<string> monthly, out List<string> alltime, out string error))
                 {
                     Popup(error);
                     return;
@@ -228,7 +230,7 @@ namespace ConsolePL
                 TitleScreenDrawBorders(false, true);
                 StartTitleAnim();
 
-                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                switch (OptionPicker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
                 {
                     case 0:
                         ViewScoresScreen(personal, "PERSONAL SCORES");
@@ -269,7 +271,7 @@ namespace ConsolePL
                     Console.Write($"Welcome, {ServerHandler.Nickname}!");
                 }
 
-                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                switch (OptionPicker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
                 {
                     case 0:
                         ViewAccountInfoScreen();
@@ -304,7 +306,8 @@ namespace ConsolePL
         static void LoadGame()
         {
             if (ServerHandler.IsLoggedIn)
-                ServerHandler.DownloadSave();
+                if (!ServerHandler.DownloadSave(out string downloadSaveError))
+                    Popup(downloadSaveError);
 
             List<GameSave> saves = GameSave.LoadGameSaves(out string? error);
 
@@ -324,7 +327,7 @@ namespace ConsolePL
                     Console.WriteLine(" -- Choose Save:");
                 }
 
-                int? pickedSaveInd = Picker.Component(saves, CursorPos.TitleScreenMenuTop + 1);
+                int? pickedSaveInd = OptionPicker.Component(saves, CursorPos.TitleScreenMenuTop + 1);
                 if (pickedSaveInd != null)
                 {
                     StopTitleAnim();
@@ -350,7 +353,7 @@ namespace ConsolePL
                 TitleScreenDrawBorders(false, true);
                 StartTitleAnim();
 
-                switch (Picker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
+                switch (OptionPicker.String(options, CursorPos.TitleScreenMenuTop, CursorPos.TitleScreenMenuLeft))
                 {
                     case 0:
                         StartNewRun();
@@ -372,7 +375,7 @@ namespace ConsolePL
         {
             StopTitleAnim();
 
-            GameStateHandler gameHandler = new(seed);
+            GameHandler gameHandler = new(seed);
 
             List<Equipment> startEquips =
             [
@@ -390,7 +393,7 @@ namespace ConsolePL
             GenericGameScreen(gameHandler.Progress, gameHandler.Player);
             PrintMainZone(startEquips, "Choose Starting Item:");
             
-            int? pickedEquipInd = Picker.Component(startEquips, CursorPos.MainZoneTop + 1);
+            int? pickedEquipInd = OptionPicker.Component(startEquips, CursorPos.MainZoneTop + 1);
             if (pickedEquipInd == null)
                 return;
 
@@ -399,7 +402,7 @@ namespace ConsolePL
             GenericGameScreen(gameHandler.Progress, gameHandler.Player);
             PrintMainZone(startSkills, "Choose Starting Skill:");
             
-            int? pickedSkillInd = Picker.Component(startSkills, CursorPos.MainZoneTop + 1);
+            int? pickedSkillInd = OptionPicker.Component(startSkills, CursorPos.MainZoneTop + 1);
             if (pickedSkillInd == null)
                 return;
                 
@@ -408,7 +411,7 @@ namespace ConsolePL
             GameLoop(gameHandler);
         }
 
-        static void GameLoop(GameStateHandler gameHandler)
+        static void GameLoop(GameHandler gameHandler)
         {
             List<string> actions = ["Pick A Route", "Inventory"];
             List<string> invOptions = ["Change Equipment", "Change Skill"];
@@ -419,21 +422,21 @@ namespace ConsolePL
             {
                 gameHandler.SaveAs("AutoSave");
 
-                List<Event> routes = gameHandler.Events.GetEvents();
+                List<GameEvent> routes = gameHandler.Events.GetEvents();
 
                 GenericGameScreen(gameHandler.Progress, gameHandler.Player);
                 PrintMainZone(routes, "Routes:");
                 PrintSubZone(actions, "Actions:");
 
-                int? pickedActionInd = Picker.String(actions, CursorPos.SubZoneTop + 1);
+                int? pickedActionInd = OptionPicker.String(actions, CursorPos.SubZoneTop + 1);
                 switch (pickedActionInd)
                 {
                     case 0:
-                        int? pickedRouteInd = Picker.Component(routes, CursorPos.MainZoneTop + 1);
+                        int? pickedRouteInd = OptionPicker.Component(routes, CursorPos.MainZoneTop + 1);
                         if (pickedRouteInd == null)
                             break;
 
-                        Event pickedRoute = routes[(int) pickedRouteInd];
+                        GameEvent pickedRoute = routes[(int) pickedRouteInd];
                         if (!HandleEvent(gameHandler, pickedRoute))
                             return;
 
@@ -447,7 +450,7 @@ namespace ConsolePL
                     case 1:
                         PrintSubZone(invOptions, "Inventory:");
 
-                        int? pickedInvInd = Picker.String(invOptions, CursorPos.SubZoneTop + 1);
+                        int? pickedInvInd = OptionPicker.String(invOptions, CursorPos.SubZoneTop + 1);
                         switch (pickedInvInd)
                         {
                             case 0:
@@ -472,14 +475,14 @@ namespace ConsolePL
             }
         }
 
-        static bool HandlePause(GameStateHandler gameHandler)
+        static bool HandlePause(GameHandler gameHandler)
         {
             List<string> pauseOptions = ["RESUME", "SAVE & EXIT"];
 
             gameHandler.Timer(false);
             PausePopup(pauseOptions, gameHandler.GetElapsedTime());
 
-            int? pickedPauseInd = Picker.String(pauseOptions, CursorPos.PauseMenuTop, CursorPos.PauseMenuLeft, pauseOptions.Count, 4);
+            int? pickedPauseInd = OptionPicker.String(pauseOptions, CursorPos.PauseMenuTop, CursorPos.PauseMenuLeft, pauseOptions.Count, 4);
             switch (pickedPauseInd)
             {
                 case 1:
@@ -492,7 +495,7 @@ namespace ConsolePL
             }
         }
 
-        static void HandleEquipInventory(GameStateHandler gameHandler)
+        static void HandleEquipInventory(GameHandler gameHandler)
         {
             List<Equipment> equipInv = gameHandler.Player.EquipInventory;
 
@@ -502,7 +505,7 @@ namespace ConsolePL
                 PrintMainZone([], "Inventory:");
                 PrintSubZone(gameHandler.Player.Equipped, "Currently Equipped:");
 
-                int? pickedEquipInd = Picker.Component(equipInv, CursorPos.MainZoneTop + 1, 0, UIConstants.MainZoneHeight - 1);
+                int? pickedEquipInd = OptionPicker.Component(equipInv, CursorPos.MainZoneTop + 1, 0, UIConstants.MainZoneHeight - 1);
                 if (pickedEquipInd == null)
                     return;
 
@@ -512,7 +515,7 @@ namespace ConsolePL
             }
         }
 
-        static void HandleSkillInventory(GameStateHandler gameHandler)
+        static void HandleSkillInventory(GameHandler gameHandler)
         {
             List<Skill> skillInv = gameHandler.Player.SkillInventory;
             int displayCount = UIConstants.MainZoneHeight - 1;
@@ -523,7 +526,7 @@ namespace ConsolePL
                 PrintMainZone([], "Inventory:");
                 PrintSubZone(gameHandler.Player.Skills, "Currently Equipped:");
 
-                int? pickedSkillInd = Picker.Component(skillInv, CursorPos.MainZoneTop + 1, 0, displayCount);
+                int? pickedSkillInd = OptionPicker.Component(skillInv, CursorPos.MainZoneTop + 1, 0, displayCount);
                 if (pickedSkillInd == null)
                     return;
 
@@ -535,7 +538,7 @@ namespace ConsolePL
                 }
                 else
                 {
-                    int? equippedSkillInd = Picker.Component(gameHandler.Player.Skills, CursorPos.SubZoneTop + 1);
+                    int? equippedSkillInd = OptionPicker.Component(gameHandler.Player.Skills, CursorPos.SubZoneTop + 1);
                     if (equippedSkillInd != null)
                         gameHandler.Player.ChangeSkill((int) equippedSkillInd, pickedSkill);
                 }
@@ -544,7 +547,7 @@ namespace ConsolePL
             }
         }
 
-        static bool HandleEvent(GameStateHandler gameHandler, Event route)
+        static bool HandleEvent(GameHandler gameHandler, GameEvent route)
         {
             return route switch
             {
@@ -553,7 +556,7 @@ namespace ConsolePL
             };
         }
 
-        static bool HandleFightEvent(GameStateHandler gameHandler, FightEvent fightEvent)
+        static bool HandleFightEvent(GameHandler gameHandler, FightEvent fightEvent)
         {
             List<string> fightActions = ["Attack", "Use Skill"];
             List<string> lostOptions = ["RETRY", "RETURN TO TITLE"];
@@ -566,7 +569,7 @@ namespace ConsolePL
                 PrintMainZone(fightEvent.Monsters);
                 PrintSubZone(fightActions, "Actions:");
 
-                int? pickedActionInd = Picker.String(fightActions, CursorPos.SubZoneTop + 1);
+                int? pickedActionInd = OptionPicker.String(fightActions, CursorPos.SubZoneTop + 1);
                 if (pickedActionInd == null)
                 {
                     if (HandlePause(gameHandler))
@@ -578,7 +581,7 @@ namespace ConsolePL
                 switch (pickedActionInd)
                 {
                     case 0:
-                        int? pickedMonsterInd = Picker.Component(fightEvent.Monsters, CursorPos.MainZoneTop);
+                        int? pickedMonsterInd = OptionPicker.Component(fightEvent.Monsters, CursorPos.MainZoneTop);
                         if (pickedMonsterInd == null)
                             continue;
 
@@ -588,7 +591,7 @@ namespace ConsolePL
                     case 1:
                         PrintSubZone(gameHandler.Player.Skills, "Skills:");
 
-                        int? pickedSkillInd = Picker.Component(gameHandler.Player.Skills, CursorPos.SubZoneTop + 1);
+                        int? pickedSkillInd = OptionPicker.Component(gameHandler.Player.Skills, CursorPos.SubZoneTop + 1);
                         if (pickedSkillInd == null)
                             continue;
 
@@ -604,7 +607,7 @@ namespace ConsolePL
                             switch (pickedSkill.SkillType)
                             {
                                 case Skill.Type.Single:
-                                    pickedMonsterInd = Picker.Component(fightEvent.Monsters, CursorPos.MainZoneTop);
+                                    pickedMonsterInd = OptionPicker.Component(fightEvent.Monsters, CursorPos.MainZoneTop);
                                     if (pickedMonsterInd == null)
                                         continue;
 
@@ -634,7 +637,7 @@ namespace ConsolePL
                 {
                     LostScreen(lostOptions);
 
-                    int? pickLostOptInd = Picker.String(lostOptions, CursorPos.EndScreenMenuTop, CursorPos.EndScreenMenuLeft);
+                    int? pickLostOptInd = OptionPicker.String(lostOptions, CursorPos.EndScreenMenuTop, CursorPos.EndScreenMenuLeft);
                     switch (pickLostOptInd)
                     {
                         case 0:
@@ -650,7 +653,7 @@ namespace ConsolePL
             return HandleRewards(gameHandler, fightEvent.Rewards);
         }
 
-        static bool HandleNonfightEvent(GameStateHandler gameHandler, Event route)
+        static bool HandleNonfightEvent(GameHandler gameHandler, GameEvent route)
         {
             switch (route)
             {
@@ -672,7 +675,7 @@ namespace ConsolePL
                 default:
                     switch (route.EventType)
                     {
-                        case Event.Type.Camp:
+                        case GameEvent.Type.Camp:
                             gameHandler.Player.Regenerate();
                             CampfireScreen(gameHandler.Progress, gameHandler.Player);
                             break;
@@ -683,21 +686,21 @@ namespace ConsolePL
             return true;
         }
 
-        static bool HandleRewards(GameStateHandler gameHandler, List<Item> rewards)
+        static bool HandleRewards(GameHandler gameHandler, List<GameItem> rewards)
         {
             while (rewards.Count > 0)
             {
                 GenericGameScreen(gameHandler.Progress, gameHandler.Player);
                 PrintMainZone(rewards, "Rewards:");
 
-                int? pickedRewardInd = Picker.Component(rewards, CursorPos.MainZoneTop + 1);
+                int? pickedRewardInd = OptionPicker.Component(rewards, CursorPos.MainZoneTop + 1);
                 if (pickedRewardInd == null)
                     if (HandlePause(gameHandler))
                         continue;
                     else
                         return false;
 
-                Item pickedReward = rewards[(int) pickedRewardInd];
+                GameItem pickedReward = rewards[(int) pickedRewardInd];
 
                 gameHandler.Player.AddItem(pickedReward);
                 rewards.Remove(pickedReward);
@@ -706,7 +709,7 @@ namespace ConsolePL
             return true;
         }
 
-        static void HandleShop(GameStateHandler gameHandler, ShopEvent shopEvent)
+        static void HandleShop(GameHandler gameHandler, ShopEvent shopEvent)
         {
             List<string> options = ["Shopping", "Inventory", "Continue"];
             List<string> shopActions = ["Buy", "Sell", $"Reroll Shop ({gameHandler.RerollCost}G)"];
@@ -718,14 +721,14 @@ namespace ConsolePL
                 ShopBanner();
                 PrintSubZone(options, "Actions:");
                 
-                switch (Picker.String(options, CursorPos.SubZoneTop + 1))
+                switch (OptionPicker.String(options, CursorPos.SubZoneTop + 1))
                 {
                     case 0:
                         GenericGameScreen(gameHandler.Progress, gameHandler.Player);
                         ShopBanner();
                         PrintSubZone(shopActions, "Shopping:");
                         
-                        int? pickedShopInd = Picker.String(shopActions, CursorPos.SubZoneTop + 1);
+                        int? pickedShopInd = OptionPicker.String(shopActions, CursorPos.SubZoneTop + 1);
                         switch (pickedShopInd)
                         {
                             case 0:
@@ -750,7 +753,7 @@ namespace ConsolePL
                         ShopBanner();
                         PrintSubZone(invActions, "Inventory:");
 
-                        int? pickedInvInd = Picker.String(invActions, CursorPos.SubZoneTop + 1);
+                        int? pickedInvInd = OptionPicker.String(invActions, CursorPos.SubZoneTop + 1);
                         switch (pickedInvInd)
                         {
                             case 0:
@@ -772,20 +775,20 @@ namespace ConsolePL
             }
         }
 
-        static void HandleShopBuy(GameStateHandler gameHandler, ShopEvent shopEvent)
+        static void HandleShopBuy(GameHandler gameHandler, ShopEvent shopEvent)
         {
-            List<Item> shopItems = shopEvent.SellingItems;
+            List<GameItem> shopItems = shopEvent.SellingItems;
             int displayCount = UIConstants.MainZoneHeight + UIConstants.SubZoneHeight;
 
             while (true)
             {
                 ShopTradingScreen(gameHandler.Progress, gameHandler.Player, shopItems, true);
 
-                int? pickedItemInd = Picker.TradeItem(shopItems, true, CursorPos.MainZoneTop + 1, 0, displayCount);
+                int? pickedItemInd = OptionPicker.TradeItem(shopItems, true, CursorPos.MainZoneTop + 1, 0, displayCount);
                 if (pickedItemInd == null)
                     return;
 
-                Item pickedItem = shopItems[(int) pickedItemInd];
+                GameItem pickedItem = shopItems[(int) pickedItemInd];
                 if (pickedItem.Price <= gameHandler.Player.Gold.Quantity)
                 {
                     gameHandler.Player.TradeItem(pickedItem, true);
@@ -796,9 +799,9 @@ namespace ConsolePL
             }
         }
 
-        static void HandleShopSell(GameStateHandler gameHandler)
+        static void HandleShopSell(GameHandler gameHandler)
         {
-            List<Item> playerInv = [];
+            List<GameItem> playerInv = [];
             playerInv.AddRange(gameHandler.Player.EquipInventory);
             playerInv.AddRange(gameHandler.Player.SkillInventory);
 
@@ -808,17 +811,17 @@ namespace ConsolePL
             {
                 ShopTradingScreen(gameHandler.Progress, gameHandler.Player, playerInv, false);
 
-                int? pickedItemInd = Picker.TradeItem(playerInv, false, CursorPos.MainZoneTop + 1, 0, displayCount);
+                int? pickedItemInd = OptionPicker.TradeItem(playerInv, false, CursorPos.MainZoneTop + 1, 0, displayCount);
                 if (pickedItemInd == null)
                     return;
 
-                Item pickedItem = playerInv[(int) pickedItemInd];
+                GameItem pickedItem = playerInv[(int) pickedItemInd];
                 gameHandler.Player.TradeItem(pickedItem, false);
                 playerInv.Remove(pickedItem);
             }
         }
 
-        static void HandleVictory(GameStateHandler gameHandler)
+        static void HandleVictory(GameHandler gameHandler)
         {
             gameHandler.RunWin();
 
@@ -826,7 +829,7 @@ namespace ConsolePL
 
             VictoryScreen(gameHandler.GetElapsedTime(), winOptions);
 
-            switch (Picker.String(winOptions, CursorPos.EndScreenMenuTop + 3, CursorPos.EndScreenMenuLeft))
+            switch (OptionPicker.String(winOptions, CursorPos.EndScreenMenuTop + 3, CursorPos.EndScreenMenuLeft))
             {
                 default:
                     return;

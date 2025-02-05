@@ -44,7 +44,7 @@ namespace ConsolePL
             {
                 ServerUI.MainMenu(serverIP, port, false);
 
-                switch (ServerUIHelper.ReadInput())
+                switch (ConsoleUtilities.ReadInput())
                 {
                     case "1":
                         return true;
@@ -98,7 +98,7 @@ namespace ConsolePL
             {
                 ServerUI.MainMenu(serverIP, port, true);
 
-                switch (ServerUIHelper.ReadInput())
+                switch (ConsoleUtilities.ReadInput())
                 {
                     case "1":
                         ServerUI.ViewConnectedClients(Server.ClientList);
@@ -132,7 +132,7 @@ namespace ConsolePL
             {
                 ServerUI.ManageAccounts();
 
-                switch (ServerUIHelper.ReadInput())
+                switch (ConsoleUtilities.ReadInput())
                 {
                     case "1":
                         await ServerUI.ViewAccounts();
@@ -156,10 +156,10 @@ namespace ConsolePL
             {
                 ServerUI.GameDataMenu();
 
-                switch (ServerUIHelper.ReadInput())
+                switch (ConsoleUtilities.ReadInput())
                 {
                     case "1":
-                        await AssetManagerPL.Intance.Start();
+                        await AssetManagerUI.Start();
                         continue;
 
                     case "2":

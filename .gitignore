@@ -1,7 +1,6 @@
 /test
 /testServer
 Project.sln
-/.vscode
 /Game/BLL/bin
 /Game/BLL/obj
 /Game/ConsolePL/bin
