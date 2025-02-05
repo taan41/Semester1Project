@@ -97,10 +97,10 @@ namespace BLL.Game.Components.Entity
 
             int rarityPercentage = skill.ItemRarity switch
             {
-                Item.GameItem.Rarity.Common => GameConfig.SkillRarityCommonPercentage,
-                Item.GameItem.Rarity.Rare => GameConfig.SkillRarityRarePercentage,
-                Item.GameItem.Rarity.Epic => GameConfig.SkillRarityEpicPercentage,
-                Item.GameItem.Rarity.Legendary => GameConfig.SkillRarityLegendaryPercentage,
+                GameItem.Rarity.Common => GameConfig.SkillRarityCommonPercentage,
+                GameItem.Rarity.Rare => GameConfig.SkillRarityRarePercentage,
+                GameItem.Rarity.Epic => GameConfig.SkillRarityEpicPercentage,
+                GameItem.Rarity.Legendary => GameConfig.SkillRarityLegendaryPercentage,
                 _ => 100
             };
 

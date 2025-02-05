@@ -4,11 +4,11 @@ namespace BLL.Game.Components.Event
 {
     public class TreasureEvent : GameEvent
     {
-        public List<Item.GameItem> Treasures { get; set; } = [];
+        public List<GameItem> Treasures { get; set; } = [];
 
         public TreasureEvent() : base(Type.Treasure) {}
 
-        public TreasureEvent(List<Item.GameItem> treasures) : base(Type.Treasure)
+        public TreasureEvent(List<GameItem> treasures) : base(Type.Treasure)
             => Treasures = treasures;
     }
 }

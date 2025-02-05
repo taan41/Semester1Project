@@ -12,17 +12,16 @@ namespace BLL.Game.Components.Others
 
         public GameSave() {}
 
-        public GameSave(RunData gameData, DateTime? saveTime = null) : base("UnnamedSave")
+        public GameSave(RunData gameData, string name, DateTime? saveTime = null) : base(name)
         {
             RunData = gameData;
             SaveTime = saveTime ?? DateTime.Now;
         }
         
-        public void SaveAs(string? saveName)
+        public static void SaveLocal(GameSave save)
         {
-            Name = saveName ?? "UnnamedSave";
-            RunData.SaveTime();
-            FileManager.WriteJson(FileManager.FolderNames.Saves, Name, this);
+            save.RunData.SaveTime();
+            FileManager.WriteJson(FileManager.FolderNames.Saves, save.Name, save);
         }
 
         public static List<GameSave> LoadGameSaves(out string? error)

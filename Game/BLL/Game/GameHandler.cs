@@ -10,13 +10,11 @@ namespace BLL.Game
     {
         private static ServerHandler ServerHandler => ServerHandler.Instance;
         
-        private readonly GameSave _save;
         private readonly RunData _runData;
-
-        private int _prefightHP, _prefightMP;
+        private readonly EventGenerator _events;
         private readonly List<Monster> _prefightMonsters = [];
+        private int _prefightHP, _prefightMP;
 
-        public readonly EventGenerator Events;
         public readonly RunProgress Progress;
         public readonly Player Player;
 
@@ -24,10 +22,9 @@ namespace BLL.Game
 
         public GameHandler(GameSave save)
         {
-            _save = save;
             _runData = save.RunData;
 
-            Events = new(_runData);
+            _events = new(_runData.Seed);
             Progress = _runData.Progress;
             Player = _runData.Player;
         }
@@ -35,27 +32,30 @@ namespace BLL.Game
         public GameHandler(string? seed)
         {
             _runData = new RunData(seed);
-            _save = new GameSave(_runData);
 
-            Events = new EventGenerator(_runData);
+            _events = new EventGenerator(_runData.Seed);
             Progress = _runData.Progress;
             Player = _runData.Player;
         }
 
+        public List<GameEvent> GetEvents()
+            => _events.GetRoomEvents(Progress);
+
         public void Timer(bool start)
-            => _runData.Timer(start);
+            => _runData.TimerControl(start);
 
         public TimeSpan GetElapsedTime()
             => _runData.GetElapsedTime();
 
-        public void SaveAs(string saveName, bool saveToCloud = false)
+        public void SaveAs(string saveName, bool saveToServer = false)
         {
-            _save.SaveAs(saveName);
+            GameSave save = new(_runData, saveName);
+            GameSave.SaveLocal(save);
 
-            if (ServerHandler.IsConnected && saveToCloud)
+            if (saveToServer && ServerHandler.IsConnected)
             {
-                _save.Name = "CloudSave";
-                ServerHandler.UploadSave(_save, out _);
+                save.Name = "CloudSave";
+                ServerHandler.UploadSave(save, out _);
             }
         }
 
@@ -90,7 +90,7 @@ namespace BLL.Game
 
         public void RerollShop(ShopEvent shop)
         {
-            Events.RerollShop(Progress, shop);
+            _events.RerollShop(Progress, shop);
             Player.Gold.Quantity -= RerollCost;
         }
     }

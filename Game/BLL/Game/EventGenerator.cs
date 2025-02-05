@@ -49,23 +49,21 @@ namespace BLL.Game
 
         #region Fields
         private readonly Random _rng;
-        private readonly RunData _gameData;
         private readonly List<List<GameEvent>> _allEvents;
         #endregion
 
         #region Constructors
-        public EventGenerator(RunData gameData)
+        public EventGenerator(int seed)
         {
-            _gameData = gameData;
-            _rng = new(gameData.Seed);
+            _rng = new(seed);
             _allEvents = GenerateAllEvents();
         }
         #endregion
 
         #region Public Methods
         // Get events of current room
-        public List<GameEvent> GetEvents()
-            => _allEvents.ElementAt(Math.Max(0, _gameData.Progress.Room - 1 + (_gameData.Progress.Floor - 1) * MaxRoom));
+        public List<GameEvent> GetRoomEvents(RunProgress progress)
+            => _allEvents.ElementAt(Math.Max(0, progress.Room - 1 + (progress.Floor - 1) * MaxRoom));
 
         public void RerollShop(RunProgress progress, ShopEvent shop)
         {

@@ -422,7 +422,7 @@ namespace ConsolePL
             {
                 gameHandler.SaveAs("AutoSave");
 
-                List<GameEvent> routes = gameHandler.Events.GetEvents();
+                List<GameEvent> routes = gameHandler.GetEvents();
 
                 GenericGameScreen(gameHandler.Progress, gameHandler.Player);
                 PrintMainZone(routes, "Routes:");

@@ -342,7 +342,16 @@ namespace BLL.Server
                 return false;
             }
 
-            FromJson<GameSave>(result)?.SaveAs("CloudSave");
+            var cloudSave = FromJson<GameSave>(result);
+            if (cloudSave == null)
+            {
+                error = "Can't parse server response";
+                return false;
+            }
+
+            cloudSave.Name = "CloudSave";
+            GameSave.SaveLocal(cloudSave);
+            
             error = "";
             return true;
         }

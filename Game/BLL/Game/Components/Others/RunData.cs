@@ -28,7 +28,7 @@ namespace BLL.Game.Components.Others
             Seed = seed.HasValue ? (int) seed & int.MaxValue : GenerateSeed();
         }
 
-        public void Timer(bool start)
+        public void TimerControl(bool start)
         {
             if (start)
                 _stopwatch.Start();

@@ -77,7 +77,7 @@ namespace BLL.Game.Components.Entity
             SkillInventory.Sort(new SkillComparer());
         }
 
-        public void AddItem<T>(T item) where T : Item.GameItem
+        public void AddItem<T>(T item) where T : GameItem
         {
             switch (item)
             {
@@ -149,7 +149,7 @@ namespace BLL.Game.Components.Entity
         public void Regenerate()
             => Regenerate(100, 100);
 
-        public void TradeItem(Item.GameItem item, bool buying)
+        public void TradeItem(GameItem item, bool buying)
         {
             if (buying)
             {

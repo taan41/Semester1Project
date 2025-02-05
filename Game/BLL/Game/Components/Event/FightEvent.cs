@@ -6,11 +6,11 @@ namespace BLL.Game.Components.Event
     public class FightEvent : GameEvent
     {
         public List<Monster> Monsters { get; set; } = [];
-        public List<Item.GameItem> Rewards { get; set; } = [];
+        public List<GameItem> Rewards { get; set; } = [];
 
         public FightEvent() : base(Type.Fight) {}
 
-        public FightEvent(List<Monster> monsters, List<Item.GameItem> rewards) : base(Type.Fight)
+        public FightEvent(List<Monster> monsters, List<GameItem> rewards) : base(Type.Fight)
         {
             Monsters.AddRange(monsters);
             Rewards.AddRange(rewards);
