@@ -1,4 +1,4 @@
-namespace DAL.Persistence.GameComponents.Entity
+namespace DAL.GameComponents.Entity
 {
     [Serializable]
     public abstract class GameEntity : GameComponent

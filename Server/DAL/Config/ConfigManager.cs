@@ -1,9 +1,6 @@
 using DAL.DBHandlers;
-using DAL.Persistence.ConfigClasses;
 
-using static DAL.Utitlities;
-
-namespace DAL
+namespace DAL.Config
 {
     [Serializable]
     public class ConfigManager

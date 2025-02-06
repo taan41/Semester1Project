@@ -1,6 +1,6 @@
 using System.Data;
-using DAL.Persistence;
 using MySql.Data.MySqlClient;
+using DAL.DataModels;
 
 namespace DAL.DBHandlers
 {

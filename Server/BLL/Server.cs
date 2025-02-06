@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
-using DAL;
+using DAL.Config;
 using DAL.DBHandlers;
 
 namespace BLL

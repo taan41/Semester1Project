@@ -1,6 +1,6 @@
 using System.Net.Sockets;
 using System.Security.Cryptography;
-using DAL.Persistence.DataModels;
+using DAL.DataModels;
 
 using static BLL.GenericUtilities;
 

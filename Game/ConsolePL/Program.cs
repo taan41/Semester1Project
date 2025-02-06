@@ -15,6 +15,7 @@ namespace ConsolePL
     {
         private static ServerHandler ServerHandler => ServerHandler.Instance;
 
+        #region Main
         public static void Main()
         {
             Console.CursorVisible = false;
@@ -45,7 +46,9 @@ namespace ConsolePL
                 }
             }
         }
-        
+        #endregion
+
+        #region Menu Screens
         static bool ModeSelection()
         {
             List<string> options = ["GUIDE", "PLAY ONLINE", "PLAY OFFLINE", "EXIT"];
@@ -370,7 +373,9 @@ namespace ConsolePL
                 }
             }
         }
+        #endregion
 
+        #region Game Screens
         static void StartNewRun(string? seed = null)
         {
             StopTitleAnim();
@@ -835,5 +840,6 @@ namespace ConsolePL
                     return;
             }
         }
+        #endregion
     }
 }

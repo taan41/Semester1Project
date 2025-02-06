@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
-using DAL;
+using DAL.Config;
 using DAL.DBHandlers;
-using DAL.Persistence.DataModels;
+using DAL.DataModels;
 
 using static BLL.DataPacket;
 using static BLL.GenericUtilities;

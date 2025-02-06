@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace DAL.Persistence.GameComponents.Item
+namespace DAL.GameComponents.Item
 {
     [Serializable]
     public class Gold : GameItem

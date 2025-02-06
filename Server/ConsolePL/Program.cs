@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using BLL;
-using DAL;
+using DAL.Config;
 using static System.Console;
 
 namespace ConsolePL

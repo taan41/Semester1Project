@@ -12,6 +12,7 @@ namespace ConsolePL
 
         public static object ConsoleLock { get; } = new();
 
+        #region Constants
         public static class UIConstants
         {
             public const int
@@ -48,7 +49,9 @@ namespace ConsolePL
                 PauseElapsedTimeTop = 13,
                 BottomBorderTop = 22;
         }
+        #endregion
 
+        #region Methods
         public static void WriteCenter(string str)
         {
             CursorLeft = (Math.Min(UIWidth, WindowWidth) - str.Length) / 2;
@@ -174,5 +177,6 @@ namespace ConsolePL
 
             return result;
         }
+        #endregion
     }
 }

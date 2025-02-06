@@ -1,7 +1,6 @@
-using System.Text.Json;
-using DAL.Persistence.GameComponents.Item;
+using DAL.GameComponents.Item;
 
-namespace DAL.Persistence.GameComponents.Entity
+namespace DAL.GameComponents.Entity
 {
     [Serializable]
     public class Player : GameEntity

@@ -1,7 +1,7 @@
-using DAL;
+using DAL.Config;
 using DAL.DBHandlers;
-using DAL.Persistence.GameComponents.Entity;
-using DAL.Persistence.GameComponents.Item;
+using DAL.GameComponents.Entity;
+using DAL.GameComponents.Item;
 
 namespace BLL
 {

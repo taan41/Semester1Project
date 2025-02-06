@@ -1,6 +1,6 @@
 using DAL.DBHandlers;
 
-namespace DAL.Persistence.ConfigClasses
+namespace DAL.Config
 {
     [Serializable]
     public class DatabaseConfig

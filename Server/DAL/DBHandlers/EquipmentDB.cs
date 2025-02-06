@@ -1,5 +1,5 @@
 using System.Data;
-using DAL.Persistence.GameComponents.Item;
+using DAL.GameComponents.Item;
 using MySql.Data.MySqlClient;
 
 namespace DAL.DBHandlers

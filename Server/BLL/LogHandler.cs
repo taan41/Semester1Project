@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using DAL.DBHandlers;
-using DAL.Persistence;
+using DAL.DataModels;
 
 namespace BLL
 {

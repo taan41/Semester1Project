@@ -1,4 +1,4 @@
-namespace DAL.Persistence
+namespace DAL.DataModels
 {
     public class Log(DateTime? _time, string _source, string _content)
     {

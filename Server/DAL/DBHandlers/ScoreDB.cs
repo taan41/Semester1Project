@@ -1,4 +1,4 @@
-using DAL.Persistence.DataModels;
+using DAL.DataModels;
 using MySql.Data.MySqlClient;
 
 namespace DAL.DBHandlers

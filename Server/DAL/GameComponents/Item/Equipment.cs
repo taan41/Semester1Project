@@ -1,4 +1,4 @@
-namespace DAL.Persistence.GameComponents.Item
+namespace DAL.GameComponents.Item
 {
 
     [Serializable]

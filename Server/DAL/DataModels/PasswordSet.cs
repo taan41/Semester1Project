@@ -1,4 +1,4 @@
-namespace DAL.Persistence.DataModels
+namespace DAL.DataModels
 {
     [Serializable]
     public class PasswordSet(byte[] pwdHash, byte[] pwdSalt)

@@ -8,24 +8,24 @@ namespace ConsolePL
 {
     public static class OptionPicker
     {
-        private enum Input
+        private enum InputKey
         {
             None, Up, Down, Confirm, Cancel
         }
 
-        private static Input GetInput(ConsoleKey key)
+        private static InputKey GetInputKey(ConsoleKey key)
         {
             return key switch
             {
                 ConsoleKey.UpArrow or ConsoleKey.W
-                    => Input.Up,
+                    => InputKey.Up,
                 ConsoleKey.DownArrow or ConsoleKey.S
-                    => Input.Down,
+                    => InputKey.Down,
                 ConsoleKey.Enter or ConsoleKey.RightArrow or ConsoleKey.Spacebar or ConsoleKey.D
-                    => Input.Confirm,
+                    => InputKey.Confirm,
                 ConsoleKey.Escape or ConsoleKey.LeftArrow or ConsoleKey.A
-                    => Input.Cancel,
-                _ => Input.None,
+                    => InputKey.Cancel,
+                _ => InputKey.None,
             };
         }
 
@@ -35,7 +35,7 @@ namespace ConsolePL
             {
                 while (true)
                 {
-                    if (GetInput(ReadKey(true).Key) == Input.Cancel)
+                    if (GetInputKey(ReadKey(true).Key) == InputKey.Cancel)
                         return null;
                 }
             }
@@ -88,9 +88,9 @@ namespace ConsolePL
                     refreshScreen = false;
                 }
 
-                switch (GetInput(ReadKey(true).Key))
+                switch (GetInputKey(ReadKey(true).Key))
                 {
-                    case Input.Up:
+                    case InputKey.Up:
                         if (index > 0)
                         {
                             index--;
@@ -104,7 +104,7 @@ namespace ConsolePL
                         }
                         continue;
 
-                    case Input.Down:
+                    case InputKey.Down:
                         if (index < options.Count - 1)
                         {
                             index++;
@@ -118,13 +118,13 @@ namespace ConsolePL
                         }
                         continue;
 
-                    case Input.Confirm:
+                    case InputKey.Confirm:
                         SetCursorPosition(startCursorLeft, indexCursorTop);
                         if (leavePointer) Write(" ►");
                         printFunc(options[index]);
                         return index;
 
-                    case Input.Cancel:
+                    case InputKey.Cancel:
                         SetCursorPosition(startCursorLeft, indexCursorTop);
                         printFunc(options[index]);
                         return null;

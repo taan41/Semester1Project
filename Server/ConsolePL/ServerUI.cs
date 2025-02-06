@@ -1,9 +1,8 @@
 using System.Reflection;
 using BLL;
-using DAL;
 using DAL.DBHandlers;
-using DAL.Persistence.ConfigClasses;
-using DAL.Persistence.DataModels;
+using DAL.Config;
+using DAL.DataModels;
 
 using static System.Console;
 using static ConsoleUtilities;

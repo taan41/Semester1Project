@@ -1,8 +1,7 @@
 using BLL;
-using DAL;
-using DAL.Persistence.ConfigClasses;
-using DAL.Persistence.GameComponents.Entity;
-using DAL.Persistence.GameComponents.Item;
+using DAL.Config;
+using DAL.GameComponents.Entity;
+using DAL.GameComponents.Item;
 
 using static System.Console;
 using static ConsoleUtilities;

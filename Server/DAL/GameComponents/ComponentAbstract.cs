@@ -1,6 +1,6 @@
-using DAL.Persistence.ConfigClasses;
+using DAL.Config;
 
-namespace DAL.Persistence.GameComponents
+namespace DAL.GameComponents
 {
     public abstract class GameComponent
     {
