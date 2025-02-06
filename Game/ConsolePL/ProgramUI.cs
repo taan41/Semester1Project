@@ -12,7 +12,7 @@ using static ConsolePL.ComponentRenderer;
 
 namespace ConsolePL
 {
-    public static class GameScreens
+    public static class ProgramUI
     {
         #region Constants
         public const string GameTitle = "CONSOLE CONQUER";

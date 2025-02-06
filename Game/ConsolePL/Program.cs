@@ -6,7 +6,7 @@ using BLL.Game.Components.Event;
 using BLL.Game.Components.Entity;
 using BLL.Server;
 
-using static ConsolePL.GameScreens;
+using static ConsolePL.ProgramUI;
 using static ConsolePL.ConsoleUtilities;
 
 namespace ConsolePL
