@@ -1124,7 +1124,7 @@ namespace ConsolePL
         }
         #endregion
 
-        #region Game Screens
+        #region Game UI
         public static string? EnterSeed()
         {
             int tempTop;

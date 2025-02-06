@@ -51,6 +51,7 @@ class AssetManagerUI
         }
     }
 
+    #region Equipments
     private static async Task ManageEquip()
     {
         while (true)
@@ -416,7 +417,9 @@ class AssetManagerUI
             Price = price.Value
         };
     }
+    #endregion
 
+    #region Skills
     private static async Task ManageSkill()
     {
         while (true)
@@ -790,7 +793,9 @@ class AssetManagerUI
             Price = price.Value
         };
     }
+    #endregion
 
+    #region Monsters
     private static async Task ManageMonster()
     {
         while (true)
@@ -1081,4 +1086,5 @@ class AssetManagerUI
         }
         return null;
     }
+    #endregion
 }
