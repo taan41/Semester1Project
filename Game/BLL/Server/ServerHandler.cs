@@ -17,7 +17,7 @@ namespace BLL.Server
     public class ServerHandler
     {
         #region Properties
-        private ServerConfig ServerConfig => ConfigManager.Instance.ServerConfig;
+        private static ServerConfig ServerConfig => ConfigManager.Instance.ServerConfig;
 
         private TcpClient? _client;
         private NetworkStream? _stream;
@@ -289,7 +289,7 @@ namespace BLL.Server
         public bool ValidatePassword(string oldPasswod)
             => mainUser != null && mainUser.PwdSet != null && Security.VerifyPassword(oldPasswod, mainUser.PwdSet);
 
-        private bool UpdateMainUser(User tempUser, out string error)
+        public bool UpdateMainUser(string? nickname, string? email, string? password, out string error)
         {
             if (!IsLoggedIn)
             {
@@ -297,11 +297,14 @@ namespace BLL.Server
                 return false;
             }
 
-            tempUser.UserID = mainUser!.UserID;
-            tempUser.Username = mainUser.Username;
-            tempUser.Nickname ??= mainUser!.Nickname;
-            tempUser.Email ??= mainUser!.Email;
-            tempUser.PwdSet ??= mainUser!.PwdSet;
+            User tempUser = new()
+            {
+                UserID = mainUser!.UserID,
+                Username = mainUser.Username,
+                Nickname = nickname ?? mainUser.Nickname,
+                Email = email ?? mainUser.Email,
+                PwdSet = password != null ? new(password) : mainUser.PwdSet
+            };
 
             if (!PacketHandler(CreateUserPacket(UserRequest.UserUpdate, ToJson(tempUser)), out error))
                 return false;
@@ -309,15 +312,6 @@ namespace BLL.Server
             mainUser = tempUser;
             return true;
         }
-
-        public bool ChangePassword(string newPassword, out string error)
-            => UpdateMainUser(new User() { PwdSet = new(newPassword) }, out error);
-
-        public bool ChangeNickname(string newNickname, out string error)
-            => UpdateMainUser(new User() { Nickname = newNickname }, out error);
-
-        public bool ChangeEmail(string newEmail, out string error)
-            => UpdateMainUser(new User() { Email = newEmail }, out error);
 
         public bool DeleteAccount(out string error)
         {

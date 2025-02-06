@@ -872,7 +872,7 @@ namespace ConsolePL
                     }
                 }
 
-                if (!ServerHandler.ChangePassword(newPassword, out string error))
+                if (!ServerHandler.UpdateMainUser(null, null, newPassword, out string error))
                 {
                     Popup(error);
                     return;
@@ -922,7 +922,7 @@ namespace ConsolePL
                         continue;
                     }
 
-                    if (!ServerHandler.ChangeNickname(nickname, out string error))
+                    if (!ServerHandler.UpdateMainUser(nickname, null, null, out string error))
                     {
                         Popup(error);
                         nickname = null;
@@ -974,7 +974,7 @@ namespace ConsolePL
                         continue;
                     }
 
-                    if (!ServerHandler.ChangeEmail(email, out string error))
+                    if (!ServerHandler.UpdateMainUser(null, email, null, out string error))
                     {
                         Popup(error);
                         email = null;
