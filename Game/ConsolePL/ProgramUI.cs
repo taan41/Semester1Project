@@ -73,7 +73,7 @@ namespace ConsolePL
         {
             string[] msgLines = msg.Split('\n');
 
-            StopTitleAnim();
+            bool wasRunningTitleAnim = StopTitleAnim();
             CursorTop = CursorPos.PopupTop;
             WriteCenter($"╔{new string('═', UIConstants.PopupWidth)}╗");
             for (int i = 0; i < UIConstants.PopupHeight + msgLines.Length - 3; i++)
@@ -105,6 +105,9 @@ namespace ConsolePL
                 WriteCenter(line);
             ReadKey(true);
             Clear();
+
+            if (wasRunningTitleAnim)
+                StartTitleAnim();
         }
 
         public static void PausePopup(List<string> pauseOptions, TimeSpan? elapsedTime = null)
@@ -235,13 +238,14 @@ namespace ConsolePL
             _ = Task.Run(() => TitleAnimation(titleAnimTokenSource.Token));
         }
 
-        public static void StopTitleAnim()
+        public static bool StopTitleAnim()
         {
             if (titleAnimTokenSource == null)
-                return;
+                return false;
 
             titleAnimTokenSource.Cancel();
             titleAnimTokenSource = null;
+            return true;
         }
         #endregion
 
@@ -815,7 +819,7 @@ namespace ConsolePL
                         continue;
                     }
 
-                    if (!ServerHandler.ValidatePassword(oldPassword))
+                    if (!ServerHandler.VerifyPassword(oldPassword))
                     {
                         Popup("Incorrect password!");
                         oldPassword = null;
@@ -1024,7 +1028,7 @@ namespace ConsolePL
                         continue;
                     }
 
-                    if (!ServerHandler.ValidatePassword(password))
+                    if (!ServerHandler.VerifyPassword(password))
                     {
                         Popup("Incorrect password!");
                         password = null;

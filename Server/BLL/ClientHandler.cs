@@ -179,7 +179,10 @@ namespace BLL
             if (result == null || error != "")
                 return LogErrorPacket(this, clientPacket, error, logError);
 
-            return new(clientPacket, ToJson(result));
+            if (result is string str)
+                return new(clientPacket, str);
+            else
+                return new(clientPacket, ToJson(result));
         }
 
         private async Task<DataPacket> PersonalDBResult<T>(DataPacket clientPacket, Task<(T?, string)> dbTask, bool logError = true)

@@ -35,7 +35,7 @@ namespace BLL.Server
         public string Email => mainUser?.Email ?? "Guest Email";
         #endregion
 
-        private ServerHandler() {}
+        public ServerHandler() {}
 
         #region PacketHandler
         private bool PacketHandler(DataPacket packet, out string result, bool getResponse = true)
@@ -229,15 +229,12 @@ namespace BLL.Server
 
         public bool ResetPassword(string username, string email, string password, out string error)
         {
-            if (!PacketHandler(CreateUserPacket(UserRequest.UserGet, username), out string result))
-            {
-                error = result;
+            var requestedUser = GetUser(username, out error);
+
+            if (requestedUser == null)
                 return false;
-            }
 
-            var requestedUser = FromJson<User>(result);
-
-            if (requestedUser == null || requestedUser.Email != email)
+            if (requestedUser.Email != email)
             {
                 error = "Invalid email";
                 return false;
@@ -249,16 +246,14 @@ namespace BLL.Server
 
         public bool Login(string username, string password, out string error)
         {
-            if (!PacketHandler(CreateUserPacket(UserRequest.UserGet, username), out string result))
-            {
-                error = result;
-                return false;
-            }
+            var requestedUser = GetUser(username, out error);
 
-            var requestedUser = FromJson<User>(result);
+            if (requestedUser == null)
+                return false;
+
             var pwdSet = requestedUser?.PwdSet;
 
-            if (requestedUser == null || pwdSet == null || !Security.VerifyPassword(password, pwdSet))
+            if (pwdSet == null || !Security.VerifyPassword(password, pwdSet))
             {
                 error = "Invalid password";
                 return false;
@@ -286,8 +281,27 @@ namespace BLL.Server
             return true;
         }
 
-        public bool ValidatePassword(string oldPasswod)
-            => mainUser != null && mainUser.PwdSet != null && Security.VerifyPassword(oldPasswod, mainUser.PwdSet);
+        public User? GetUser(string username, out string error)
+        {
+            if (!PacketHandler(CreateUserPacket(UserRequest.UserGet, username), out string result))
+            {
+                error = result;
+                return null;
+            }
+
+            var requestedUser = FromJson<User>(result);
+            if (requestedUser == null)
+            {
+                error = "Can't parse server response";
+                return null;
+            }
+
+            error = "";
+            return requestedUser;
+        }
+
+        public bool VerifyPassword(string currentPassword)
+            => mainUser != null && mainUser.PwdSet != null && Security.VerifyPassword(currentPassword, mainUser.PwdSet);
 
         public bool UpdateMainUser(string? nickname, string? email, string? password, out string error)
         {

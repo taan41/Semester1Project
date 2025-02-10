@@ -7,7 +7,17 @@ namespace BLL.Utilities
     {
         // JSON Serialization
         public static string ToJson<T>(T obj) => JsonSerializer.Serialize(obj);
-        public static T? FromJson<T>(string json) => JsonSerializer.Deserialize<T>(json);
+        public static T? FromJson<T>(string json)
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<T>(json);
+            }
+            catch
+            {
+                return default;
+            }
+        }
 
         // String <-> Bytes
         public static string BytesToString(byte[] data) => Encoding.UTF8.GetString(data);
