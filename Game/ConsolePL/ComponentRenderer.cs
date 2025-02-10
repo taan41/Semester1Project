@@ -14,16 +14,32 @@ namespace ConsolePL
         private static GameConfig GameConfig => ConfigManager.Instance.GameConfig;
 
         public static void Render<T>(T component) where T : GameComponent
-            => RenderComponent(component switch
-                {
-                    Player player => player,
-                    Monster monster => monster,
-                    Equipment equip => equip,
-                    Skill skill => skill,
-                    Gold gold => gold,
-                    GameSave save => save,
-                    _ => component
-                });
+        {
+            switch (component)
+            {
+                case GameSave save:
+                    RenderComponent(save);
+                    break;
+                case Player player:
+                    RenderComponent(player);
+                    break;
+                case Monster monster:
+                    RenderComponent(monster);
+                    break;
+                case Equipment equip:
+                    RenderComponent(equip);
+                    break;
+                case Skill skill:
+                    RenderComponent(skill);
+                    break;
+                case Gold gold:
+                    RenderComponent(gold);
+                    break;
+                default:
+                    RenderComponent(component);
+                    break;
+            }
+        }
 
         public static void RenderComponent(GameComponent component)
         {
