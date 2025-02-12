@@ -33,8 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\bll\BLL.csproj" />
-    <ProjectReference Include="..\dal\DAL.csproj" />
+    <ProjectReference Include="..\game\bll\BLL.csproj" />
+    <ProjectReference Include="..\game\dal\DAL.csproj" />
   </ItemGroup>
 
 </Project>

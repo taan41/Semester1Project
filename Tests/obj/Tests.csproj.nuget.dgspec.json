@@ -1,0 +1,207 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\tests\\Tests.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\bll\\BLL.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\bll\\BLL.csproj",
+        "projectName": "BLL",
+        "projectPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\bll\\BLL.csproj",
+        "packagesPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\bll\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\newsk.DESKTOP-JVF8HRC\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\dal\\DAL.csproj": {
+                "projectPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\dal\\DAL.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.402/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\dal\\DAL.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\dal\\DAL.csproj",
+        "projectName": "DAL",
+        "projectPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\dal\\DAL.csproj",
+        "packagesPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\dal\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\newsk.DESKTOP-JVF8HRC\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.402/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\tests\\Tests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\tests\\Tests.csproj",
+        "projectName": "Tests",
+        "projectPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\tests\\Tests.csproj",
+        "packagesPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\tests\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\newsk.DESKTOP-JVF8HRC\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\bll\\BLL.csproj": {
+                "projectPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\bll\\BLL.csproj"
+              },
+              "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\dal\\DAL.csproj": {
+                "projectPath": "C:\\Users\\newsk.DESKTOP-JVF8HRC\\Desktop\\VTCA\\Semester1Project\\game\\dal\\DAL.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.12.0, )"
+            },
+            "xunit.runner.visualstudio": {
+              "target": "Package",
+              "version": "[3.0.2, )"
+            },
+            "xunit.v3": {
+              "target": "Package",
+              "version": "[1.1.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.402/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
