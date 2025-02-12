@@ -1,6 +1,3 @@
-/test
-/testServer
-Project.sln
 /Game/BLL/bin
 /Game/BLL/obj
 /Game/ConsolePL/bin
@@ -16,5 +13,5 @@ Project.sln
 /Server/ConsolePL/obj
 /Server/DAL/bin
 /Server/DAL/obj
-/Game/Tests/bin
-/Game/Tests/obj
+/Tests/bin
+/Tests/obj
