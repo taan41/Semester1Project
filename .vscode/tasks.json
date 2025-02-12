@@ -1,0 +1,46 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+			"label": "dotnet build game",
+			"type": "shell",
+			"group": "build",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/Game/ConsolePL"
+            ],
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": true,
+                "close": false
+			},
+            "problemMatcher": "$msCompile"
+
+        },
+		{
+			"label": "dotnet build server",
+			"type": "shell",
+			"group": "build",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/Server/ConsolePL"
+            ],
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": false,
+				"clear": true,
+                "close": false
+			},
+            "problemMatcher": "$msCompile"
+		},
+    ]
+}

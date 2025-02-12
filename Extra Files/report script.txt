@@ -1,0 +1,104 @@
+I. Project introduction:
+    This project is a Role-Playing Game (RPG) that combines elements of turn-based strategy and roguelike genres. The game is designed around Object-Oriented Analysis and Design (OOAD) principles, with online functionality for saving game progress and comparing high scores, alongside a database system for managing player data and procedural content generation.
+
+    1. Proposed system:
+        - A client application for Players to engage with the game and connect to the server for online functionalities, including game progress saving and high score comparison.
+        - A server application with a user interface (UI) for Game Administrators to manage player accounts, modify game assets and balance game difficulty. The server also connects to the database for data storage and retrieval.
+
+    2. The scope of the project:
+        This project aims to provide players with a unique and enjoyable RPG experience while offering game administrators tools to effectively manage game dynamics.
+
+    3. System name:
+        Console Conquer
+
+    4. Deployment Environments:
+        Windows, Mac, Linux
+
+    5. Development Tools:
+        - Visual Studio Code
+        - Draw.io
+        - MySQL Workbench 8.0 CE
+
+    6. System Requirements
+        a. Functional Requirements:
+        - Gameplay Mechanics
+        - Game Progress Saving
+        - Leaderboards
+        - Player Account Management
+        - Game Asset Management
+        b. External Interface Requirements:
+        - User Interface (UI)
+        - Database Interface
+        - Network Interface
+        c. System Features:
+        - Procedural Game Generation
+        - Real-time Saving and Loading
+        - Leaderboards
+        - Admin Controls
+        d. Nonfunctional Requirements
+        - Performance
+        - Scalability
+        - Security
+        - Usability
+
+
+II. Analyze System Requirements
+a. Functional Requirements:
+    - Gameplay Mechanics:
+        + Implement turn-based combat.
+        + Character progression through item acquisition.
+        + Dungeon exploration with procedurally generated floors.
+    - Game Progress Saving:
+        + Ability to save and load game states.
+        + Persistent player data across sessions.
+    - Leaderboards:
+        + Track and display player rankings.
+        + Update leaderboards in read-time.
+    - Player Account Management:
+        + User registration and login.
+        + Profile management.
+    - Game Asset Management:
+        + Manage game assets like equipments, items and mosters.
+        + Admin tools for modifying assets and game configurations.
+
+b. External Interface Requirements:
+    - User Interface (UI):
+        + Intuitive and user-friendly interface for players.
+        + Admin interface for managing server.
+    - Database Interface:
+        + Store and retrieve player data, game states, and leaderboards.
+        + Ensure data intergrity and security.
+    - Network Interface:
+        + Support for online features like updating game assets, uploading game saves and leaderboards.
+        + Secure communication between client and server.
+
+c. System Features:
+    - Procedural Game Generation:
+        + Generate dungeon floors and encounters dynamically.
+        + Ensure variety and replayability.
+    - Real-time Saving and Loading:
+        + Save game progress in real-time to prevent data loss.
+        + Quick loading of saved game states.
+    - Leaderboards:
+        + Display top players and their scores.
+        + Update in real-time after each player's win.
+    - Admin Controls:
+        + Tools for managing game content and configurations.
+        + Monitor and maintain the game system.
+
+d. Nonfunctional Requirements:
+    - Performance:
+        + Ensure smooth gameplay with minimal lag.
+        + Optimize loading times and resource usage.
+    - Scalability:
+        + Support a growing number of players and game data.
+        + Efficiently handle increased load.
+    - Security:
+        + Protect player data.
+        + Secure authentication and data transmission.
+    - Usability:
+        + Provide an intuitive and accessible interface.
+        + Ensure ease of use for both players and admins.
+    - Reliability:
+        + Ensure the system is robust and error-free.
+        + Minimize downtime and quickly recover from failures.
