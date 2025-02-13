@@ -20,17 +20,18 @@ namespace ConsolePL
         {
             Console.CursorVisible = false;
             Console.Clear();
-            Console.SetWindowSize(UIConstants.UIWidth, UIConstants.UIHeight);
+            Console.SetWindowSize(UIConstants.UIWidth + 1, UIConstants.UIHeight + 1);
 
             do
             {
                 ConsoleSizeNotice();
             }
-            while (Console.WindowHeight < UIConstants.UIHeight && Console.WindowWidth < UIConstants.UIWidth);
+            while (Console.WindowHeight < UIConstants.UIHeight + 1 && Console.WindowWidth < UIConstants.UIWidth + 1);
 
             while (true)
             {
                 Console.Clear();
+                Console.CursorVisible = false;
 
                 try
                 {
@@ -388,6 +389,9 @@ namespace ConsolePL
 
             GameHandler gameHandler = new(seed);
 
+            if (ServerHandler.IsLoggedIn)
+                gameHandler.Player.Name = ServerHandler.Nickname;
+
             List<Equipment> startEquips =
             [
                 AssetLoader.GetEquip(1),
@@ -426,6 +430,9 @@ namespace ConsolePL
         {
             List<string> actions = ["Pick A Route", "Inventory"];
             List<string> invOptions = ["Change Equipment", "Change Skill"];
+
+            if (ServerHandler.IsLoggedIn)
+                gameHandler.Player.Name = ServerHandler.Nickname;
 
             gameHandler.Timer(true);
 
@@ -838,7 +845,7 @@ namespace ConsolePL
 
             List<string> winOptions = ["RETURN TO TITLE"];
 
-            VictoryScreen(gameHandler.GetElapsedTime(), winOptions);
+            VictoryScreen(gameHandler.GetElapsedTime(), winOptions, ServerHandler.IsLoggedIn);
 
             switch (OptionPicker.String(winOptions, CursorPos.EndScreenMenuTop + 3, CursorPos.EndScreenMenuLeft))
             {
