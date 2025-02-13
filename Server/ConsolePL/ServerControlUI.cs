@@ -6,11 +6,13 @@ using DAL.DataModels;
 
 using static System.Console;
 using static ConsolePL.ConsoleUtilities;
+using System.Net;
 
 namespace ConsolePL;
 
 public static class ServerControlUI
 {
+    private static ConfigManager Config => ConfigManager.Instance;
     private static Server Server => Server.Instance;
 
     public static string Header { get; } = "Server Control Center";
@@ -71,11 +73,10 @@ public static class ServerControlUI
         }
     }
     
-    public static void MainMenu(string? serverIP, int port, bool serverOnline)
+    public static void MainMenu(int port, bool serverOnline)
     {
         Clear();
         DrawHeader(Header);
-        WriteLine($" Server's IP: {serverIP ?? "Any"}");
         WriteLine($" Server's port: {port}");
         Write(" Server's status: ");
         ForegroundColor = serverOnline ? ConsoleColor.Green : ConsoleColor.Red;
@@ -86,9 +87,8 @@ public static class ServerControlUI
         if (!serverOnline)
         {
             WriteLine(" 1. Start server");
-            WriteLine(" 2. Change IP");
-            WriteLine(" 3. Change port");
-            WriteLine(" 4. View activity log");
+            WriteLine(" 2. Manage server's address");
+            WriteLine(" 3. View activity log");
             WriteLine(" 0. Exit program");
         }
         else
@@ -104,6 +104,169 @@ public static class ServerControlUI
         Write(" Enter choice: ");
     }
 
+    public static async Task<int> ManageServerAddresses(int curPort)
+    {
+        bool viewingIPs = true;
+
+        while (true)
+        {
+            Clear();
+            DrawHeader(Header);
+            WriteLine(" -- Managing server's valid addresses");
+            WriteLine(" 'ESC' or 0 to return");
+            DrawLine('-');
+
+            if (viewingIPs)
+            {
+                WriteLine(" Valid IPs:");
+                for (int i = 0; i < Config.ServerConfig.ServerIPs.Count; i++)
+                    WriteLine($" - {Config.ServerConfig.ServerIPs[i]}");
+            }
+            else
+            {
+                WriteLine(" Valid ports:");
+                for (int i = 0; i < Config.ServerConfig.ServerPorts.Count; i++)
+                    WriteLine($" - {Config.ServerConfig.ServerPorts[i]}");
+            }
+
+            DrawLine('-');
+            WriteLine($" 1. Toggle to {(viewingIPs ? "ports" : "IPs")}");
+            WriteLine(" 2. Add");
+            WriteLine(" 3. Remove");
+            if (!viewingIPs)
+                WriteLine($" 4. Change server's current port: {curPort}");
+            DrawLine('-');
+
+            Write(" Enter choice: ");
+
+            switch (ReadInput())
+            {
+                case "1":
+                    viewingIPs = !viewingIPs;
+                    continue;
+
+                case "2":
+                    if (viewingIPs)
+                    {
+                        Write(" Enter new IP: ");
+                        string? newIP = ReadInput();
+                        if (newIP == null)
+                            continue;
+
+                        if (!Helper.CheckIPv4(newIP))
+                        {
+                            WriteLine(" (!) Invalid IP address");
+                            ReadKey(true);
+                            continue;
+                        }
+
+                        if (Config.ServerConfig.ServerIPs.Contains(newIP))
+                        {
+                            WriteLine(" (!) IP already exists");
+                            ReadKey(true);
+                            continue;
+                        }
+
+                        Config.ServerConfig.ServerIPs.Add(newIP);
+                        await Config.ServerConfig.Save();
+                        continue;
+                    }
+                    else
+                    {
+                        Write(" Enter new port: ");
+                        string? newPort = ReadInput();
+                        if (newPort == null)
+                            continue;
+
+                        if (!Helper.CheckPort(newPort))
+                        {
+                            WriteLine(" (!) Invalid port");
+                            ReadKey(true);
+                            continue;
+                        }
+
+                        if (Config.ServerConfig.ServerPorts.Contains(Convert.ToInt32(newPort)))
+                        {
+                            WriteLine(" (!) Port already exists");
+                            ReadKey(true);
+                            continue;
+                        }
+
+                        Config.ServerConfig.ServerPorts.Add(Convert.ToInt32(newPort));
+                        await Config.ServerConfig.Save();
+                        continue;
+                    }
+
+                case "3":
+                    if (viewingIPs)
+                    {
+                        Write(" Enter IP to remove: ");
+                        string? remIP = ReadInput();
+                        if (remIP == null)
+                            continue;
+
+                        if (!Config.ServerConfig.ServerIPs.Remove(remIP))
+                        {
+                            WriteLine(" (!) IP not found");
+                            ReadKey(true);
+                            continue;
+                        }
+
+                        await Config.ServerConfig.Save();
+                        continue;
+                    }
+                    else
+                    {
+                        Write(" Enter port to remove: ");
+                        string? remPort = ReadInput();
+                        if (remPort == null)
+                            continue;
+
+                        if (!Config.ServerConfig.ServerPorts.Remove(Convert.ToInt32(remPort)))
+                        {
+                            WriteLine(" (!) Port not found");
+                            ReadKey(true);
+                            continue;
+                        }
+
+                        await Config.ServerConfig.Save();
+                        continue;
+                    }
+
+                case "4":
+                    if (viewingIPs)
+                        continue;
+                    
+                    Write(" Enter new port: ");
+                    string? port = ReadInput();
+                    if (port == null)
+                        continue;
+
+                    if (!Helper.CheckPort(port))
+                    {
+                        WriteLine(" (!) Invalid port");
+                        ReadKey(true);
+                        continue;
+                    }
+
+                    if (!Config.ServerConfig.ServerPorts.Contains(Convert.ToInt32(port)))
+                    {
+                        WriteLine(" (!) Port not in list of valid ports");
+                        ReadKey(true);
+                        continue;
+                    }
+
+                    curPort = Convert.ToInt32(port);
+                    continue;
+
+                case "0": case null:
+                    return curPort;
+
+                default: continue;
+            }
+        }
+    }
+
     public static void ViewConnectedClients(List<ClientHandler> clients)
     {
         int curPage = 0;
@@ -114,7 +277,7 @@ public static class ServerControlUI
             DrawHeader(Header);
             WriteLine($" -- Connected clients (Page {curPage + 1}/{(clients.Count - 1) / 10 + 1})");
             WriteLine(" 'Left/Right' to navigate pages");
-            WriteLine(" 'ESC' to return");
+            WriteLine(" 'ESC' or 0 to return");
             DrawLine('-');
 
             foreach(var client in clients.GetRange(curPage * 10, Math.Min(clients.Count - curPage * 10, 10)))
@@ -138,6 +301,8 @@ public static class ServerControlUI
                     break;
 
                 case ConsoleKey.Escape:
+                case ConsoleKey.D0:
+                case ConsoleKey.NumPad0:
                     return;
             }
         }
@@ -148,7 +313,7 @@ public static class ServerControlUI
         Clear();
         DrawHeader(Header);
         WriteLine(" -- Managing player accounts");
-        WriteLine(" 'ESC' to return");
+        WriteLine(" 'ESC' or 0 to return");
         DrawLine('-');
 
         WriteLine(" 1. View all accounts");
@@ -175,7 +340,7 @@ public static class ServerControlUI
             DrawHeader(Header);
             WriteLine($" -- Player accounts (Page {curPage + 1}/{(accounts.Count - 1) / 10 + 1})");
             WriteLine(" 'Left/Right' to navigate pages");
-            WriteLine(" 'ESC' to return");
+            WriteLine(" 'ESC' or 0 to return");
             DrawLine('-');
 
             foreach (var account in accounts.GetRange(curPage * 10, Math.Min(accounts.Count - curPage * 10, 10)))
@@ -199,6 +364,8 @@ public static class ServerControlUI
                     break;
 
                 case ConsoleKey.Escape:
+                case ConsoleKey.D0:
+                case ConsoleKey.NumPad0:
                     return;
             }
         }
@@ -296,7 +463,7 @@ public static class ServerControlUI
         Clear();
         DrawHeader(Header);
         WriteLine(" -- Modifying game data");
-        WriteLine(" 'ESC' to return");
+        WriteLine(" 'ESC' or 0 to return");
         DrawLine('-');
 
         WriteLine(" 1. Modify game assets");
@@ -447,7 +614,7 @@ public static class ServerControlUI
             DrawHeader(Header);
             WriteLine(" -- Viewing activity log");
             WriteLine(" 'DEL' to clear log");
-            WriteLine(" 'ESC' to return");
+            WriteLine(" 'ESC' or 0 to return");
             DrawLine('-');
             
             LogHandler.WriteAllLog();
@@ -460,6 +627,8 @@ public static class ServerControlUI
                 switch(key)
                 {
                     case ConsoleKey.Escape:
+                    case ConsoleKey.D0:
+                    case ConsoleKey.NumPad0:
                         LogHandler.ToggleLogView(false);
                         return;
 
@@ -469,6 +638,40 @@ public static class ServerControlUI
                         break;
                 }
             }
+        }
+    }
+    
+    private static class Helper
+    {
+        public static bool CheckIPv4(string? ipAddress)
+        {
+            if (!IPAddress.TryParse(ipAddress, out _))
+                return false;
+
+            string[] parts = ipAddress.Split('.');
+            if (parts.Length != 4) return false;
+
+            foreach(string part in parts)
+            {
+                if (!int.TryParse(part, out int number))
+                    return false;
+
+                if (number < 0 || number > 255)
+                    return false;
+
+                if (part.Length > 1 && part[0] == '0')
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool CheckPort(string? port)
+        {
+            if (!int.TryParse(port, out int number))
+                return false;
+
+            return number >= 0 && number <= 65535;
         }
     }
 }

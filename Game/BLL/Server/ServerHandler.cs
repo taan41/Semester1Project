@@ -11,6 +11,7 @@ using BLL.Config;
 using static BLL.Server.DataPacket;
 using static BLL.Utilities.GenericUtilities;
 using static BLL.Utilities.NetworkUtilities;
+using System.Net;
 
 namespace BLL.Server
 {
@@ -112,24 +113,47 @@ namespace BLL.Server
         #region Server Requests
         public bool Connect(out string error)
         {
-            try
+            if (IsConnected)
             {
-                string ip = CheckIPv4(ServerConfig.ServerIP) ? ServerConfig.ServerIP : "127.0.0.1";
-                _client = new TcpClient(ip, ServerConfig.Port);
-                _stream = _client.GetStream();
-
-                Security.InitAESClient(_stream, out _aes);
-
-                error = "";
-                return true;
+                error = "Already connected";
+                return false;
             }
-            catch (Exception ex) when (ex is SocketException or IOException)
-            {
-                Close();
 
+            TcpClient newClient;
+
+            foreach (string ip in ServerConfig.ServerIPs)
+            {
+                foreach (int port in ServerConfig.ServerPorts)
+                {
+                    try
+                    {
+                        newClient = new TcpClient();
+                        newClient.Connect(IPEndPoint.Parse($"{ip}:{port}"));
+
+                        if (newClient.Connected)
+                        {
+                            _client = newClient;
+                            _stream = _client.GetStream();
+                            break;
+                        }
+                    }
+                    catch (Exception ex) when (ex is IOException or SocketException) {}
+                }
+
+                if (IsConnected)
+                    break;
+            }
+
+            if (!IsConnected)
+            {
                 error = "Can't connect to server";
                 return false;
             }
+
+            Security.InitAESClient(_stream!, out _aes);
+
+            error = "";
+            return true;
         }
 
         public void Close()
@@ -157,6 +181,18 @@ namespace BLL.Server
             if (gameConfig != null)
             {
                 FileManager.WriteJson(FileManager.FolderNames.Configs, FileManager.FileNames.GameConfig, gameConfig);
+            }
+
+            if (!PacketHandler(CreateDatabasePacket(DatabaseRequest.ConfigServer), out result))
+            {
+                error = result;
+                return false;
+            }
+
+            var serverConfig = FromJson<ServerConfig>(result);
+            if (serverConfig != null)
+            {
+                FileManager.WriteJson(FileManager.FolderNames.Configs, FileManager.FileNames.ServerConfig, serverConfig);
             }
 
             if (!PacketHandler(CreateDatabasePacket(DatabaseRequest.ConfigDatabase), out result))

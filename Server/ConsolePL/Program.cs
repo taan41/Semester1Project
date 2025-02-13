@@ -1,5 +1,4 @@
-﻿using System.Net;
-using BLL;
+﻿using BLL;
 using DAL.Config;
 
 using static System.Console;
@@ -8,7 +7,6 @@ namespace ConsolePL;
 
 public class Program
 {
-    private static ConfigManager Config => ConfigManager.Instance;
     private static Server Server => Server.Instance;
 
     public static async Task Main()
@@ -24,81 +22,80 @@ public class Program
                 break;
         }
 
-        string? serverIP = null;
-        int port = Config.ServerConfig.Port;
+        int port = ServerConfig.DefaultPort;
 
         while (true)
         {
-            if (!InitServer(ref serverIP, ref port))
-                return;
+            try
+            {
+                var (success, newPort) = await InitServer(port);
 
-            await Server.Start(serverIP, port);
+                if (!success)
+                    return;
 
-            await ServerMenu(serverIP, port);
+                port = newPort;
 
-            Server.Stop();
+                await ServerMenu(port);
+            }
+            catch (Exception e)
+            {
+                Server.Stop();
+                WriteLine($"Error: {e.Message}");
+                ReadKey(true);
+            }
         }
     }
 
-    static bool InitServer(ref string? serverIP, ref int port)
+    static async Task<(bool success, int port)> InitServer(int port)
     {
         while (true)
         {
-            ServerControlUI.MainMenu(serverIP, port, false);
+            ServerControlUI.MainMenu(port, Server.IsRunning);
 
             switch (ConsoleUtilities.ReadInput())
             {
                 case "1":
-                    return true;
+                    Server.Start(port);
+                    return (true, port);
 
                 case "2":
-                    Write(" Enter IP: ");
-                    serverIP = ReadLine();
-
-                    if (serverIP == null || !Helper.CheckIPv4(serverIP))
-                    {
-                        serverIP = null;
-                        WriteLine(" Invalid IP.");
-                        ReadKey(true);
-                    }
+                    port = await ServerControlUI.ManageServerAddresses(port);
                     continue;
 
                 case "3":
-                    Write(" Enter port: ");
-                    int oldPort = port;
-                    try
-                    {
-                        port = Convert.ToInt32(ReadLine());
-                        
-                        if (port < 0 || port > 65535)
-                            throw new FormatException();
-                    }
-                    catch (FormatException)
-                    {
-                        port = oldPort;
-                        WriteLine(" Invalid port");
-                        ReadKey(true);
-                    }
-                    continue;
-
-                case "4":
                     ServerControlUI.ViewLog();
                     continue;
 
                 case "0": case null:
-                    WriteLine(" Exiting program...");
-                    return false;
+                    Write(" Re-enter 'ESC' or '0' after 1s...");
+                    await Task.Delay(1000);
+
+                    while (KeyAvailable)
+                        ReadKey(true);
+
+                    CursorLeft = 0;
+                    Write(" Re-enter 'ESC' or '0' to exit program: ");
+
+                    var confirm = ConsoleUtilities.ReadInput();
+                    if (confirm == "0" || confirm == null)
+                    {
+                        Server.Stop();
+                        WriteLine(" Shutting down server...");
+                        return (false, port);
+                    }
+                    else
+                        continue;
 
                 default: continue;
             }
         }
     }
 
-    static async Task ServerMenu(string? serverIP, int port)
+    static async Task ServerMenu(int port)
     {
         while (true)
         {
-            ServerControlUI.MainMenu(serverIP, port, true);
+            ServerControlUI.MainMenu(port, Server.IsRunning);
 
             switch (ConsoleUtilities.ReadInput())
             {
@@ -119,6 +116,7 @@ public class Program
                     continue;
 
                 case "0": case null:
+                    Server.Stop();
                     WriteLine(" Shutting down server...");
                     ReadKey(true);
                     return;
@@ -177,32 +175,6 @@ public class Program
 
                 default: continue;
             }
-        }
-    }
-    
-    private static class Helper
-    {
-        public static bool CheckIPv4(string? ipAddress)
-        {
-            if (!IPAddress.TryParse(ipAddress, out _))
-                return false;
-
-            string[] parts = ipAddress.Split('.');
-            if (parts.Length != 4) return false;
-
-            foreach(string part in parts)
-            {
-                if (!int.TryParse(part, out int number))
-                    return false;
-
-                if (number < 0 || number > 255)
-                    return false;
-
-                if (part.Length > 1 && part[0] == '0')
-                    return false;
-            }
-
-            return true;
         }
     }
 }

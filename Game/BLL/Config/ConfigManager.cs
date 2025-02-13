@@ -10,7 +10,7 @@ namespace BLL.Config
         public ServerConfig ServerConfig { get; set; } = new();
         public DatabaseConfig DatabaseConfig { get; set; } = new();
 
-        private ConfigManager(bool loadConfig)
+        public ConfigManager(bool loadConfig)
         {
             if (loadConfig)
                 LoadConfig();

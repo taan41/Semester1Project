@@ -105,7 +105,7 @@ public class ServerTest(ITestOutputHelper output)
         var (success, error) = await server.InitializeDB("localhost", "root", "");
         Assert.True(success, error);
 
-        await server.Start(null, 12345);
+        server.Start(12345);
 
         TcpClient testClient = new();
         testClient.Connect("127.0.0.1", 12345);

@@ -90,7 +90,10 @@ public class ClientHandler
                 };
 
                 if (disconnect)
+                {
+                    LogHandler.AddLog("Disconnected", this);
                     break;
+                }
 
                 byte[] responseBytes = Security.EncryptString(ToJson(responsePacket), aes);
                 await _stream.WriteAsync(responseBytes, 0, responseBytes.Length, token);

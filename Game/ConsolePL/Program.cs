@@ -19,8 +19,14 @@ namespace ConsolePL
         public static void Main()
         {
             Console.CursorVisible = false;
+            Console.Clear();
             Console.SetWindowSize(UIConstants.UIWidth, UIConstants.UIHeight);
-            ConsoleSizeNotice();
+
+            do
+            {
+                ConsoleSizeNotice();
+            }
+            while (Console.WindowHeight < UIConstants.UIHeight && Console.WindowWidth < UIConstants.UIWidth);
 
             while (true)
             {
@@ -36,7 +42,7 @@ namespace ConsolePL
                     StopTitleAnim();
                     
                     Console.Clear();
-                    Console.WriteLine($"Game crashed: {ex}");
+                    Console.WriteLine($"Game crashed: {ex.Message}");
                     Console.ReadKey(true);
                 }
                 finally

@@ -16,6 +16,7 @@ public class Server
     public static Server Instance { get; } = new();
 
     public List<ClientHandler> Clients { get; private set; } = [];
+    public bool IsRunning => listener != null && listener.Server.IsBound;
 
     public async Task<(bool success, string error)> InitializeDB(string sqlIP, string uid, string password)
     {
@@ -30,15 +31,13 @@ public class Server
         return (true, "");
     }
 
-    public async Task Start(string? serverIP, int port)
+    public void Start(int port)
     {
-        listener = serverIP == null ? new(IPAddress.Any, port) : new(IPAddress.Parse(serverIP), port);
+        listener = new(IPAddress.Any, port);
         listener.Start();
 
-        Config.ServerConfig.Port = port;
-        await Config.ServerConfig.Save();
 
-        LogHandler.AddLog($"Server started on address: {serverIP ?? "Any"}, port: {port}");
+        LogHandler.AddLog($"Server started on port: {port}");
 
         serverStopToken = new();
         _ = Task.Run(() => AcceptClientsAsync(listener, serverStopToken.Token));
