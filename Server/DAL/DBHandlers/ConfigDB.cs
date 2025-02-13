@@ -6,6 +6,8 @@ namespace DAL.DBHandlers
 {
     public static class ConfigDB
     {
+        private static DBManager DBManager => DBManager.Instance;
+        
         public static async Task<(bool success, string error)> Add(string configName, string configValue)
         {
             string query = @"

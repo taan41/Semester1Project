@@ -5,8 +5,8 @@ namespace DAL.DataModels
     {
         public int UserID { get; set; } = -1;
         public string Username { get; set; } = "";
-        public string? Nickname { get; set; } = "";
-        public string? Email { get; set; } = "";
+        public string Nickname { get; set; } = "";
+        public string Email { get; set; } = "";
         public PasswordSet? PwdSet { get; set; }
 
         public User() {}

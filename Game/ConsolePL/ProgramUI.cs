@@ -554,7 +554,7 @@ namespace ConsolePL
                     }
                 }
 
-                if (!ServerHandler.Register(username, nickname, password, email, out error))
+                if (!ServerHandler.Register(username, nickname, email, password, out error))
                 {
                     Popup(error);
                     continue;

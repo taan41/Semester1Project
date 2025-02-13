@@ -224,8 +224,8 @@ namespace BLL.Server
         public bool CheckUsername(string username, out string error)
             => PacketHandler(CreateUserPacket(UserRequest.UsernameAvailable, username), out error);
 
-        public bool Register(string username, string nickname, string password, string email, out string error)
-            => PacketHandler(CreateUserPacket(UserRequest.UserRegister, ToJson(new User(username, nickname, password, email))), out error);
+        public bool Register(string username, string nickname, string email, string password, out string error)
+            => PacketHandler(CreateUserPacket(UserRequest.UserRegister, ToJson(new User(username, nickname, email, password))), out error);
 
         public bool ResetPassword(string username, string email, string password, out string error)
         {

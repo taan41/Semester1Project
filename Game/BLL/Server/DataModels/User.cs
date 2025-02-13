@@ -4,14 +4,14 @@ namespace BLL.Server.DataModels
     public class User
     {
         public int UserID { get; set; } = -1;
-        public string? Username { get; set; }
-        public string? Nickname { get; set; }
-        public string? Email { get; set; }
+        public string Username { get; set; } = "";
+        public string Nickname { get; set; } = "";
+        public string Email { get; set; } = "";
         public PasswordSet? PwdSet { get; set; }
 
         public User() {}
 
-        public User(string username, string nickname, string password, string email)
+        public User(string username, string nickname, string email, string password)
         {
             Username = username;
             Nickname = nickname;

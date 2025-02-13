@@ -4,8 +4,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Tests</RootNamespace>
+    <RootNamespace>Server</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <!--
     To enable the Microsoft Testing Platform 'dotnet test' experience, add property:
       <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
@@ -33,8 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\game\bll\BLL.csproj" />
-    <ProjectReference Include="..\game\dal\DAL.csproj" />
+    <ProjectReference Include="..\..\server\bll\BLL.csproj" />
+    <ProjectReference Include="..\..\server\dal\DAL.csproj" />
   </ItemGroup>
 
 </Project>

@@ -6,6 +6,8 @@ namespace DAL.DBHandlers
 {
     public static class EquipmentDB
     {
+        private static DBManager DBManager => DBManager.Instance;
+        
         public static async Task<(bool success, string error)> Add(Equipment equipment)
         {
             string query = @"

@@ -3,7 +3,7 @@ using MySql.Data.MySqlClient;
 
 namespace DAL.DBHandlers
 {
-    public static class DBManager
+    public class DBManager
     {
         public static class Tables
         {
@@ -24,10 +24,12 @@ namespace DAL.DBHandlers
             public const string DatabaseConfig = "DatabaseConfig";
             public const string AssetConfig = "AssetConfig";
         }
-        
-        public static string ConnectionString { get; private set; } = "";
 
-        public static bool Initialize(string server, string db, string uid, string? password, out string error)
+        public static DBManager Instance { get; } = new();
+        
+        public string ConnectionString { get; private set; } = "";
+
+        public bool Initialize(string sqlIP, string uid, string? password, out string error)
         {
             error = "";
 
@@ -35,7 +37,7 @@ namespace DAL.DBHandlers
             {
                 StringBuilder sb = new();
 
-                sb.Append($"server={server};uid={uid}");
+                sb.Append($"server={sqlIP};uid={uid}");
 
                 if (password != null)
                     sb.Append($";pwd={password};");
@@ -43,31 +45,31 @@ namespace DAL.DBHandlers
                 using MySqlConnection conn = new(sb.ToString());
                 conn.Open();
 
-                using MySqlCommand checkDBCmd = new($"SHOW DATABASES LIKE '{db}';", conn);
+                using MySqlCommand checkDBCmd = new("SHOW DATABASES LIKE 'consoleconquer'", conn);
 
                 using MySqlDataReader reader = checkDBCmd.ExecuteReader();
                 if (!reader.HasRows) // Database does not exist
                 {
                     reader.Close();
-                    CreateDB(conn, db);
+                    CreateDB(conn);
                 }
 
-                sb.Append($"database={db};");
+                sb.Append("database=consoleconquer;");
                 ConnectionString = sb.ToString();
                 return true;
             }
             catch (MySqlException ex)
             {
-                // error = ex.Message;
-                error = ex.ToString();
+                error = ex.Message;
+                // error = ex.ToString();
                 return false;
             }
         }
         
-        private static void CreateDB(MySqlConnection conn, string dbName)
+        private static void CreateDB(MySqlConnection conn)
         {
-            using (MySqlCommand createDB = new(@$"
-                CREATE DATABASE {dbName}
+            using (MySqlCommand createDB = new(@"
+                CREATE DATABASE consoleconquer
                 CHARACTER SET = utf8mb4
                 COLLATE = utf8mb4_unicode_ci;
                 ", conn))
@@ -75,7 +77,7 @@ namespace DAL.DBHandlers
                 createDB.ExecuteNonQuery();
             }
 
-            conn.ChangeDatabase(dbName);
+            conn.ChangeDatabase("consoleconquer");
 
             using (MySqlCommand createUsers = new(@$"
                 CREATE TABLE {Tables.Users} (

@@ -5,10 +5,14 @@ using DAL.Config;
 using DAL.DataModels;
 
 using static System.Console;
-using static ConsoleUtilities;
+using static ConsolePL.ConsoleUtilities;
 
-static class ServerUI
+namespace ConsolePL;
+
+public static class ServerControlUI
 {
+    private static Server Server => Server.Instance;
+
     public static string Header { get; } = "Server Control Center";
 
     public static async Task<(bool success, bool exit)> FillDBInfo()
@@ -28,19 +32,13 @@ static class ServerUI
         WriteLine(@" -- MySql dump file for local db is located at: MySql Files\Dump\");
         DrawLine('-');
 
-        string? dbIP, db, uid, password;
+        string? dbIP, uid, password;
         
         Write(" Database IP (default localhost): ");
         if ((dbIP = ReadInput()) == null)
             return (false, true);
         if (string.IsNullOrWhiteSpace(dbIP))
             dbIP = "127.0.0.1";
-
-        Write(" Database name (default 'consoleconquer'): ");
-        if ((db = ReadInput()) == null)
-            return (false, true);
-        if (string.IsNullOrWhiteSpace(db))
-            db = "consoleconquer";
 
         Write(" UID (default 'root'): ");
         if ((uid = ReadInput()) == null)
@@ -56,7 +54,7 @@ static class ServerUI
 
         DrawLine('-');
 
-        var (success, error) = await Server.InitializeDB(dbIP, db, uid, password);
+        var (success, error) = await Server.InitializeDB(dbIP, uid, password);
         if (success)
         {
             WriteLine(" Database connection successful!");
@@ -269,7 +267,7 @@ static class ServerUI
                     {
                         WriteLine(" Account deleted.");
 
-                        foreach (var client in Server.ClientList)
+                        foreach (var client in Server.Clients)
                         {
                             if (client.User?.UserID == account.UserID)
                             {

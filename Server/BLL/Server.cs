@@ -3,88 +3,90 @@ using System.Net.Sockets;
 using DAL.Config;
 using DAL.DBHandlers;
 
-namespace BLL
+namespace BLL;
+
+public class Server
 {
-    public static class Server
+    private static ConfigManager Config => ConfigManager.Instance;
+    private static DBManager DBManager => DBManager.Instance;
+
+    private TcpListener? listener;
+    private CancellationTokenSource? serverStopToken;
+
+    public static Server Instance { get; } = new();
+
+    public List<ClientHandler> Clients { get; private set; } = [];
+
+    public async Task<(bool success, string error)> InitializeDB(string sqlIP, string uid, string password)
     {
-        private static ConfigManager Config => ConfigManager.Instance;
-
-        private static TcpListener? listener;
-        private static CancellationTokenSource? serverStopToken;
-
-        public static readonly List<ClientHandler> ClientList = [];
-
-        public static async Task<(bool success, string error)> InitializeDB(string server, string db, string uid, string password)
+        if (!DBManager.Initialize(sqlIP, uid, password, out string error))
         {
-            if (!DBManager.Initialize(server, db, uid, password, out string error))
-            {
-                LogHandler.AddLog($"Error while connecting to MySql DB: {error}");
-                return (false, error);
-            }
-
-            LogHandler.Initialize();
-            await ConfigManager.Instance.LoadConfig(true);
-            return (true, "");
+            LogHandler.AddLog($"Error while connecting to MySql DB: {error}");
+            return (false, error);
         }
 
-        public static async Task Start(string? serverIP, int port)
+        LogHandler.Initialize();
+        await ConfigManager.Instance.LoadConfig(true);
+        return (true, "");
+    }
+
+    public async Task Start(string? serverIP, int port)
+    {
+        listener = serverIP == null ? new(IPAddress.Any, port) : new(IPAddress.Parse(serverIP), port);
+        listener.Start();
+
+        Config.ServerConfig.Port = port;
+        await Config.ServerConfig.Save();
+
+        LogHandler.AddLog($"Server started on address: {serverIP ?? "Any"}, port: {port}");
+
+        serverStopToken = new();
+        _ = Task.Run(() => AcceptClientsAsync(listener, serverStopToken.Token));
+    }
+
+    public void Stop()
+    {
+        serverStopToken?.Cancel();
+        listener?.Stop();
+
+        LogHandler.AddLog("Server stopped");
+    }
+    
+    public async Task AcceptClientsAsync(TcpListener listener, CancellationToken serverStopToken)
+    {
+        try
         {
-            listener = serverIP == null ? new(IPAddress.Any, port) : new(IPAddress.Parse(serverIP), port);
-            listener.Start();
-
-            Config.ServerConfig.Port = port;
-            await Config.ServerConfig.Save();
-
-            LogHandler.AddLog($"Server started on address: {serverIP ?? "Any"}, port: {port}");
-
-            serverStopToken = new();
-            _ = Task.Run(() => AcceptClientsAsync(listener, serverStopToken.Token));
-        }
-
-        public static void Stop()
-        {
-            serverStopToken?.Cancel();
-            listener?.Stop();
-
-            LogHandler.AddLog("Server stopped");
-        }
-        
-        static async Task AcceptClientsAsync(TcpListener listener, CancellationToken serverStopToken)
-        {
-            try
+            while (true)
             {
-                while (true)
-                {
-                    TcpClient client = await listener.AcceptTcpClientAsync(serverStopToken);
+                TcpClient client = await listener.AcceptTcpClientAsync(serverStopToken);
 
-                    if (serverStopToken.IsCancellationRequested)
-                        return;
+                if (serverStopToken.IsCancellationRequested)
+                    return;
 
-                    ClientHandler clientHandler = new(client);
+                ClientHandler clientHandler = new(client);
 
-                    lock(ClientList)
-                        ClientList.Add(clientHandler);
+                lock(Clients)
+                    Clients.Add(clientHandler);
 
-                    _ = Task.Run(() => clientHandler.HandlingClientAsync(serverStopToken), CancellationToken.None);
-                }
-            }
-            catch (OperationCanceledException) {}
-            catch (Exception ex)
-            {
-                LogHandler.AddLog($"Error: {ex.Message}");
-            }
-            finally
-            {
-                listener.Stop();
+                _ = Task.Run(() => clientHandler.HandlingClientAsync(serverStopToken), CancellationToken.None);
             }
         }
-
-        public static void RemoveClient(ClientHandler client)
+        catch (OperationCanceledException) {}
+        catch (Exception ex)
         {
-            lock(ClientList)
-            {
-                ClientList.Remove(client);
-            }
+            LogHandler.AddLog($"Error: {ex.Message}");
+        }
+        finally
+        {
+            listener.Stop();
+        }
+    }
+
+    public void RemoveClient(ClientHandler client)
+    {
+        lock(Clients)
+        {
+            Clients.Remove(client);
         }
     }
 }

@@ -4,7 +4,10 @@ using BLL.Server;
 using BLL.Server.DataModels;
 using DAL;
 
-namespace Tests;
+namespace Client;
+
+[CollectionDefinition("NonParallelCollection", DisableParallelization = true)]
+public class NonParallelCollectionDefinition {}
 
 [Collection("NonParallelCollection")]
 [TestCaseOrderer(typeof(PriorityOrderer))]
@@ -71,7 +74,7 @@ public class ClientTest(ITestOutputHelper output)
 
         serverHandler.Connect(out _);
 
-        bool registerResult = serverHandler.Register("username", "nickname", "password", "email", out string error);
+        bool registerResult = serverHandler.Register("username", "nickname", "email", "password", out string error);
         Assert.True(registerResult, error);
     }
 
@@ -82,7 +85,7 @@ public class ClientTest(ITestOutputHelper output)
 
         serverHandler.Connect(out _);
 
-        bool registerResult = serverHandler.Register("username", "nickname", "password", "email", out string error);
+        bool registerResult = serverHandler.Register("username", "nickname", "email", "password", out string error);
         if (error != "")
             _output.WriteLine($"Register error: {error}");
         Assert.False(registerResult);

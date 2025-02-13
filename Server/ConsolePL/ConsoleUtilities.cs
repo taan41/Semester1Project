@@ -1,9 +1,11 @@
 using System.Text;
 
 using static System.Console;
-using static ConsoleUtilities.UIConstants;
+using static ConsolePL.ConsoleUtilities.UIConstants;
 
-static class ConsoleUtilities
+namespace ConsolePL;
+
+public static class ConsoleUtilities
 {
     public static class UIConstants
     {

@@ -7,6 +7,8 @@ namespace DAL.DBHandlers
 {
     public static class UserDB
     {
+        private static DBManager DBManager => DBManager.Instance;
+        
         public static async Task<(bool success, string error)> CheckUsername(string username)
         {
             string query = "SELECT * FROM Users WHERE Username = @username";

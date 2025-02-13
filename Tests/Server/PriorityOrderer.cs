@@ -2,7 +2,13 @@ using System.Reflection;
 using Xunit.Sdk;
 using Xunit.v3;
 
-namespace Tests;
+namespace Server;
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public class TestPriorityAttribute(int priority) : Attribute
+{
+    public int Priority { get; private set; } = priority;
+}
 
 public class PriorityOrderer : ITestCaseOrderer
 {

@@ -5,6 +5,8 @@ namespace DAL.DBHandlers
 {
     public static class ScoreDB
     {
+        private static DBManager DBManager => DBManager.Instance;
+        
         public static async Task<(bool success, string error)> Add(Score? score)
         {
             if (score == null)

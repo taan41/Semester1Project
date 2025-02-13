@@ -13,6 +13,8 @@
 /Server/ConsolePL/obj
 /Server/DAL/bin
 /Server/DAL/obj
-/Tests/bin
-/Tests/obj
-/Tests/GameData
+/Tests/Client/obj
+/Tests/Client/bin
+/Tests/Client/GameData
+/Tests/Server/obj
+/Tests/Server/bin

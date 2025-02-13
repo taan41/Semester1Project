@@ -4,9 +4,11 @@ using DAL.GameComponents.Entity;
 using DAL.GameComponents.Item;
 
 using static System.Console;
-using static ConsoleUtilities;
+using static ConsolePL.ConsoleUtilities;
 
-class AssetManagerUI
+namespace ConsolePL;
+
+public class AssetManagerUI
 {
     private static AssetManager Manager => AssetManager.Instance;
     private static AssetConfig AssetConfig => ConfigManager.Instance.AssetConfig;
