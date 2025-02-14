@@ -104,7 +104,7 @@ public class Program
                     continue;
 
                 case "2":
-                    await ManageAccounts();
+                    await ManageUsers();
                     continue;
 
                 case "3":
@@ -126,29 +126,8 @@ public class Program
         }
     }
 
-    static async Task ManageAccounts()
-    {
-        while (true)
-        {
-            ServerControlUI.ManageAccounts();
-
-            switch (ConsoleUtilities.ReadInput())
-            {
-                case "1":
-                    await ServerControlUI.ViewAccounts();
-                    continue;
-
-                case "2":
-                    await ServerControlUI.SearchAccount();
-                    continue;
-
-                case "0": case null:
-                    return;
-
-                default: continue;
-            }
-        }
-    }
+    static async Task ManageUsers()
+        => await ServerControlUI.ManageUsers();
 
     static async Task ManageGameData()
     {

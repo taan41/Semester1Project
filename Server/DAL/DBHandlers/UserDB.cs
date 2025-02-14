@@ -259,5 +259,27 @@ namespace DAL.DBHandlers
                 return (null, ex.Message);
             }
         }
+
+        public static async Task<(bool success, string error)> DeleteAll(string username)
+        {
+            string query = "DELETE FROM Users WHERE Username LIKE CONCAT('%', @username, '%')";
+
+            try
+            {
+                using MySqlConnection conn = new(DBManager.ConnectionString);
+                await conn.OpenAsync();
+
+                using MySqlCommand cmd = new(query, conn);
+                cmd.Parameters.AddWithValue("@username", username);
+
+                await cmd.ExecuteNonQueryAsync();
+
+                return (true, "");
+            }
+            catch (MySqlException ex)
+            {
+                return (false, ex.Message);
+            }
+        }
     }
 }

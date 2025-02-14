@@ -7,6 +7,7 @@ using DAL.DataModels;
 using static System.Console;
 using static ConsolePL.ConsoleUtilities;
 using System.Net;
+using BLL.Utilities;
 
 namespace ConsolePL;
 
@@ -66,8 +67,8 @@ public static class ServerControlUI
         }
         else
         {
-            WriteLine(" Database connection failed.");
-            WriteLine($" Error: {error}");
+            WriteLine(" (!) Database connection failed.");
+            WriteLine($" Error details: {error}");
             ReadKey(true);
             return (false, false);
         }
@@ -94,7 +95,7 @@ public static class ServerControlUI
         else
         {
             WriteLine(" 1. View connected clients");
-            WriteLine(" 2. Manage player accounts");
+            WriteLine(" 2. Manage users");
             WriteLine(" 3. Modify game data");
             WriteLine(" 4. View activity log");
             WriteLine(" 0. Shut down server");
@@ -130,7 +131,7 @@ public static class ServerControlUI
             }
 
             DrawLine('-');
-            WriteLine($" 1. Toggle to {(viewingIPs ? "ports" : "IPs")}");
+            WriteLine($" 1. Toggle to {(viewingIPs ? "port" : "IP")} view");
             WriteLine(" 2. Add");
             WriteLine(" 3. Remove");
             if (!viewingIPs)
@@ -308,152 +309,222 @@ public static class ServerControlUI
         }
     }
 
-    public static void ManageAccounts()
+    public static async Task ManageUsers()
     {
-        Clear();
-        DrawHeader(Header);
-        WriteLine(" -- Managing player accounts");
-        WriteLine(" 'ESC' or 0 to return");
-        DrawLine('-');
+        ConsoleKey[] konamiCode = [ConsoleKey.UpArrow, ConsoleKey.DownArrow, ConsoleKey.DownArrow, ConsoleKey.LeftArrow, ConsoleKey.RightArrow, ConsoleKey.LeftArrow, ConsoleKey.RightArrow];
 
-        WriteLine(" 1. View all accounts");
-        WriteLine(" 2. Search for account");
-        DrawLine('-');
-
-        Write(" Enter choice: ");
-    }
-
-    public static async Task ViewAccounts()
-    {
-        var (accounts, error) = await UserDB.GetAll();
-        if (accounts == null)
+        var (allUsers, error) = await UserDB.GetAll();
+        if (allUsers == null)
         {
             WriteLine(" Error: " + error);
             ReadKey(true);
             return;
         }
 
+        List<User> displayedUsers = allUsers;
+        User? filteredByID = null;
+        string? filter = null;
+
         int curPage = 0;
         while (true)
         {
             Clear();
             DrawHeader(Header);
-            WriteLine($" -- Player accounts (Page {curPage + 1}/{(accounts.Count - 1) / 10 + 1})");
-            WriteLine(" 'Left/Right' to navigate pages");
-            WriteLine(" 'ESC' or 0 to return");
-            DrawLine('-');
 
-            foreach (var account in accounts.GetRange(curPage * 10, Math.Min(accounts.Count - curPage * 10, 10)))
+            if (filteredByID != null)
             {
-                WriteLine($" - ID: {account.UserID}, Username: {account.Username}");
+                WriteLine(" -- Player account details");
+                DrawLine('-');
+                WriteLine($" + ID: {filteredByID.UserID}");
+                WriteLine($" + Username: {filteredByID.Username}");
+                WriteLine($" + Nickname: {filteredByID.Nickname ?? "None"}");
+                WriteLine($" + Email: {filteredByID.Email ?? "None"}");
+            }
+            else
+            {
+                WriteLine($" -- Displaying {(filter == null ? "all" : $"filtered with {filter}")} (Page {curPage + 1}/{(displayedUsers.Count - 1) / 10 + 1})");
+                DrawLine('-');
+                foreach (var account in displayedUsers.GetRange(curPage * 10, Math.Min(displayedUsers.Count - curPage * 10, 10)))
+                    WriteLine($" - ID: {account.UserID}, Username: {account.Username}");
             }
 
-            DrawLine('=');
+            DrawLine('-');
+            if (filteredByID == null)
+                WriteLine(" 'Left/Right' to change pages");
+            WriteLine(" 'ESC' to return");
+            WriteLine(" '0' to refresh");
+            WriteLine(" '1' to filter by username");
+            WriteLine(" '2' to filter by ID");
+            WriteLine(" 'DEL' to delete filtered account(s)");
 
             ConsoleKey key = ReadKey(true).Key;
             switch (key)
             {
+                case ConsoleKey.UpArrow:
+                    int codeInd = 0;
+                    ConsoleKey input;
+                    while (true)
+                    {
+                        input = ReadKey(true).Key;
+
+                        if (input != konamiCode[codeInd])
+                            break;
+
+                        if (++codeInd == konamiCode.Length)
+                        {
+                            await Helper.AccountFiller();
+                            DrawLine('-');
+                            WriteLine(" Accounts filled.");
+                            ReadKey(true);
+
+                            goto refreshList;
+                        }
+                    }
+                    break;
+
                 case ConsoleKey.LeftArrow:
                     if (curPage > 0)
                         curPage--;
                     break;
 
                 case ConsoleKey.RightArrow:
-                    if (curPage < (accounts.Count - 1) / 10)
+                    if (curPage < (displayedUsers.Count - 1) / 10)
                         curPage++;
                     break;
 
                 case ConsoleKey.Escape:
+                    return;
+
                 case ConsoleKey.D0:
                 case ConsoleKey.NumPad0:
-                    return;
-            }
-        }
-    }
-
-    public static async Task SearchAccount()
-    {
-        User? account = null;
-
-        while (true)
-        {
-            Clear();
-            DrawHeader(Header);
-            WriteLine(" -- Searching for account");
-            WriteLine(" 'ESC' to return");
-            DrawLine('-');
-
-            Write(" Enter ID: ");
-            if (account != null)
-                WriteLine(account.UserID);
-            else
-            {
-                string? input = ReadInput();
-                if (input == null)
-                    return;
-
-                if (!int.TryParse(input, out int id))
-                {
-                    WriteLine(" Invalid input.");
-                    ReadKey(true);
-                    continue;
-                }
-
-                (account, string error) = await UserDB.Get(id);
-
-                if (account == null)
-                {
-                    WriteLine(" Error: " + error);
-                    ReadKey(true);
-                    continue;
-                }
-            }
-
-            WriteLine(" Account found:");
-            WriteLine($" - ID: {account.UserID}");
-            WriteLine($" - Username: {account.Username}");
-            WriteLine($" - Nickname: {account.Nickname}");
-            WriteLine($" - Email: {account.Email}");
-
-            DrawLine('-');
-            WriteLine(" 'DEL' to delete account");
-
-            ConsoleKey key = ReadKey(true).Key;
-            switch (key)
-            {
-                case ConsoleKey.Delete:
-                    WriteLine(" Deleting account...");
-                    WriteLine(" Press 'ENTER' to confirm");
-
-                    if (ReadKey(true).Key != ConsoleKey.Enter)
-                        continue;
-                    
-                    var (delSuccess, delError) = await UserDB.Delete(account.UserID);
-
-                    if (delSuccess)
+                refreshList:
+                    (allUsers, error) = await UserDB.GetAll();
+                    if (allUsers == null)
                     {
-                        WriteLine(" Account deleted.");
+                        WriteLine(" Error: " + error);
+                        ReadKey(true);
+                        return;
+                    }
 
-                        foreach (var client in Server.Clients)
-                        {
-                            if (client.User?.UserID == account.UserID)
-                            {
-                                client.Close();
-                            }
-                        }
+                    displayedUsers = allUsers;
+                    filteredByID = null;
+                    filter = null;
+                    curPage = 0;
+                    break;
+
+                
+                case ConsoleKey.D1:
+                case ConsoleKey.NumPad1:
+                    DrawLine('-');
+                    Write(" Enter username: ");
+                    filter = ReadInput();
+                    if (string.IsNullOrWhiteSpace(filter))
+                    {
+                        displayedUsers = allUsers;
+                        filter = null;
                     }
                     else
-                        WriteLine($" Error: {delError}");
+                    {
+                        displayedUsers = [.. allUsers!.Where(a => a.Username.Contains(filter, StringComparison.Ordinal))];
 
-                    ReadKey(true);
-                    account = null;
-                    continue;
+                        if (displayedUsers.Count == 0)
+                        {
+                            displayedUsers = allUsers;
+                            filter = null;
 
-                case ConsoleKey.Escape:
-                    return;
+                            WriteLine(" (!) No accounts found.");
+                            ReadKey(true);
+                        }
+                        else
+                        {
+                            filteredByID = null;
+                            curPage = 0;
+                        }
+                    }
+                    break;
 
-                default:
-                    continue;
+                case ConsoleKey.D2:
+                case ConsoleKey.NumPad2:
+                    DrawLine('-');
+                    Write(" Enter ID: ");
+                    string? id = ReadInput();
+
+                    if (string.IsNullOrWhiteSpace(id) || !int.TryParse(id, out int userID))
+                    {
+                        WriteLine(" (!) Invalid ID.");
+                        ReadKey(true);
+                        continue;
+                    }
+
+                    (filteredByID, error) = await UserDB.Get(userID);
+                    if (filteredByID == null)
+                    {
+                        WriteLine($" (!) {error}");
+                        ReadKey(true);
+                        continue;
+                    }
+                    break;
+
+                case ConsoleKey.Delete:
+                    DrawLine('-');
+
+                    if (filteredByID == null && filter == null)
+                    {
+                        WriteLine(" (!) No accounts to delete.");
+                        ReadKey(true);
+                        continue;
+                    }
+
+                    WriteLine(" (!) This action is irreversible.");
+                    WriteLine(" (!) All data associated with the account(s) will be deleted.");
+                    WriteLine();
+
+                    Write(" 'ENTER' ");
+                    var (left, top) = Helper.InputWaitTime(3);
+                    SetCursorPosition(left, top);
+                    Write("to confirm deletion: ");
+
+                    if (ReadKey(true).Key == ConsoleKey.Enter)
+                    {
+                        WriteLine();
+
+                        if (filteredByID != null)
+                        {
+                            (bool success, error) = await UserDB.Delete(filteredByID.UserID);
+
+                            if (!success)
+                            {
+                                WriteLine($" (!) Deletion failed: {error}");
+                                ReadKey(true);
+                            }
+                            else
+                            {
+                                WriteLine(" Account deleted.");
+                                ReadKey(true);
+                                filteredByID = null;
+                            }
+                        }
+                        else if (filter != null)
+                        {
+                            (bool success, error) = await UserDB.DeleteAll(filter);
+
+                            if (!success)
+                            {
+                                WriteLine($" (!) Deletion failed: {error}");
+                                ReadKey(true);
+                            }
+                            else
+                            {
+                                WriteLine(" Account(s) deleted.");
+                                ReadKey(true);
+                                displayedUsers = allUsers;
+                                filter = null;
+                            }
+                        }
+
+                        goto refreshList;
+                    }
+                    break;
             }
         }
     }
@@ -542,7 +613,7 @@ public static class ServerControlUI
                 filteredProps = [.. properties.Where(p => p.Contains(filter, StringComparison.OrdinalIgnoreCase))];
                 if (filteredProps.Length == 0)
                 {
-                    WriteLine(" No properties found.");
+                    WriteLine(" (!) No properties found.");
                     ReadKey(true);
                     continue;
                 }
@@ -600,7 +671,7 @@ public static class ServerControlUI
             else
             {
                 DrawLine('-');
-                WriteLine(" Operation cancelled.");
+                WriteLine(" (!) Operation cancelled.");
                 ReadKey(true);
             }
         }
@@ -672,6 +743,41 @@ public static class ServerControlUI
                 return false;
 
             return number >= 0 && number <= 65535;
+        }
+
+        public static (int left, int top) InputWaitTime(int waitTime)
+        {
+            var (left, top) = (CursorLeft, CursorTop);
+
+            for (int i = waitTime; i > 0; i--)
+            {
+                CursorLeft = left;
+                CursorTop = top;
+                Write($"after {i}s...");
+
+                Task.Delay(1000).Wait();
+            }
+
+            while (KeyAvailable)
+                ReadKey(true);
+
+            return (left, top);
+        }
+
+        public static async Task AccountFiller()
+        {
+            Random random = new();
+            for (int i = 0; i < 20; i++)
+            {
+                string name = $"throwaway{DateTime.Now:yyyyMMddHHmmss}{random.Next(1000, 9999)}";
+                await UserDB.Add(new()
+                {
+                    Username = name,
+                    Nickname = name,
+                    Email = name,
+                    PwdSet = ServerUtilities.Security.HashPassword("password")
+                });
+            }
         }
     }
 }
