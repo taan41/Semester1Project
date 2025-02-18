@@ -206,8 +206,8 @@ public static class ProgramUI
     {
         int lineIndex = 0, lineLength = background[0].Length;
         int randomTitle =
-            // RandomNumberGenerator.GetInt32(titles.Length);
-            0;
+            RandomNumberGenerator.GetInt32(titles.Length);
+            // 0;
 
         ConsoleColor[] titleColors = [ ConsoleColor.Red, ConsoleColor.Blue, ConsoleColor.Magenta, ConsoleColor.Yellow ];
         ConsoleColor[] backgroundColors = [ ConsoleColor.Green, ConsoleColor.Cyan ];
@@ -222,11 +222,11 @@ public static class ProgramUI
                     SetCursorPosition(0, CursorPos.TitleAnimationTop);
                     for (int i = 0; i < background.Length; i++)
                     {
-                        // ForegroundColor = backgroundColors[colorIndex % backgroundColors.Length];
-                        ForegroundColor = ConsoleColor.Cyan;
+                        ForegroundColor = backgroundColors[colorIndex % backgroundColors.Length];
+                        // ForegroundColor = ConsoleColor.Cyan;
                         Write($"{background[i][lineIndex..]}{background[i][0..lineIndex]}");
-                        // ForegroundColor = titleColors[colorIndex % titleColors.Length];
-                        ForegroundColor = ConsoleColor.Yellow;
+                        ForegroundColor = titleColors[colorIndex % titleColors.Length];
+                        // ForegroundColor = ConsoleColor.Yellow;
                         WriteCenter(titles[randomTitle][i]);
                         ResetColor();
                     }
