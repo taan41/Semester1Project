@@ -1,0 +1,4 @@
+Roguelike là một thể loại game nhập vai nhấn mạnh vào sự tạo ngẫu nhiên, lấy cảm hứng từ game Rogue từ năm 1980. Thể loại roguelike có một vài tiêu chí chính:
+- Chú trọng vào việc khám phá môi trường và tiêu diệt kẻ địch
+- Môi trường, kẻ địch, vật phẩm được tạo ngẫu nhiên, nên mỗi ván chơi sẽ cho trải nghiệm khác nhau
+- Permadeath - chết là mất hết: mỗi lần chết sẽ phải bắt đầu lại, người chơi cần có chiến lược và quản lý tài nguyên tốt để chiến thắng
