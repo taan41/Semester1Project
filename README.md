@@ -9,20 +9,21 @@ This is Console Conquer, a turn-based RPG played using CLI. This project is a pa
 - To work collaboratively in a team environment.
 
 ## Technologies Used
-- Programming Language: C#, MySql
+- Programming Language: C#, SQL
 - Frameworks: .NET Core
-- Tools: Visual Studio Code, MySql Workbench, Git
+- Database management system: MySQL
+- Tools: Visual Studio Code, MySQL Workbench, Git
 
 ## Installation
-1. Install .NET 8.0 and MySql Server + Workbench
+1. Install .NET 8.0 and lastest MySQL Server + Workbench
 2. Clone the repository:
     ```
     git clone https://github.com/taan/semester1project.git
     ```
-3. Install MySql database using dump file in MySql Files/Dump
+3. Install MySQL database using dump file in MySQL Files/Dump
 
 ## Usage
-1. Run MySql Server for the forementioned database
+1. Run MySQL Server for the forementioned database
 2. Navigate to the project directory using any CLI
 3. Run the application:
 - To run the server
