@@ -3,6 +3,10 @@
 ## Overview
 This is Console Conquer, a turn-based RPG played using CLI. This project is a part of the curriculum for Semester 1 at VTCA. It aims to provide hands-on experience with the concepts and technologies covered during the semester.
 
+## Documents
+- Words: https://1drv.ms/w/c/b9b1469107974ea4/EdN7wnfRdmdPlzYHh4bQ3JsB1EvAxW4TKNpUrIuZmq6Zlw?e=8XLRQi
+- PowerPoint: https://1drv.ms/p/c/b9b1469107974ea4/EcHu7n0DyJNEnastO4xhduYBoxO_4MtH4yO6OYQhYF-3Ow?e=DzKxFg
+
 ## Objectives
 - To apply theoretical knowledge in a practical project.
 - To develop problem-solving and coding skills.
