@@ -60,9 +60,9 @@ namespace BLL.Config
         public int EventRoomCountShop { get; set; } = 5;
         public int EventGoldBase { get; set; } = 75;
         public int EventGoldPerNormal { get; set; } = 5;
-        public int EventGoldPerElite { get; set; } = 25;
-        public int EventGoldPerBoss { get; set; } = 100;
-        public int EventGoldFloorPercentage { get; set; } = 15;
+        public int EventGoldPerElite { get; set; } = 15;
+        public int EventGoldPerBoss { get; set; } = 50;
+        public int EventGoldFloorPercentage { get; set; } = 25;
         public int EventGoldTreasure { get; set; } = 150;
         public int EventGoldTreasurePerFloorPercentage { get; set; } = 50;
 

@@ -17,6 +17,18 @@ namespace BLL.Game.Components.Item
 
         public Equipment() {}
 
+        public Equipment(int id, string name, int rarity, int equipType, int bonusATKPoint, int bonusDEFPoint, int bonusHPPoint, int bonusMPPoint, int price = -1) : base(name, (Rarity) rarity)
+        {
+            ID = id;
+            EquipType = (Type) equipType;
+            BonusATKPoint = bonusATKPoint;
+            BonusDEFPoint = bonusDEFPoint;
+            BonusHPPoint = bonusHPPoint;
+            BonusMPPoint = bonusMPPoint;
+
+            Price = price != -1 ? price : GameConfig.ItemPriceBase * (100 + (int) ItemRarity * GameConfig.ItemPriceRarityBonusPercentage) * (100 + GameConfig.ItemPriceEquipBonusPercentage) / 10000;
+        }
+
         public Equipment(Equipment other) : base(other.Name, other.ItemRarity)
         {
             ID = other.ID;

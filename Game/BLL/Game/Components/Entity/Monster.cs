@@ -19,6 +19,13 @@ namespace BLL.Game.Components.Entity
 
         public Monster() {}
 
+        public Monster(int id, string name, int floor, int type, int atk, int def, int hp) : base(name, atk, def, hp, 0)
+        {
+            ID = id;
+            MonsterType = (Type) type;
+            Floor = floor;
+        }
+
         public Monster(Monster other, int targetPower = 0) : base(other.Name, other.ATK, other.DEF, other.HP, 0)
         {
             ID = other.ID;

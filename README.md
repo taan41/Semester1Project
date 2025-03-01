@@ -10,7 +10,7 @@ This is Console Conquer, a turn-based RPG played using CLI. This project is a pa
 
 ## Technologies Used
 - Programming Language: C#, SQL
-- Frameworks: .NET Core
+- Frameworks: .NET
 - Database management system: MySQL
 - Tools: Visual Studio Code, MySQL Workbench, Git
 

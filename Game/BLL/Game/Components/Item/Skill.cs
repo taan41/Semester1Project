@@ -15,6 +15,17 @@ namespace BLL.Game.Components.Item
 
         public Skill() {}
 
+        public Skill(int id, string name, int rarity, int skillType, int damagePoint, int healPoint, int mpCost, int price = -1) : base(name, (Rarity) rarity)
+        {
+            ID = id;
+            SkillType = (Type) skillType;
+            DamagePoint = damagePoint;
+            HealPoint = healPoint;
+            MPCost = mpCost;
+
+            Price = price != -1 ? price : GameConfig.ItemPriceBase * (100 + (int) ItemRarity * GameConfig.ItemPriceRarityBonusPercentage) * (100 + GameConfig.ItemPriceSkillBonusPercentage) / 10000;
+        }
+
         public Skill(Skill other) : base(other.Name, other.ItemRarity)
         {
             ID = other.ID;
