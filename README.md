@@ -1,7 +1,7 @@
 # Semester 1 Project
 
 ## Overview
-This is Console Conquer, a turn-based RPG played using CLI. This project is a part of the curriculum for Semester 1 at VTCA. It aims to provide hands-on experience with the concepts and technologies covered during the semester.
+This is Console Conquer, a turn-based roguelike RPG played using CLI. It's the main project for first semester at VTCA. It aims to provide hands-on experience with the concepts and technologies covered during the semester.
 
 ## Documents
 - Words: https://1drv.ms/w/c/b9b1469107974ea4/EdN7wnfRdmdPlzYHh4bQ3JsB1EvAxW4TKNpUrIuZmq6Zlw?e=8XLRQi
